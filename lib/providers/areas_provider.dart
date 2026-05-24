@@ -1,12 +1,16 @@
 import 'package:flutter/foundation.dart';
 import '../models/area_model.dart';
 import '../services/storage_service.dart';
+import '../services/firestore_service.dart';
 import '../constants/app_constants.dart';
 
 const String _kAreasKey = 'areas_data';
 
 class AreasProvider extends ChangeNotifier {
   List<AreaModel> _areas = [];
+
+  String? _uid;
+  bool _isCloud = false;
 
   List<AreaModel> get areas => _areas;
 
@@ -24,11 +28,55 @@ class AreasProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> init() async {
-    _loadAreas();
+  // ── Inicialização ─────────────────────────────────────────────────────────
+
+  /// Carrega dados locais — chamado uma vez na criação do provider
+  void initLocal() {
+    _loadAreasLocal();
   }
 
-  void _loadAreas() {
+  /// Compatibilidade retroativa
+  Future<void> init() async {
+    initLocal();
+  }
+
+  /// Chamado pelo ProxyProvider quando o usuário autenticado muda.
+  void syncUser(String? uid, bool isCloud) {
+    if (_uid == uid && _isCloud == isCloud) return;
+    _uid = uid;
+    _isCloud = isCloud;
+    if (uid != null && isCloud) {
+      _loadFromCloud(uid);
+    }
+  }
+
+  // ── Sincronização com Firestore ───────────────────────────────────────────
+
+  Future<void> _loadFromCloud(String uid) async {
+    final cloudAreas = await FirestoreService.instance.getAreas(uid);
+
+    if (cloudAreas.isNotEmpty) {
+      _areas = cloudAreas;
+      // Garante que todas as áreas do sistema existam (novos releases)
+      for (final config in kAreas) {
+        if (!_areas.any((a) => a.id == config.id)) {
+          final newArea =
+              AreaModel(id: config.id, name: config.name, icon: config.icon);
+          _areas.add(newArea);
+          await FirestoreService.instance.saveArea(uid, newArea);
+        }
+      }
+    } else {
+      // Primeira vez no Firestore: migra dados locais
+      await FirestoreService.instance.saveAllAreas(uid, _areas);
+    }
+
+    notifyListeners();
+  }
+
+  // ── Carregamento local ─────────────────────────────────────────────────────
+
+  void _loadAreasLocal() {
     final saved = StorageService.instance.getJsonList(_kAreasKey);
     if (saved.isEmpty) {
       _areas = kAreas
@@ -36,28 +84,46 @@ class AreasProvider extends ChangeNotifier {
           .toList();
     } else {
       _areas = saved.map((j) => AreaModel.fromJson(j)).toList();
-      // Ensure all areas are present (if new areas added later)
       for (final config in kAreas) {
         if (!_areas.any((a) => a.id == config.id)) {
-          _areas.add(AreaModel(id: config.id, name: config.name, icon: config.icon));
+          _areas.add(
+              AreaModel(id: config.id, name: config.name, icon: config.icon));
         }
       }
     }
     notifyListeners();
   }
 
-  Future<void> _saveAreas() async {
+  // ── Persistência (local + cloud) ──────────────────────────────────────────
+
+  Future<void> _saveAreasLocal() async {
     await StorageService.instance.setJsonList(
       _kAreasKey,
       _areas.map((a) => a.toJson()).toList(),
     );
   }
 
+  Future<void> _saveArea(AreaModel area) async {
+    await _saveAreasLocal();
+    if (_isCloud && _uid != null) {
+      await FirestoreService.instance.saveArea(_uid!, area);
+    }
+  }
+
+  Future<void> _saveAllAreas() async {
+    await _saveAreasLocal();
+    if (_isCloud && _uid != null) {
+      await FirestoreService.instance.saveAllAreas(_uid!, _areas);
+    }
+  }
+
+  // ── Operações ─────────────────────────────────────────────────────────────
+
   Future<void> updateAreaScore(String areaId, double score) async {
     final index = _areas.indexWhere((a) => a.id == areaId);
     if (index == -1) return;
     _areas[index].currentScore = score.clamp(1, 10);
-    await _saveAreas();
+    await _saveArea(_areas[index]);
     notifyListeners();
   }
 
@@ -65,7 +131,7 @@ class AreasProvider extends ChangeNotifier {
     final index = _areas.indexWhere((a) => a.id == areaId);
     if (index == -1) return;
     _areas[index].importance = importance;
-    await _saveAreas();
+    await _saveArea(_areas[index]);
     notifyListeners();
   }
 
@@ -73,17 +139,18 @@ class AreasProvider extends ChangeNotifier {
     final index = _areas.indexWhere((a) => a.id == areaId);
     if (index == -1) return;
     _areas[index].goals.add(goal);
-    await _saveAreas();
+    await _saveArea(_areas[index]);
     notifyListeners();
   }
 
   Future<void> updateGoal(String areaId, GoalModel goal) async {
     final areaIndex = _areas.indexWhere((a) => a.id == areaId);
     if (areaIndex == -1) return;
-    final goalIndex = _areas[areaIndex].goals.indexWhere((g) => g.id == goal.id);
+    final goalIndex =
+        _areas[areaIndex].goals.indexWhere((g) => g.id == goal.id);
     if (goalIndex == -1) return;
     _areas[areaIndex].goals[goalIndex] = goal;
-    await _saveAreas();
+    await _saveArea(_areas[areaIndex]);
     notifyListeners();
   }
 
@@ -91,7 +158,7 @@ class AreasProvider extends ChangeNotifier {
     final areaIndex = _areas.indexWhere((a) => a.id == areaId);
     if (areaIndex == -1) return;
     _areas[areaIndex].goals.removeWhere((g) => g.id == goalId);
-    await _saveAreas();
+    await _saveArea(_areas[areaIndex]);
     notifyListeners();
   }
 
@@ -102,14 +169,13 @@ class AreasProvider extends ChangeNotifier {
         _areas[index].currentScore = entry.value.clamp(1, 10);
       }
     }
-    await _saveAreas();
+    await _saveAllAreas();
     notifyListeners();
   }
 
   List<GoalModel> get allGoals =>
       _areas.expand((a) => a.goals).toList();
 
-  List<GoalModel> get activeGoals => allGoals
-      .where((g) => g.status != 'completed')
-      .toList();
+  List<GoalModel> get activeGoals =>
+      allGoals.where((g) => g.status != 'completed').toList();
 }

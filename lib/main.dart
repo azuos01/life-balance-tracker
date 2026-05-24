@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app.dart';
 import 'firebase_options.dart';
 import 'providers/user_provider.dart';
@@ -11,35 +12,57 @@ import 'services/storage_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializa StorageService local
+  // Inicializa StorageService local (SharedPreferences)
   await StorageService.instance.init();
 
-  // Inicializa Firebase (Auth)
+  // Inicializa Firebase (Auth + Firestore)
   // Se firebase_options.dart não estiver configurado, o app roda em modo demo
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // Ativa persistência offline do Firestore (cache local automático)
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
   } catch (e) {
     debugPrint('Firebase não configurado — modo demo ativo: $e');
   }
 
+  // UserProvider inicializado antes do runApp (routing depende de isInitialized)
   final userProvider = UserProvider();
-  final areasProvider = AreasProvider();
-  final activitiesProvider = ActivitiesProvider();
-
-  await Future.wait([
-    userProvider.init(),
-    areasProvider.init(),
-    activitiesProvider.init(),
-  ]);
+  await userProvider.init();
 
   runApp(
     MultiProvider(
       providers: [
+        // UserProvider: fonte de verdade de autenticação
         ChangeNotifierProvider.value(value: userProvider),
-        ChangeNotifierProvider.value(value: areasProvider),
-        ChangeNotifierProvider.value(value: activitiesProvider),
+
+        // AreasProvider: recebe uid do UserProvider para sincronizar com Firestore
+        ChangeNotifierProxyProvider<UserProvider, AreasProvider>(
+          create: (_) => AreasProvider()..initLocal(),
+          update: (_, up, ap) {
+            ap!.syncUser(
+              up.user?.id,
+              up.isCloudUser,
+            );
+            return ap;
+          },
+        ),
+
+        // ActivitiesProvider: recebe uid do UserProvider para sincronizar com Firestore
+        ChangeNotifierProxyProvider<UserProvider, ActivitiesProvider>(
+          create: (_) => ActivitiesProvider()..initLocal(),
+          update: (_, up, act) {
+            act!.syncUser(
+              up.user?.id,
+              up.isCloudUser,
+            );
+            return act;
+          },
+        ),
       ],
       child: const LifeBalanceApp(),
     ),

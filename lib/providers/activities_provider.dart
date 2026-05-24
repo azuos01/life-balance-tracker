@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/activity_model.dart';
 import '../models/checkin_model.dart';
 import '../services/storage_service.dart';
+import '../services/firestore_service.dart';
 import '../constants/app_constants.dart';
 
 const String _kActivitiesKey = 'activities_data';
@@ -10,6 +11,9 @@ const String _kCheckInsKey = 'checkins_data';
 class ActivitiesProvider extends ChangeNotifier {
   List<ActivityModel> _activities = [];
   List<CheckInModel> _checkIns = [];
+
+  String? _uid;     // null = modo Demo
+  bool _isCloud = false;
 
   List<ActivityModel> get activities => _activities;
   List<CheckInModel> get checkIns => _checkIns;
@@ -39,35 +43,74 @@ class ActivitiesProvider extends ChangeNotifier {
   int get eveningCheckInsCount =>
       _checkIns.where((c) => c.hasEvening).length;
 
-  Future<void> init() async {
-    _loadActivities();
-    _loadCheckIns();
+  // ── Inicialização ─────────────────────────────────────────────────────────
+
+  /// Carrega dados locais (SharedPreferences) — chamado uma vez na criação
+  void initLocal() {
+    _loadActivitiesLocal();
+    _loadCheckInsLocal();
   }
 
-  void _loadActivities() {
+  /// Compatibilidade retroativa com o init() async original
+  Future<void> init() async {
+    initLocal();
+  }
+
+  /// Chamado pelo ProxyProvider quando o usuário autenticado muda.
+  /// [uid] null = demo mode; [isCloud] true = usa Firestore
+  void syncUser(String? uid, bool isCloud) {
+    if (_uid == uid && _isCloud == isCloud) return;
+    _uid = uid;
+    _isCloud = isCloud;
+    if (uid != null && isCloud) {
+      _loadFromCloud(uid);
+    }
+  }
+
+  // ── Sincronização com Firestore ───────────────────────────────────────────
+
+  Future<void> _loadFromCloud(String uid) async {
+    final acts = await FirestoreService.instance.getActivities(uid);
+    if (acts.isNotEmpty) {
+      _activities = acts;
+    }
+    final checks = await FirestoreService.instance.getCheckIns(uid);
+    if (checks.isNotEmpty) {
+      _checkIns = checks;
+    }
+    notifyListeners();
+  }
+
+  // ── Carregamento local ─────────────────────────────────────────────────────
+
+  void _loadActivitiesLocal() {
     final saved = StorageService.instance.getJsonList(_kActivitiesKey);
     _activities = saved.map((j) => ActivityModel.fromJson(j)).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
-  void _loadCheckIns() {
+  void _loadCheckInsLocal() {
     final saved = StorageService.instance.getJsonList(_kCheckInsKey);
     _checkIns = saved.map((j) => CheckInModel.fromJson(j)).toList();
   }
 
-  Future<void> _saveActivities() async {
+  // ── Persistência (local + cloud) ──────────────────────────────────────────
+
+  Future<void> _saveActivitiesLocal() async {
     await StorageService.instance.setJsonList(
       _kActivitiesKey,
       _activities.map((a) => a.toJson()).toList(),
     );
   }
 
-  Future<void> _saveCheckIns() async {
+  Future<void> _saveCheckInsLocal() async {
     await StorageService.instance.setJsonList(
       _kCheckInsKey,
       _checkIns.map((c) => c.toJson()).toList(),
     );
   }
+
+  // ── Operações de atividade ────────────────────────────────────────────────
 
   Future<int> addActivity(ActivityModel activity) async {
     int xp;
@@ -83,16 +126,30 @@ class ActivitiesProvider extends ChangeNotifier {
     }
     activity.xpEarned = xp;
     _activities.insert(0, activity);
-    await _saveActivities();
+
+    // Salva localmente (cache)
+    await _saveActivitiesLocal();
+    // Se cloud, salva no Firestore
+    if (_isCloud && _uid != null) {
+      await FirestoreService.instance.saveActivity(_uid!, activity);
+    }
+
     notifyListeners();
     return xp;
   }
 
   Future<void> deleteActivity(String id) async {
     _activities.removeWhere((a) => a.id == id);
-    await _saveActivities();
+
+    await _saveActivitiesLocal();
+    if (_isCloud && _uid != null) {
+      await FirestoreService.instance.deleteActivity(_uid!, id);
+    }
+
     notifyListeners();
   }
+
+  // ── Operações de check-in ─────────────────────────────────────────────────
 
   Future<CheckInModel> saveMorningCheckIn({
     required String userId,
@@ -124,7 +181,12 @@ class ActivitiesProvider extends ChangeNotifier {
       );
       _checkIns.add(checkIn);
     }
-    await _saveCheckIns();
+
+    await _saveCheckInsLocal();
+    if (_isCloud && _uid != null) {
+      await FirestoreService.instance.saveCheckIn(_uid!, checkIn);
+    }
+
     notifyListeners();
     return checkIn;
   }
@@ -137,12 +199,18 @@ class ActivitiesProvider extends ChangeNotifier {
   }) async {
     final today = _today();
     final existing = todayCheckIn;
+
     if (existing != null) {
       existing.eveningReflection = reflection;
       existing.tomorrowPlan = tomorrowPlan;
       existing.overallDayScore = dayScore;
+
+      await _saveCheckInsLocal();
+      if (_isCloud && _uid != null) {
+        await FirestoreService.instance.saveCheckIn(_uid!, existing);
+      }
     } else {
-      _checkIns.add(CheckInModel(
+      final newCheckIn = CheckInModel(
         id: '${userId}_eve_${today.toIso8601String()}',
         userId: userId,
         date: today,
@@ -150,11 +218,19 @@ class ActivitiesProvider extends ChangeNotifier {
         tomorrowPlan: tomorrowPlan,
         overallDayScore: dayScore,
         createdAt: DateTime.now(),
-      ));
+      );
+      _checkIns.add(newCheckIn);
+
+      await _saveCheckInsLocal();
+      if (_isCloud && _uid != null) {
+        await FirestoreService.instance.saveCheckIn(_uid!, newCheckIn);
+      }
     }
-    await _saveCheckIns();
+
     notifyListeners();
   }
+
+  // ── Queries ───────────────────────────────────────────────────────────────
 
   List<ActivityModel> activitiesByArea(String areaId) =>
       _activities.where((a) => a.areaId == areaId).toList();
@@ -167,11 +243,11 @@ class ActivitiesProvider extends ChangeNotifier {
     return map;
   }
 
-  // Returns map of date -> activity count for heatmap
   Map<DateTime, int> get activityHeatmap {
     final map = <DateTime, int>{};
     for (final a in _activities) {
-      final day = DateTime(a.createdAt.year, a.createdAt.month, a.createdAt.day);
+      final day =
+          DateTime(a.createdAt.year, a.createdAt.month, a.createdAt.day);
       map[day] = (map[day] ?? 0) + 1;
     }
     return map;
