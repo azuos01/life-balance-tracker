@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
+import 'tasks/tasks_screen.dart';
 import 'activities_screen.dart';
 import 'goals_screen.dart';
 import 'profile_screen.dart';
@@ -17,6 +18,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static const _screens = [
     DashboardScreen(),
+    TasksScreen(),
     ActivitiesScreen(),
     GoalsScreen(),
     ProfileScreen(),
@@ -38,11 +40,17 @@ class _MainScreenState extends State<MainScreen> {
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (i) => setState(() => _currentIndex = i),
+          type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),
               label: 'Início',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.grid_view_outlined),
+              activeIcon: Icon(Icons.grid_view),
+              label: 'Tarefas',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list_alt_outlined),

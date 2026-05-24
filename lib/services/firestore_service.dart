@@ -4,6 +4,7 @@ import '../models/activity_model.dart';
 import '../models/area_model.dart';
 import '../models/checkin_model.dart';
 import '../models/achievement_model.dart';
+import '../models/task_model.dart';
 
 /// Serviço de acesso ao Cloud Firestore.
 ///
@@ -31,6 +32,9 @@ class FirestoreService {
 
   CollectionReference<Map<String, dynamic>> _achievementsRef(String uid) =>
       _db.collection('users').doc(uid).collection('achievements');
+
+  CollectionReference<Map<String, dynamic>> _tasksRef(String uid) =>
+      _db.collection('users').doc(uid).collection('tasks');
 
   // ── Perfil ─────────────────────────────────────────────────────────────────
 
@@ -139,6 +143,31 @@ class FirestoreService {
     if (!ach.isUnlocked) return;
     try {
       await _achievementsRef(uid).doc(ach.id).set(ach.toJson());
+    } catch (_) {}
+  }
+
+  // ── Tarefas ───────────────────────────────────────────────────────────────
+
+  Future<List<TaskModel>> getTasks(String uid) async {
+    try {
+      final snap = await _tasksRef(uid)
+          .orderBy('createdAt', descending: true)
+          .get();
+      return snap.docs.map((d) => TaskModel.fromJson(d.data())).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> saveTask(String uid, TaskModel task) async {
+    try {
+      await _tasksRef(uid).doc(task.id).set(task.toJson());
+    } catch (_) {}
+  }
+
+  Future<void> deleteTask(String uid, String taskId) async {
+    try {
+      await _tasksRef(uid).doc(taskId).delete();
     } catch (_) {}
   }
 }

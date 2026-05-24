@@ -7,6 +7,7 @@ import 'firebase_options.dart';
 import 'providers/user_provider.dart';
 import 'providers/areas_provider.dart';
 import 'providers/activities_provider.dart';
+import 'providers/tasks_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -16,7 +17,6 @@ void main() async {
   await StorageService.instance.init();
 
   // Inicializa Firebase (Auth + Firestore)
-  // Se firebase_options.dart não estiver configurado, o app roda em modo demo
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -40,27 +40,30 @@ void main() async {
         // UserProvider: fonte de verdade de autenticação
         ChangeNotifierProvider.value(value: userProvider),
 
-        // AreasProvider: recebe uid do UserProvider para sincronizar com Firestore
+        // AreasProvider: sincroniza com Firestore quando autenticado
         ChangeNotifierProxyProvider<UserProvider, AreasProvider>(
           create: (_) => AreasProvider()..initLocal(),
           update: (_, up, ap) {
-            ap!.syncUser(
-              up.user?.id,
-              up.isCloudUser,
-            );
+            ap!.syncUser(up.user?.id, up.isCloudUser);
             return ap;
           },
         ),
 
-        // ActivitiesProvider: recebe uid do UserProvider para sincronizar com Firestore
+        // ActivitiesProvider: sincroniza com Firestore quando autenticado
         ChangeNotifierProxyProvider<UserProvider, ActivitiesProvider>(
           create: (_) => ActivitiesProvider()..initLocal(),
           update: (_, up, act) {
-            act!.syncUser(
-              up.user?.id,
-              up.isCloudUser,
-            );
+            act!.syncUser(up.user?.id, up.isCloudUser);
             return act;
+          },
+        ),
+
+        // TasksProvider: tarefas MIT + Matriz de Eisenhower
+        ChangeNotifierProxyProvider<UserProvider, TasksProvider>(
+          create: (_) => TasksProvider()..initLocal(),
+          update: (_, up, tp) {
+            tp!.syncUser(up.user?.id, up.isCloudUser);
+            return tp;
           },
         ),
       ],
