@@ -14,6 +14,14 @@ dependencies:
   uuid: ^4.4.2
   intl: ^0.19.0
   google_fonts: ^6.2.1
+  # Firebase Auth
+  firebase_core: ^3.13.1
+  firebase_auth: ^5.5.3
+  google_sign_in: ^6.2.2
+  # LinkedIn OAuth2 PKCE + HTTP
+  url_launcher: ^6.3.1
+  http: ^1.2.2
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:

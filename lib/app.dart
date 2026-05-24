@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'providers/user_provider.dart';
 import 'screens/splash_screen.dart';
+import 'screens/auth/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/main_screen.dart';
 
@@ -17,8 +18,16 @@ class LifeBalanceApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Consumer<UserProvider>(
         builder: (context, userProvider, _) {
+          // Ainda carregando dados locais
           if (!userProvider.isInitialized) return const SplashScreen();
+
+          // Usuário não autenticado → Login
+          if (!userProvider.isAuthenticated) return const LoginScreen();
+
+          // Autenticado, mas não fez onboarding → Wizard
           if (!userProvider.onboardingComplete) return const OnboardingScreen();
+
+          // Tudo pronto → App principal
           return const MainScreen();
         },
       ),

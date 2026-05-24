@@ -189,6 +189,16 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showSettings(BuildContext context) {
+    final provider = context.read<UserProvider>().authProvider;
+    final providerLabel = switch (provider) {
+      'google' => '🔵 Google',
+      'github' => '🐙 GitHub',
+      'linkedin' => '🔷 LinkedIn',
+      'facebook' => '📘 Facebook',
+      'demo' => '🎮 Modo Demo',
+      _ => 'Desconhecido',
+    };
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -197,14 +207,33 @@ class ProfileScreen extends StatelessWidget {
           'Configurações',
           style: TextStyle(color: AppTheme.textPrimary),
         ),
-        content: const Text(
-          'Mais configurações em breve.',
-          style: TextStyle(color: AppTheme.textSecondary),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Conectado via $providerLabel',
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 13,
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
+            child: const Text('Fechar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await context.read<UserProvider>().signOut();
+            },
+            child: const Text(
+              'Sair da conta',
+              style: TextStyle(color: AppTheme.accent),
+            ),
           ),
           TextButton(
             onPressed: () async {

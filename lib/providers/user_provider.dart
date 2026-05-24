@@ -2,20 +2,26 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../models/user_model.dart';
 import '../models/achievement_model.dart';
+import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 import '../constants/app_constants.dart';
 
 const String _kUserKey = 'user_data';
 const String _kAchievementsKey = 'achievements_data';
+const String _kAuthKey = 'auth_state'; // persists auth between sessions
 
 class UserProvider extends ChangeNotifier {
   UserModel? _user;
   List<AchievementModel> _achievements = [];
   bool _isInitialized = false;
+  bool _isAuthenticated = false;
+  String? _authProvider; // 'google' | 'github' | 'facebook' | 'linkedin' | 'demo'
 
   UserModel? get user => _user;
   bool get isInitialized => _isInitialized;
+  bool get isAuthenticated => _isAuthenticated;
   bool get onboardingComplete => _user?.onboardingComplete ?? false;
+  String? get authProvider => _authProvider;
   List<AchievementModel> get achievements => _achievements;
   List<AchievementModel> get unlockedAchievements =>
       _achievements.where((a) => a.isUnlocked).toList();
@@ -24,7 +30,48 @@ class UserProvider extends ChangeNotifier {
     await StorageService.instance.init();
     _loadUser();
     _loadAchievements();
+    _restoreAuthState();
     _isInitialized = true;
+    notifyListeners();
+  }
+
+  /// Restores auth state persisted from a previous session
+  void _restoreAuthState() {
+    final saved = StorageService.instance.getJson(_kAuthKey);
+    if (saved != null) {
+      _isAuthenticated = saved['isAuthenticated'] as bool? ?? false;
+      _authProvider = saved['provider'] as String?;
+    }
+  }
+
+  Future<void> _persistAuthState() async {
+    await StorageService.instance.setJson(_kAuthKey, {
+      'isAuthenticated': _isAuthenticated,
+      'provider': _authProvider,
+    });
+  }
+
+  /// Called after a successful OAuth sign-in
+  Future<void> onAuthResult(AuthResult result) async {
+    _isAuthenticated = true;
+    _authProvider = result.provider;
+    await _persistAuthState();
+
+    // If user data already exists (returning user), just mark authenticated
+    if (_user != null) {
+      notifyListeners();
+      return;
+    }
+
+    // New user: pre-create UserModel from auth data so onboarding can pre-fill
+    _user = UserModel(
+      id: result.uid,
+      name: result.name ?? 'Usuário',
+      avatar: result.photoUrl,
+      onboardingComplete: false,
+      createdAt: DateTime.now(),
+    );
+    await _saveUser();
     notifyListeners();
   }
 
@@ -166,5 +213,14 @@ class UserProvider extends ChangeNotifier {
     _isInitialized = false;
     notifyListeners();
     await init();
+  }
+
+  /// Signs out and clears auth state (keeps local app data)
+  Future<void> signOut() async {
+    await AuthService.instance.signOut();
+    _isAuthenticated = false;
+    _authProvider = null;
+    await StorageService.instance.remove(_kAuthKey);
+    notifyListeners();
   }
 }
