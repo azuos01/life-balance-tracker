@@ -29,11 +29,11 @@ class DefaultFirebaseOptions {
 
   // ↓ Substitua com os valores do seu projeto Firebase
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-    storageBucket: 'YOUR_PROJECT_ID.appspot.com',
+    apiKey: 'AIzaSyB5-oasntAAWrPukeAEecgXXkyWiq2v47c',
+    appId: '1:1018118891361:web:67b792d97435bd68098720',
+    messagingSenderId: '1018118891361',
+    projectId: 'life-balance-tracker-e2980',
+    authDomain: 'life-balance-tracker-e2980.firebaseapp.com',
+    storageBucket: 'life-balance-tracker-e2980.firebasestorage.app',
   );
 }
