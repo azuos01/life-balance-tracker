@@ -24,6 +24,14 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
+  static const _navItems = [
+    _NavItem(icon: Icons.home_outlined,       activeIcon: Icons.home,            label: 'Início'),
+    _NavItem(icon: Icons.grid_view_outlined,  activeIcon: Icons.grid_view,       label: 'Tarefas'),
+    _NavItem(icon: Icons.list_alt_outlined,   activeIcon: Icons.list_alt,        label: 'Atividades'),
+    _NavItem(icon: Icons.track_changes_outlined, activeIcon: Icons.track_changes, label: 'Objetivos'),
+    _NavItem(icon: Icons.person_outline,      activeIcon: Icons.person,          label: 'Perfil'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,43 +39,109 @@ class _MainScreenState extends State<MainScreen> {
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: AppTheme.divider, width: 0.5),
-          ),
+      bottomNavigationBar: _BottomNav(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+        items: _navItems,
+      ),
+    );
+  }
+}
+
+class _NavItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  const _NavItem({required this.icon, required this.activeIcon, required this.label});
+}
+
+class _BottomNav extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+  final List<_NavItem> items;
+
+  const _BottomNav({
+    required this.currentIndex,
+    required this.onTap,
+    required this.items,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        border: Border(
+          top: BorderSide(color: AppTheme.divider, width: 0.5),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (i) => setState(() => _currentIndex = i),
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Início',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view_outlined),
-              activeIcon: Icon(Icons.grid_view),
-              label: 'Tarefas',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list_alt_outlined),
-              activeIcon: Icon(Icons.list_alt),
-              label: 'Atividades',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.track_changes_outlined),
-              activeIcon: Icon(Icons.track_changes),
-              label: 'Objetivos',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Perfil',
-            ),
-          ],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          height: 62,
+          child: Row(
+            children: List.generate(items.length, (i) {
+              final item = items[i];
+              final selected = i == currentIndex;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Pill indicator
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                          width: selected ? 40 : 0,
+                          height: selected ? 3 : 0,
+                          margin: const EdgeInsets.only(bottom: 4),
+                          decoration: BoxDecoration(
+                            gradient: selected
+                                ? AppTheme.primaryGradient
+                                : null,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        Icon(
+                          selected ? item.activeIcon : item.icon,
+                          size: 22,
+                          color: selected
+                              ? AppTheme.primary
+                              : AppTheme.textSecondary,
+                        ),
+                        const SizedBox(height: 2),
+                        AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 200),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: selected
+                                ? FontWeight.w800
+                                : FontWeight.w400,
+                            color: selected
+                                ? AppTheme.primary
+                                : AppTheme.textSecondary,
+                          ),
+                          child: Text(item.label),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );

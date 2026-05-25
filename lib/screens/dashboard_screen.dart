@@ -11,6 +11,7 @@ import '../services/quotes_service.dart';
 import '../widgets/life_wheel_chart.dart';
 import '../widgets/xp_progress_bar.dart';
 import '../widgets/area_card.dart';
+import '../widgets/app_background.dart';
 import 'logging/morning_checkin_screen.dart';
 import 'logging/evening_checkout_screen.dart';
 import 'logging/add_activity_screen.dart';
@@ -29,12 +30,15 @@ class DashboardScreen extends StatelessWidget {
 
     if (user == null) return const SizedBox();
 
-    return Scaffold(
+    return AppBackground(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 0,
             floating: true,
+            backgroundColor: Colors.transparent,
             title: Row(
               children: [
                 const Text('⚖️', style: TextStyle(fontSize: 22)),
@@ -76,10 +80,12 @@ class DashboardScreen extends StatelessWidget {
 
                   // ── XP bar ──────────────────────────────────────────────
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       color: AppTheme.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.divider),
+                      boxShadow: AppTheme.cardShadow,
                     ),
                     child: XpProgressBar(totalXP: user.totalXP),
                   ),
@@ -108,12 +114,14 @@ class DashboardScreen extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const AddActivityScreen()),
         ),
         backgroundColor: AppTheme.primary,
+        elevation: 4,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
           '+ Atividade',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
       ),
+    ),
     );
   }
 }
@@ -124,22 +132,32 @@ class _AppHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.primary.withOpacity(0.85),
-            AppTheme.primary.withOpacity(0.5),
-          ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF5A4FCC), Color(0xFF7C6FFF), Color(0xFF9D5FE8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: AppTheme.glowShadow(AppTheme.primary, blur: 30, opacity: 0.35),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('⚖️', style: TextStyle(fontSize: 36)),
+          // Logo circle
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withOpacity(0.3)),
+            ),
+            child: const Center(
+              child: Text('⚖️', style: TextStyle(fontSize: 26)),
+            ),
+          ),
           const SizedBox(width: 14),
           const Expanded(
             child: Column(
@@ -154,19 +172,19 @@ class _AppHeroCard extends StatelessWidget {
                     letterSpacing: 0.3,
                   ),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 5),
                 Text(
-                  'Transforme intenções em ações. Execute as 3 tarefas MIT do dia, organize pela Matriz de Eisenhower e acompanhe o equilíbrio das 10 áreas da sua vida.',
+                  'Execute as 3 tarefas MIT do dia, organize pela Matriz de Eisenhower e acompanhe as 10 áreas da sua vida.',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 11,
-                    height: 1.5,
+                    height: 1.55,
                   ),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 10),
                 Wrap(
                   spacing: 6,
-                  runSpacing: 4,
+                  runSpacing: 5,
                   children: [
                     _HeroPill('⭐ MIT'),
                     _HeroPill('⚡ Eisenhower'),
@@ -214,26 +232,29 @@ class _DailyQuoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final quote = QuotesService.instance.getDailyQuote();
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.primary.withOpacity(0.2),
-        ),
-      ),
+    return GlassCard(
+      opacity: 0.06,
+      borderRadius: BorderRadius.circular(18),
+      padding: const EdgeInsets.all(18),
+      tintColor: AppTheme.primary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Text('💭', style: TextStyle(fontSize: 16)),
-              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text('💭', style: TextStyle(fontSize: 14)),
+              ),
+              const SizedBox(width: 10),
               const Text(
                 'Reflexão do Dia',
                 style: TextStyle(
-                  color: AppTheme.primary,
+                  color: AppTheme.primaryLight,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
@@ -241,27 +262,36 @@ class _DailyQuoteCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             '"${quote.text}"',
             style: const TextStyle(
               color: AppTheme.textPrimary,
               fontSize: 13,
               fontStyle: FontStyle.italic,
-              height: 1.6,
+              height: 1.65,
             ),
           ),
-          const SizedBox(height: 6),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '— ${quote.author}',
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '— ${quote.author}',
+                  style: const TextStyle(
+                    color: AppTheme.primaryLight,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

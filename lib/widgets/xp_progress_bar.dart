@@ -22,53 +22,123 @@ class XpProgressBar extends StatelessWidget {
         ? ((totalXP - prevXP) / (nextXP - prevXP)).clamp(0.0, 1.0)
         : 1.0;
 
+    final tierColor = _tierColor(tier);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showDetails)
+        if (showDetails) ...[
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Nível badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [tierColor, tierColor.withOpacity(0.6)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Nv $level',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Nível $level — $tier',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
+                    tier,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
                       fontSize: 15,
-                      color: AppTheme.textPrimary,
+                      color: tierColor,
                     ),
                   ),
                   Text(
-                    '$totalXP XP',
+                    '$totalXP XP acumulados',
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: AppTheme.textSecondary,
                     ),
                   ),
                 ],
               ),
-              Text(
-                'próx. $nextXP XP',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppTheme.textSecondary,
-                ),
+              const Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${(progress * 100).toInt()}%',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: tierColor,
+                    ),
+                  ),
+                  Text(
+                    'para nv ${level + 1}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        if (showDetails) const SizedBox(height: 8),
+          const SizedBox(height: 12),
+        ],
+        // Barra de progresso com gradiente
         ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: progress,
-            minHeight: showDetails ? 8 : 4,
-            backgroundColor: AppTheme.surfaceLight,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primary),
+          borderRadius: BorderRadius.circular(10),
+          child: Stack(
+            children: [
+              // Background
+              Container(
+                height: showDetails ? 10 : 5,
+                decoration: BoxDecoration(
+                  color: tierColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              // Fill
+              FractionallySizedBox(
+                widthFactor: progress,
+                child: Container(
+                  height: showDetails ? 10 : 5,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [tierColor, tierColor.withOpacity(0.7)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tierColor.withOpacity(0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
+
+  Color _tierColor(String tier) => switch (tier) {
+        'Iniciante'  => const Color(0xFF9CA3AF),
+        'Praticante' => const Color(0xFF34D399),
+        'Guerreiro'  => const Color(0xFF60A5FA),
+        'Mestre'     => const Color(0xFFA78BFA),
+        _            => AppTheme.accentGold,     // Lenda
+      };
 }

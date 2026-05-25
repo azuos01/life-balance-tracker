@@ -5,6 +5,7 @@ import '../../providers/tasks_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../constants/app_constants.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_background.dart';
 import 'task_create_screen.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -34,7 +35,9 @@ class _TasksScreenState extends State<TasksScreen>
   Widget build(BuildContext context) {
     final tasksProvider = context.watch<TasksProvider>();
 
-    return Scaffold(
+    return AppBackground(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Row(
           children: [
@@ -80,11 +83,13 @@ class _TasksScreenState extends State<TasksScreen>
           MaterialPageRoute(builder: (_) => const TaskCreateScreen()),
         ),
         backgroundColor: AppTheme.primary,
+        elevation: 4,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Nova Tarefa',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
+      ),
       ),
     );
   }
@@ -207,9 +212,17 @@ class _Quadrant extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 160),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.25)),
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 14,
+            spreadRadius: -4,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

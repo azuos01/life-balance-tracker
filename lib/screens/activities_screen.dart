@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/activities_provider.dart';
 import '../constants/app_constants.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_background.dart';
 import 'logging/add_activity_screen.dart';
 
 class ActivitiesScreen extends StatelessWidget {
@@ -12,14 +13,16 @@ class ActivitiesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final acts = context.watch<ActivitiesProvider>().activities;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('📝 Atividades')),
-      body: acts.isEmpty
-          ? _EmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: acts.length,
-              itemBuilder: (context, i) {
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: const Text('📝 Atividades')),
+        body: acts.isEmpty
+            ? _EmptyState()
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: acts.length,
+                itemBuilder: (context, i) {
                 final act = acts[i];
                 final areaConfig = kAreas.firstWhere(
                   (c) => c.id == act.areaId,
@@ -160,13 +163,14 @@ class ActivitiesScreen extends StatelessWidget {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AddActivityScreen()),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddActivityScreen()),
+          ),
+          backgroundColor: AppTheme.primary,
+          child: const Icon(Icons.add, color: Colors.white),
         ),
-        backgroundColor: AppTheme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

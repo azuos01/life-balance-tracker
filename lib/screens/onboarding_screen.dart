@@ -4,6 +4,7 @@ import '../providers/user_provider.dart';
 import '../providers/areas_provider.dart';
 import '../constants/app_constants.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_background.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -72,27 +73,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildProgress(),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (i) => setState(() => _currentPage = i),
-                children: [
-                  _WelcomePage(controller: _nameController),
-                  _ScoresPage(scores: _scores, onChanged: (id, v) {
-                    setState(() => _scores[id] = v);
-                  }),
-                  _GoalsPage(controllers: _goalControllers),
-                ],
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildProgress(),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: (i) => setState(() => _currentPage = i),
+                  children: [
+                    _WelcomePage(controller: _nameController),
+                    _ScoresPage(scores: _scores, onChanged: (id, v) {
+                      setState(() => _scores[id] = v);
+                    }),
+                    _GoalsPage(controllers: _goalControllers),
+                  ],
+                ),
               ),
-            ),
-            _buildBottomBar(),
-          ],
+              _buildBottomBar(),
+            ],
+          ),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import '../providers/activities_provider.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
 import '../widgets/xp_progress_bar.dart';
+import '../widgets/app_background.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -17,17 +18,19 @@ class ProfileScreen extends StatelessWidget {
 
     if (user == null) return const SizedBox();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => _showSettings(context),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Perfil'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => _showSettings(context),
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,6 +187,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 80),
           ],
         ),
+      ),
       ),
     );
   }

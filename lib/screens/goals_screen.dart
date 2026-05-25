@@ -6,6 +6,7 @@ import '../providers/user_provider.dart';
 import '../models/area_model.dart';
 import '../constants/app_constants.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_background.dart';
 
 class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
@@ -14,24 +15,27 @@ class GoalsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final areas = context.watch<AreasProvider>().areas;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('🎯 Objetivos')),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: areas.length,
-        itemBuilder: (context, i) {
-          final area = areas[i];
-          if (area.goals.isEmpty) return const SizedBox();
-          return _AreaGoalsSection(area: area, colorIndex: i);
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddGoalSheet(context),
-        backgroundColor: AppTheme.primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Novo Objetivo',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: const Text('🎯 Objetivos')),
+        body: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: areas.length,
+          itemBuilder: (context, i) {
+            final area = areas[i];
+            if (area.goals.isEmpty) return const SizedBox();
+            return _AreaGoalsSection(area: area, colorIndex: i);
+          },
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _showAddGoalSheet(context),
+          backgroundColor: AppTheme.primary,
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text(
+            'Novo Objetivo',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
         ),
       ),
     );
