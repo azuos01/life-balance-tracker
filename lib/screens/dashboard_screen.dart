@@ -255,29 +255,29 @@ class _DailyQuoteCard extends StatelessWidget {
                 'Reflexão do Dia',
                 style: TextStyle(
                   color: AppTheme.primaryLight,
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             '"${quote.text}"',
             style: const TextStyle(
               color: AppTheme.textPrimary,
-              fontSize: 13,
+              fontSize: 15,
               fontStyle: FontStyle.italic,
-              height: 1.65,
+              height: 1.7,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Row(
             children: [
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
@@ -286,7 +286,7 @@ class _DailyQuoteCard extends StatelessWidget {
                   '— ${quote.author}',
                   style: const TextStyle(
                     color: AppTheme.primaryLight,
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
