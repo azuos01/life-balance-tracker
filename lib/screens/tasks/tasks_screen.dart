@@ -22,7 +22,7 @@ class _TasksScreenState extends State<TasksScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -33,73 +33,78 @@ class _TasksScreenState extends State<TasksScreen>
 
   @override
   Widget build(BuildContext context) {
-    final tasksProvider = context.watch<TasksProvider>();
+    final tp = context.watch<TasksProvider>();
 
     return AppBackground(
       child: Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Text('⚡', style: TextStyle(fontSize: 20)),
-            const SizedBox(width: 8),
-            const Text('Tarefas'),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${tasksProvider.pendingTasks.length}',
-                style: const TextStyle(
-                  color: AppTheme.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const Text('⚡', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
+              const Text('Tarefas'),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${tp.pendingTasks.length}',
+                  style: const TextStyle(
+                    color: AppTheme.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Eisenhower'),
+              Tab(text: 'Kanban'),
+              Tab(text: 'Histórico'),
+            ],
+          ),
         ),
-        bottom: TabBar(
+        body: TabBarView(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Matriz Eisenhower'),
-            Tab(text: 'Concluídas'),
+          children: [
+            _MatrixView(tp: tp),
+            _KanbanView(tp: tp),
+            _HistoryView(tp: tp),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _MatrixView(tasksProvider: tasksProvider),
-          _CompletedView(tasksProvider: tasksProvider),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const TaskCreateScreen()),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const TaskCreateScreen()),
+          ),
+          backgroundColor: AppTheme.primary,
+          elevation: 4,
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text(
+            'Nova Tarefa',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
         ),
-        backgroundColor: AppTheme.primary,
-        elevation: 4,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Nova Tarefa',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-        ),
-      ),
       ),
     );
   }
 }
 
-// ── Matriz 2×2 de Eisenhower ──────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// EISENHOWER MATRIX VIEW
+// ══════════════════════════════════════════════════════════════════════════════
 
 class _MatrixView extends StatelessWidget {
-  final TasksProvider tasksProvider;
-  const _MatrixView({required this.tasksProvider});
+  final TasksProvider tp;
+  const _MatrixView({required this.tp});
 
   @override
   Widget build(BuildContext context) {
@@ -107,10 +112,8 @@ class _MatrixView extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          // Legenda de eixos
           _AxisLabels(),
           const SizedBox(height: 8),
-          // Q1 e Q2 (linha superior)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -121,7 +124,7 @@ class _MatrixView extends StatelessWidget {
                   action: 'Faça Agora',
                   emoji: '🔴',
                   color: Colors.red,
-                  tasks: tasksProvider.byQuadrant(1),
+                  tasks: tp.byQuadrant(1),
                 ),
               ),
               const SizedBox(width: 8),
@@ -132,13 +135,12 @@ class _MatrixView extends StatelessWidget {
                   action: 'Agende',
                   emoji: '🟢',
                   color: Colors.green,
-                  tasks: tasksProvider.byQuadrant(2),
+                  tasks: tp.byQuadrant(2),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          // Q3 e Q4 (linha inferior)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -149,7 +151,7 @@ class _MatrixView extends StatelessWidget {
                   action: 'Delegue',
                   emoji: '🟡',
                   color: Colors.orange,
-                  tasks: tasksProvider.byQuadrant(3),
+                  tasks: tp.byQuadrant(3),
                 ),
               ),
               const SizedBox(width: 8),
@@ -160,7 +162,7 @@ class _MatrixView extends StatelessWidget {
                   action: 'Elimine',
                   emoji: '⚫',
                   color: Colors.grey,
-                  tasks: tasksProvider.byQuadrant(4),
+                  tasks: tp.byQuadrant(4),
                 ),
               ),
             ],
@@ -175,11 +177,11 @@ class _MatrixView extends StatelessWidget {
 class _AxisLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
-        const SizedBox(width: 4),
-        const Text(
-          '←  NÃO URGENTE      URGENTE  →',
+        SizedBox(width: 4),
+        Text(
+          '←  NÃO URGENTE            URGENTE  →',
           style: TextStyle(fontSize: 9, color: AppTheme.textSecondary),
         ),
       ],
@@ -187,13 +189,9 @@ class _AxisLabels extends StatelessWidget {
   }
 }
 
-// ── Quadrante ─────────────────────────────────────────────────────────────────
-
 class _Quadrant extends StatelessWidget {
   final int q;
-  final String title;
-  final String action;
-  final String emoji;
+  final String title, action, emoji;
   final Color color;
   final List<TaskModel> tasks;
 
@@ -227,7 +225,6 @@ class _Quadrant extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               Text(emoji, style: const TextStyle(fontSize: 14)),
@@ -256,35 +253,29 @@ class _Quadrant extends StatelessWidget {
           const SizedBox(height: 8),
           const Divider(height: 1, color: AppTheme.divider),
           const SizedBox(height: 8),
-          // Tasks list
           if (tasks.isEmpty)
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
                   'Nenhuma tarefa',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: color.withOpacity(0.5),
-                  ),
+                  style:
+                      TextStyle(fontSize: 11, color: color.withOpacity(0.5)),
                 ),
               ),
             )
           else
-            ...tasks.map((t) => _TaskCard(task: t, accentColor: color)),
+            ...tasks.map((t) => _EisenhowerCard(task: t, accentColor: color)),
         ],
       ),
     );
   }
 }
 
-// ── Task Card ─────────────────────────────────────────────────────────────────
-
-class _TaskCard extends StatelessWidget {
+class _EisenhowerCard extends StatelessWidget {
   final TaskModel task;
   final Color accentColor;
-
-  const _TaskCard({required this.task, required this.accentColor});
+  const _EisenhowerCard({required this.task, required this.accentColor});
 
   @override
   Widget build(BuildContext context) {
@@ -292,14 +283,15 @@ class _TaskCard extends StatelessWidget {
       (a) => a.id == task.areaId,
       orElse: () => kAreas.first,
     );
+    final isInProgress = task.status == 'in_progress';
 
     return GestureDetector(
-      onTap: () => _showTaskDetail(context),
+      onTap: () => _showDetail(context),
       child: Container(
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(10),
           border: task.isMIT
               ? Border.all(color: AppTheme.accent.withOpacity(0.5))
@@ -313,7 +305,7 @@ class _TaskCard extends StatelessWidget {
                 if (task.isMIT)
                   const Padding(
                     padding: EdgeInsets.only(right: 4),
-                    child: Text('⭐', style: TextStyle(fontSize: 12)),
+                    child: Text('⭐', style: TextStyle(fontSize: 10)),
                   ),
                 Expanded(
                   child: Text(
@@ -327,6 +319,19 @@ class _TaskCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (isInProgress)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF9F1C).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      '⚡',
+                      style: TextStyle(fontSize: 9),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 4),
@@ -338,9 +343,7 @@ class _TaskCard extends StatelessWidget {
                   child: Text(
                     area.name,
                     style: const TextStyle(
-                      fontSize: 9,
-                      color: AppTheme.textSecondary,
-                    ),
+                        fontSize: 9, color: AppTheme.textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -362,7 +365,7 @@ class _TaskCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: task.progress,
                   minHeight: 3,
-                  backgroundColor: AppTheme.surfaceLight,
+                  backgroundColor: AppTheme.divider,
                   valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                 ),
               ),
@@ -373,7 +376,7 @@ class _TaskCard extends StatelessWidget {
     );
   }
 
-  void _showTaskDetail(BuildContext context) {
+  void _showDetail(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -392,7 +395,955 @@ class _TaskCard extends StatelessWidget {
   }
 }
 
-// ── Task Detail Sheet ─────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// KANBAN VIEW
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _KanbanView extends StatelessWidget {
+  final TasksProvider tp;
+  const _KanbanView({required this.tp});
+
+  static const _colorPlanned = AppTheme.primary;
+  static const _colorInProgress = Color(0xFFFF9F1C);
+  static const _colorDone = Color(0xFF34D399);
+
+  @override
+  Widget build(BuildContext context) {
+    final planned = tp.plannedTasks;
+    final inProgress = tp.inProgressTasks;
+    final completed = tp.completedTasks;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Seção de Relatório ──────────────────────────────────────────
+          _KanbanReport(
+            planned: planned.length,
+            inProgress: inProgress.length,
+            completed: completed.length,
+          ),
+          const SizedBox(height: 12),
+          // ── Colunas Kanban ──────────────────────────────────────────────
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _KanbanColumn(
+                  title: 'Planejadas',
+                  icon: '📋',
+                  color: _colorPlanned,
+                  tasks: planned,
+                  columnStatus: 'pending',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _KanbanColumn(
+                  title: 'Em Execução',
+                  icon: '⚡',
+                  color: _colorInProgress,
+                  tasks: inProgress,
+                  columnStatus: 'in_progress',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _KanbanColumn(
+                  title: 'Concluídas',
+                  icon: '✅',
+                  color: _colorDone,
+                  tasks: completed,
+                  columnStatus: 'completed',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Relatório Kanban ──────────────────────────────────────────────────────────
+
+class _KanbanReport extends StatelessWidget {
+  final int planned, inProgress, completed;
+  const _KanbanReport({
+    required this.planned,
+    required this.inProgress,
+    required this.completed,
+  });
+
+  static const _colorPlanned = AppTheme.primary;
+  static const _colorInProgress = Color(0xFFFF9F1C);
+  static const _colorDone = Color(0xFF34D399);
+
+  @override
+  Widget build(BuildContext context) {
+    final total = planned + inProgress + completed;
+    final doneRate = total > 0 ? completed / total : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.divider),
+        boxShadow: AppTheme.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cabeçalho
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text('📊', style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Relatório Kanban',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Visão geral do fluxo de tarefas',
+                      style: TextStyle(
+                          fontSize: 10, color: AppTheme.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '$total total',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Cards de status
+          Row(
+            children: [
+              _StatusChip(
+                label: 'Planejadas',
+                count: planned,
+                color: _colorPlanned,
+                icon: '📋',
+              ),
+              const SizedBox(width: 8),
+              _StatusChip(
+                label: 'Em Execução',
+                count: inProgress,
+                color: _colorInProgress,
+                icon: '⚡',
+              ),
+              const SizedBox(width: 8),
+              _StatusChip(
+                label: 'Concluídas',
+                count: completed,
+                color: _colorDone,
+                icon: '✅',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Barra de progresso segmentada
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Progresso geral',
+                style:
+                    TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+              ),
+              Text(
+                '${(doneRate * 100).toInt()}% concluído',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: _colorDone,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          _SegmentedBar(
+            planned: planned,
+            inProgress: inProgress,
+            completed: completed,
+          ),
+          const SizedBox(height: 8),
+          // Legenda
+          Row(
+            children: [
+              _LegendDot(color: _colorDone, label: 'Concluídas'),
+              const SizedBox(width: 14),
+              _LegendDot(color: _colorInProgress, label: 'Em execução'),
+              const SizedBox(width: 14),
+              _LegendDot(color: _colorPlanned, label: 'Planejadas'),
+            ],
+          ),
+          // Taxa de conclusão detalhada
+          if (planned + inProgress + completed > 0) ...[
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppTheme.divider),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _MiniStat(
+                  label: 'Taxa conclusão',
+                  value: '${(doneRate * 100).toInt()}%',
+                  color: _colorDone,
+                ),
+                const SizedBox(width: 12),
+                _MiniStat(
+                  label: 'Em andamento',
+                  value: total > 0
+                      ? '${((inProgress / total) * 100).toInt()}%'
+                      : '0%',
+                  color: _colorInProgress,
+                ),
+                const SizedBox(width: 12),
+                _MiniStat(
+                  label: 'No backlog',
+                  value: total > 0
+                      ? '${((planned / total) * 100).toInt()}%'
+                      : '0%',
+                  color: _colorPlanned,
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SegmentedBar extends StatelessWidget {
+  final int planned, inProgress, completed;
+  const _SegmentedBar({
+    required this.planned,
+    required this.inProgress,
+    required this.completed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final total = planned + inProgress + completed;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: LayoutBuilder(
+        builder: (ctx, constraints) {
+          if (total == 0) {
+            return Container(
+              height: 10,
+              color: AppTheme.surfaceLight,
+            );
+          }
+          final w = constraints.maxWidth;
+          final doneW = w * completed / total;
+          final progW = w * inProgress / total;
+          final planW = w * planned / total;
+          return SizedBox(
+            height: 10,
+            child: Row(
+              children: [
+                if (completed > 0)
+                  Container(
+                    width: doneW,
+                    color: const Color(0xFF34D399),
+                  ),
+                if (inProgress > 0)
+                  Container(
+                    width: progW,
+                    color: const Color(0xFFFF9F1C),
+                  ),
+                if (planned > 0)
+                  Container(
+                    width: planW,
+                    color: AppTheme.primary.withOpacity(0.65),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label, icon;
+  final int count;
+  final Color color;
+
+  const _StatusChip({
+    required this.label,
+    required this.count,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.07),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.22)),
+        ),
+        child: Column(
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: color,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(
+                  fontSize: 9, color: AppTheme.textSecondary),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendDot({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 9, color: AppTheme.textSecondary),
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label, value;
+  final Color color;
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          Text(
+            label,
+            style: const TextStyle(
+                fontSize: 10, color: AppTheme.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Coluna Kanban ─────────────────────────────────────────────────────────────
+
+class _KanbanColumn extends StatelessWidget {
+  final String title, icon, columnStatus;
+  final Color color;
+  final List<TaskModel> tasks;
+
+  const _KanbanColumn({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.tasks,
+    required this.columnStatus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cabeçalho da coluna
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.09),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(15)),
+              border:
+                  Border(bottom: BorderSide(color: color.withOpacity(0.2))),
+            ),
+            child: Row(
+              children: [
+                Text(icon, style: const TextStyle(fontSize: 13)),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    title.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      color: color,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${tasks.length}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Conteúdo da coluna
+          if (tasks.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+              child: Column(
+                children: [
+                  Icon(Icons.inbox_outlined,
+                      color: color.withOpacity(0.28), size: 26),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Nenhuma\ntarefa',
+                    style: TextStyle(
+                        fontSize: 10, color: color.withOpacity(0.45)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                children: tasks
+                    .map((t) => _KanbanCard(
+                          task: t,
+                          accentColor: color,
+                          columnStatus: columnStatus,
+                        ))
+                    .toList(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Card Kanban ───────────────────────────────────────────────────────────────
+
+class _KanbanCard extends StatelessWidget {
+  final TaskModel task;
+  final Color accentColor;
+  final String columnStatus;
+
+  const _KanbanCard({
+    required this.task,
+    required this.accentColor,
+    required this.columnStatus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final area = kAreas.firstWhere(
+      (a) => a.id == task.areaId,
+      orElse: () => kAreas.first,
+    );
+    final isDone = columnStatus == 'completed';
+
+    return GestureDetector(
+      onTap: () => _showDetail(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
+          borderRadius: BorderRadius.circular(12),
+          border: task.isMIT
+              ? Border.all(color: AppTheme.accent.withOpacity(0.5))
+              : Border.all(color: AppTheme.divider),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título + MIT
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (task.isMIT)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 3, top: 1),
+                    child: Text('⭐', style: TextStyle(fontSize: 10)),
+                  ),
+                Expanded(
+                  child: Text(
+                    task.title,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: isDone
+                          ? AppTheme.textSecondary
+                          : AppTheme.textPrimary,
+                      decoration:
+                          isDone ? TextDecoration.lineThrough : null,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            // Área + badge Eisenhower
+            Row(
+              children: [
+                Text(area.icon, style: const TextStyle(fontSize: 10)),
+                const SizedBox(width: 3),
+                Expanded(
+                  child: Text(
+                    area.name,
+                    style: const TextStyle(
+                        fontSize: 9, color: AppTheme.textSecondary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: _qColor(task.eisenhowerQ).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '${task.eisenhowerEmoji} Q${task.eisenhowerQ}',
+                    style: TextStyle(
+                      fontSize: 8,
+                      color: _qColor(task.eisenhowerQ),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Barra de progresso das subtarefas
+            if (task.subtasks.isNotEmpty) ...[
+              const SizedBox(height: 7),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: task.progress,
+                        minHeight: 4,
+                        backgroundColor: AppTheme.divider,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            accentColor),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${task.completedSubtasks}/${task.subtasks.length}',
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: accentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            // Prazo
+            if (task.dueDate != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                '📅 ${_fmtDate(task.dueDate!)}',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: _isOverdue(task.dueDate!) && !isDone
+                      ? Colors.redAccent
+                      : AppTheme.textSecondary,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            // Ações de transição de status
+            _buildActions(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActions(BuildContext context) {
+    if (columnStatus == 'pending') {
+      return _ActionButton(
+        label: 'Iniciar',
+        icon: '⚡',
+        color: const Color(0xFFFF9F1C),
+        onTap: () => context.read<TasksProvider>().moveToInProgress(task.id),
+      );
+    }
+
+    if (columnStatus == 'in_progress') {
+      return Column(
+        children: [
+          _ActionButton(
+            label: 'Concluir',
+            icon: '✓',
+            color: const Color(0xFF34D399),
+            onTap: () =>
+                context.read<TasksProvider>().completeTask(task.id),
+          ),
+          const SizedBox(height: 4),
+          GestureDetector(
+            onTap: () =>
+                context.read<TasksProvider>().moveToPending(task.id),
+            child: const Center(
+              child: Text(
+                '← Pausar',
+                style: TextStyle(
+                    fontSize: 10, color: AppTheme.textSecondary),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Coluna Concluídas → reabrir
+    return GestureDetector(
+      onTap: () => context.read<TasksProvider>().moveToPending(task.id),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppTheme.divider),
+        ),
+        child: const Center(
+          child: Text(
+            '↩ Reabrir',
+            style: TextStyle(
+                fontSize: 10,
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _qColor(int q) => switch (q) {
+        1 => Colors.red,
+        2 => Colors.green,
+        3 => Colors.orange,
+        _ => Colors.grey,
+      };
+
+  bool _isOverdue(DateTime d) =>
+      d.isBefore(DateTime.now().subtract(const Duration(days: 1)));
+
+  String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+  void _showDetail(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: context.read<TasksProvider>(),
+        child: ChangeNotifierProvider.value(
+          value: context.read<UserProvider>(),
+          child: _TaskDetailSheet(task: task),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final String label, icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(icon,
+                style: TextStyle(
+                    fontSize: 11,
+                    color: color,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HISTORY VIEW (tarefas concluídas — listagem detalhada)
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _HistoryView extends StatelessWidget {
+  final TasksProvider tp;
+  const _HistoryView({required this.tp});
+
+  @override
+  Widget build(BuildContext context) {
+    final completed = tp.completedTasks;
+
+    if (completed.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('🎯', style: TextStyle(fontSize: 48)),
+            SizedBox(height: 12),
+            Text(
+              'Nenhuma tarefa concluída ainda.',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Complete suas MITs e elas aparecerão aqui.',
+              style: TextStyle(
+                  color: AppTheme.textSecondary, fontSize: 12),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+      itemCount: completed.length,
+      itemBuilder: (ctx, i) {
+        final t = completed[i];
+        final area = kAreas.firstWhere(
+          (a) => a.id == t.areaId,
+          orElse: () => kAreas.first,
+        );
+        final areaIndex = kAreas.indexWhere((a) => a.id == t.areaId);
+        final color = AppTheme.areaColors[
+            areaIndex >= 0 ? areaIndex % AppTheme.areaColors.length : 0];
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                color: const Color(0xFF34D399).withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF34D399).withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check_circle,
+                    color: Color(0xFF34D399), size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textSecondary,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                              color: color, shape: BoxShape.circle),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          '${area.icon} ${area.name}',
+                          style: const TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textSecondary),
+                        ),
+                        const Text(
+                          ' • ',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textSecondary),
+                        ),
+                        Text(
+                          '${t.eisenhowerEmoji} ${t.eisenhowerLabel}',
+                          style: const TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                    if (t.subtasks.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '${t.subtasks.length} subtarefa${t.subtasks.length > 1 ? 's' : ''}'
+                        ' · ${t.totalEstimatedHours}h estimadas',
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (t.completedAt != null)
+                Text(
+                  _fmtDate(t.completedAt!),
+                  style: const TextStyle(
+                      fontSize: 10, color: AppTheme.textSecondary),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TASK DETAIL SHEET (usado em ambas as views)
+// ══════════════════════════════════════════════════════════════════════════════
 
 class _TaskDetailSheet extends StatelessWidget {
   final TaskModel task;
@@ -401,7 +1352,6 @@ class _TaskDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tp = context.watch<TasksProvider>();
-    // Refresh task from provider (may have updated subtasks)
     final current = tp.tasks.firstWhere(
       (t) => t.id == task.id,
       orElse: () => task,
@@ -434,7 +1384,7 @@ class _TaskDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Title + badges
+            // Título + MIT
             Row(
               children: [
                 if (current.isMIT)
@@ -455,18 +1405,26 @@ class _TaskDetailSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            // Area + Eisenhower badges
+            // Badges: área + Eisenhower + Kanban status + horas
             Wrap(
               spacing: 8,
+              runSpacing: 4,
               children: [
-                _Badge(text: '${area.icon} ${area.name}', color: AppTheme.primary),
                 _Badge(
-                  text: '${current.eisenhowerEmoji} ${current.eisenhowerLabel}',
+                    text: '${area.icon} ${area.name}',
+                    color: AppTheme.primary),
+                _Badge(
+                  text:
+                      '${current.eisenhowerEmoji} ${current.eisenhowerLabel}',
                   color: _qColor(current.eisenhowerQ),
+                ),
+                _Badge(
+                  text: _statusLabel(current.status),
+                  color: _statusColor(current.status),
                 ),
                 if (current.totalEstimatedHours > 0)
                   _Badge(
-                    text: '⏱ ${current.totalEstimatedHours}h estimadas',
+                    text: '⏱ ${current.totalEstimatedHours}h',
                     color: Colors.blueGrey,
                   ),
               ],
@@ -476,9 +1434,7 @@ class _TaskDetailSheet extends StatelessWidget {
               Text(
                 current.description,
                 style: const TextStyle(
-                  fontSize: 13,
-                  color: AppTheme.textSecondary,
-                ),
+                    fontSize: 13, color: AppTheme.textSecondary),
               ),
             ],
             if (current.dueDate != null) ...[
@@ -486,13 +1442,82 @@ class _TaskDetailSheet extends StatelessWidget {
               Text(
                 '📅 Prazo: ${current.dueDate!.day.toString().padLeft(2, '0')}/${current.dueDate!.month.toString().padLeft(2, '0')}/${current.dueDate!.year}',
                 style: const TextStyle(
-                  fontSize: 12,
-                  color: AppTheme.textSecondary,
-                ),
+                    fontSize: 12, color: AppTheme.textSecondary),
               ),
             ],
-            const SizedBox(height: 20),
-            // Subtasks
+            const SizedBox(height: 16),
+            // Transições Kanban
+            if (current.status != 'completed') ...[
+              const Text(
+                'Mover no Kanban',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  if (current.status == 'in_progress')
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          context
+                              .read<TasksProvider>()
+                              .moveToPending(current.id);
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.arrow_back, size: 14),
+                        label: const Text('Pausar'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.textSecondary,
+                          side:
+                              const BorderSide(color: AppTheme.divider),
+                        ),
+                      ),
+                    ),
+                  if (current.status == 'in_progress')
+                    const SizedBox(width: 8),
+                  if (current.status == 'pending')
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          context
+                              .read<TasksProvider>()
+                              .moveToInProgress(current.id);
+                          Navigator.pop(context);
+                        },
+                        icon: const Text('⚡',
+                            style: TextStyle(fontSize: 14)),
+                        label: const Text('Iniciar'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF9F1C),
+                        ),
+                      ),
+                    ),
+                  if (current.status == 'in_progress')
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          await context
+                              .read<TasksProvider>()
+                              .completeTask(current.id);
+                          if (context.mounted) Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.check,
+                            size: 16, color: Colors.white),
+                        label: const Text('Concluir',
+                            style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF34D399)),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+            // Subtarefas
             if (current.subtasks.isNotEmpty) ...[
               const Text(
                 'Subtarefas',
@@ -509,9 +1534,9 @@ class _TaskDetailSheet extends StatelessWidget {
                         .read<TasksProvider>()
                         .toggleSubtask(current.id, s.id),
                   )),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
             ],
-            // Actions
+            // Editar / Excluir
             Row(
               children: [
                 Expanded(
@@ -536,61 +1561,53 @@ class _TaskDetailSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: () async {
-                      await context
-                          .read<TasksProvider>()
-                          .completeTask(current.id);
-                      if (context.mounted) Navigator.pop(context);
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (c) => AlertDialog(
+                          backgroundColor: AppTheme.surface,
+                          title: const Text('Excluir tarefa?',
+                              style:
+                                  TextStyle(color: AppTheme.textPrimary)),
+                          content: const Text(
+                            'Esta ação não pode ser desfeita.',
+                            style:
+                                TextStyle(color: AppTheme.textSecondary),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pop(c, false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pop(c, true),
+                              child: const Text('Excluir',
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (ok == true && context.mounted) {
+                        await context
+                            .read<TasksProvider>()
+                            .deleteTask(current.id);
+                        if (context.mounted) Navigator.pop(context);
+                      }
                     },
-                    icon: const Icon(Icons.check, size: 16, color: Colors.white),
-                    label: const Text(
-                      'Concluir',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                    icon: const Icon(Icons.delete_outline,
+                        size: 16, color: Colors.red),
+                    label: const Text('Excluir',
+                        style: TextStyle(color: Colors.red)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                          color: Colors.red, width: 0.5),
                     ),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            Center(
-              child: TextButton.icon(
-                onPressed: () async {
-                  final ok = await showDialog<bool>(
-                    context: context,
-                    builder: (c) => AlertDialog(
-                      backgroundColor: AppTheme.surface,
-                      title: const Text('Excluir tarefa?',
-                          style: TextStyle(color: AppTheme.textPrimary)),
-                      content: const Text(
-                        'Esta ação não pode ser desfeita.',
-                        style: TextStyle(color: AppTheme.textSecondary),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(c, false),
-                          child: const Text('Cancelar'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(c, true),
-                          child: const Text('Excluir',
-                              style: TextStyle(color: Colors.red)),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (ok == true && context.mounted) {
-                    await context.read<TasksProvider>().deleteTask(current.id);
-                    if (context.mounted) Navigator.pop(context);
-                  }
-                },
-                icon: const Icon(Icons.delete_outline, size: 16, color: Colors.red),
-                label: const Text('Excluir tarefa',
-                    style: TextStyle(color: Colors.red)),
-              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -599,14 +1616,24 @@ class _TaskDetailSheet extends StatelessWidget {
     );
   }
 
-  Color _qColor(int q) {
-    return switch (q) {
-      1 => Colors.red,
-      2 => Colors.green,
-      3 => Colors.orange,
-      _ => Colors.grey,
-    };
-  }
+  Color _qColor(int q) => switch (q) {
+        1 => Colors.red,
+        2 => Colors.green,
+        3 => Colors.orange,
+        _ => Colors.grey,
+      };
+
+  String _statusLabel(String s) => switch (s) {
+        'pending' => '📋 Planejada',
+        'in_progress' => '⚡ Em Execução',
+        _ => '✅ Concluída',
+      };
+
+  Color _statusColor(String s) => switch (s) {
+        'pending' => AppTheme.primary,
+        'in_progress' => const Color(0xFFFF9F1C),
+        _ => const Color(0xFF34D399),
+      };
 }
 
 class _SubtaskTile extends StatelessWidget {
@@ -634,7 +1661,9 @@ class _SubtaskTile extends StatelessWidget {
               subtask.isCompleted
                   ? Icons.check_circle
                   : Icons.radio_button_unchecked,
-              color: subtask.isCompleted ? Colors.green : AppTheme.textSecondary,
+              color: subtask.isCompleted
+                  ? Colors.green
+                  : AppTheme.textSecondary,
               size: 20,
             ),
             const SizedBox(width: 10),
@@ -677,7 +1706,6 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: color.withOpacity(0.12),
@@ -691,86 +1719,6 @@ class _Badge extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-    );
-  }
-}
-
-// ── Completed View ────────────────────────────────────────────────────────────
-
-class _CompletedView extends StatelessWidget {
-  final TasksProvider tasksProvider;
-  const _CompletedView({required this.tasksProvider});
-
-  @override
-  Widget build(BuildContext context) {
-    final completed = tasksProvider.completedTasks;
-    if (completed.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('🎯', style: TextStyle(fontSize: 48)),
-            SizedBox(height: 12),
-            Text(
-              'Nenhuma tarefa concluída ainda.',
-              style: TextStyle(color: AppTheme.textSecondary),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Complete suas MITs e elas aparecerão aqui.',
-              style: TextStyle(
-                  color: AppTheme.textSecondary, fontSize: 12),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: completed.length,
-      itemBuilder: (ctx, i) {
-        final t = completed[i];
-        final area = kAreas.firstWhere(
-          (a) => a.id == t.areaId,
-          orElse: () => kAreas.first,
-        );
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.title,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textSecondary,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                    Text(
-                      '${area.icon} ${area.name} • ${t.eisenhowerEmoji} Q${t.eisenhowerQ}',
-                      style: const TextStyle(
-                          fontSize: 11, color: AppTheme.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

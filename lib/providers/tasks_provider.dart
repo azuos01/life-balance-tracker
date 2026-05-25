@@ -34,13 +34,37 @@ class TasksProvider extends ChangeNotifier {
       return a.createdAt.compareTo(b.createdAt);
     });
 
-  /// Todas as tarefas não concluídas
+  /// Todas as tarefas não concluídas (pending + in_progress)
   List<TaskModel> get pendingTasks =>
       _tasks.where((t) => t.status != 'completed').toList();
 
+  /// Tarefas planejadas (coluna Kanban "A Fazer")
+  List<TaskModel> get plannedTasks => _tasks
+      .where((t) => t.status == 'pending')
+      .toList()
+    ..sort((a, b) {
+      if (a.isMIT != b.isMIT) return a.isMIT ? -1 : 1;
+      if (a.eisenhowerQ != b.eisenhowerQ) {
+        return a.eisenhowerQ.compareTo(b.eisenhowerQ);
+      }
+      return a.createdAt.compareTo(b.createdAt);
+    });
+
+  /// Tarefas em execução (coluna Kanban "Em Progresso")
+  List<TaskModel> get inProgressTasks => _tasks
+      .where((t) => t.status == 'in_progress')
+      .toList()
+    ..sort((a, b) {
+      if (a.isMIT != b.isMIT) return a.isMIT ? -1 : 1;
+      return a.createdAt.compareTo(b.createdAt);
+    });
+
   /// Tarefas concluídas
-  List<TaskModel> get completedTasks =>
-      _tasks.where((t) => t.status == 'completed').toList();
+  List<TaskModel> get completedTasks => _tasks
+      .where((t) => t.status == 'completed')
+      .toList()
+    ..sort((a, b) =>
+        (b.completedAt ?? b.createdAt).compareTo(a.completedAt ?? a.createdAt));
 
   int get totalTasks => _tasks.length;
   int get completedCount => completedTasks.length;
@@ -173,6 +197,41 @@ class TasksProvider extends ChangeNotifier {
     );
 
     if (allDone) _normalizeMITs();
+    await _persist(_tasks[i]);
+    notifyListeners();
+  }
+
+  /// Move tarefa de 'pending' para 'in_progress' (Kanban: Planejada → Em Execução)
+  Future<void> moveToInProgress(String taskId) async {
+    final i = _tasks.indexWhere((t) => t.id == taskId);
+    if (i == -1) return;
+    _tasks[i] = _tasks[i].copyWith(status: 'in_progress');
+    await _persist(_tasks[i]);
+    notifyListeners();
+  }
+
+  /// Retorna tarefa para 'pending' (Kanban: Em Execução → Planejada ou reabertura)
+  Future<void> moveToPending(String taskId) async {
+    final i = _tasks.indexWhere((t) => t.id == taskId);
+    if (i == -1) return;
+    final t = _tasks[i];
+    // Cria nova instância explicitamente para resetar completedAt → null
+    _tasks[i] = TaskModel(
+      id: t.id,
+      userId: t.userId,
+      title: t.title,
+      description: t.description,
+      areaId: t.areaId,
+      eisenhowerQ: t.eisenhowerQ,
+      isMIT: false,
+      mitOrder: 0,
+      status: 'pending',
+      dueDate: t.dueDate,
+      subtasks: t.subtasks,
+      createdAt: t.createdAt,
+      completedAt: null,
+    );
+    _normalizeMITs();
     await _persist(_tasks[i]);
     notifyListeners();
   }
