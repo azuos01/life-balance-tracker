@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'calendar_service.dart';
 
 // ⚠️ Substitua com seu LinkedIn Client ID (sem secret - usamos PKCE)
 const String _linkedInClientId = 'YOUR_LINKEDIN_CLIENT_ID';
@@ -46,12 +47,26 @@ class AuthService {
       if (kIsWeb) {
         final provider = GoogleAuthProvider()
           ..addScope('email')
-          ..addScope('profile');
+          ..addScope('profile')
+          ..addScope('https://www.googleapis.com/auth/calendar');
         cred = await _auth.signInWithPopup(provider);
+        // Capture Calendar access token at sign-in time
+        final accessToken =
+            (cred.credential as OAuthCredential?)?.accessToken;
+        CalendarService.instance.setAccessToken(accessToken);
+        debugPrint(
+            '[AuthService] Calendar token captured: ${accessToken != null}');
       } else {
-        final googleUser = await GoogleSignIn().signIn();
+        final googleUser = await GoogleSignIn(
+          scopes: [
+            'email',
+            'profile',
+            'https://www.googleapis.com/auth/calendar',
+          ],
+        ).signIn();
         if (googleUser == null) return null;
         final googleAuth = await googleUser.authentication;
+        CalendarService.instance.setAccessToken(googleAuth.accessToken);
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
@@ -62,6 +77,35 @@ class AuthService {
     } catch (e) {
       debugPrint('Google Sign-In error: $e');
       rethrow;
+    }
+  }
+
+  /// Solicita (ou renova) o token de acesso ao Google Calendar via
+  /// reauthenticateWithPopup. Retorna o novo access token ou null.
+  Future<String?> requestCalendarAccess() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return null;
+
+      if (kIsWeb) {
+        final provider = GoogleAuthProvider()
+          ..addScope('https://www.googleapis.com/auth/calendar');
+        final cred = await user.reauthenticateWithPopup(provider);
+        final token = (cred.credential as OAuthCredential?)?.accessToken;
+        CalendarService.instance.setAccessToken(token);
+        return token;
+      } else {
+        final googleUser = await GoogleSignIn(
+          scopes: ['https://www.googleapis.com/auth/calendar'],
+        ).signIn();
+        if (googleUser == null) return null;
+        final googleAuth = await googleUser.authentication;
+        CalendarService.instance.setAccessToken(googleAuth.accessToken);
+        return googleAuth.accessToken;
+      }
+    } catch (e) {
+      debugPrint('[AuthService] requestCalendarAccess error: $e');
+      return null;
     }
   }
 

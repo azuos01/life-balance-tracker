@@ -8,6 +8,7 @@ import 'providers/user_provider.dart';
 import 'providers/areas_provider.dart';
 import 'providers/activities_provider.dart';
 import 'providers/tasks_provider.dart';
+import 'providers/calendar_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -64,6 +65,15 @@ void main() async {
           update: (_, up, tp) {
             tp!.syncUser(up.user?.id, up.isCloudUser);
             return tp;
+          },
+        ),
+
+        // CalendarProvider: Google Calendar integration
+        ChangeNotifierProxyProvider<UserProvider, CalendarProvider>(
+          create: (_) => CalendarProvider(),
+          update: (_, up, cp) {
+            cp!.syncUser(up.authProvider);
+            return cp;
           },
         ),
       ],

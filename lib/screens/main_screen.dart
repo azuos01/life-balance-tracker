@@ -5,6 +5,7 @@ import 'tasks/tasks_screen.dart';
 import 'activities_screen.dart';
 import 'goals_screen.dart';
 import 'profile_screen.dart';
+import 'calendar/calendar_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -21,15 +22,17 @@ class _MainScreenState extends State<MainScreen> {
     TasksScreen(),
     ActivitiesScreen(),
     GoalsScreen(),
+    CalendarScreen(),
     ProfileScreen(),
   ];
 
   static const _navItems = [
-    _NavItem(icon: Icons.home_outlined,       activeIcon: Icons.home,            label: 'Início'),
-    _NavItem(icon: Icons.grid_view_outlined,  activeIcon: Icons.grid_view,       label: 'Tarefas'),
-    _NavItem(icon: Icons.list_alt_outlined,   activeIcon: Icons.list_alt,        label: 'Atividades'),
-    _NavItem(icon: Icons.track_changes_outlined, activeIcon: Icons.track_changes, label: 'Objetivos'),
-    _NavItem(icon: Icons.person_outline,      activeIcon: Icons.person,          label: 'Perfil'),
+    _NavItem(icon: Icons.home_outlined,          activeIcon: Icons.home,               label: 'Início'),
+    _NavItem(icon: Icons.grid_view_outlined,     activeIcon: Icons.grid_view,          label: 'Tarefas'),
+    _NavItem(icon: Icons.list_alt_outlined,      activeIcon: Icons.list_alt,           label: 'Atividades'),
+    _NavItem(icon: Icons.track_changes_outlined, activeIcon: Icons.track_changes,      label: 'Objetivos'),
+    _NavItem(icon: Icons.calendar_month_outlined,activeIcon: Icons.calendar_month,     label: 'Agenda'),
+    _NavItem(icon: Icons.person_outline,         activeIcon: Icons.person,             label: 'Perfil'),
   ];
 
   @override
