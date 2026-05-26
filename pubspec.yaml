@@ -1,6 +1,15 @@
 name: life_balance_tracker
 description: Life Balance Tracker - Sistema de Gestão de Vida Gamificado
-version: 1.0.0+1
+version: 2.0.0+2
+
+# ── Política de versionamento (MAJOR.MINOR.PATCH+BUILD) ──────────────────────
+# MAJOR (1→2→...): alterações complexas na arquitetura do código
+#                  ex: mudança de providers, refatoração de camadas
+# MINOR (0→1→...): implementação de melhorias e novas funcionalidades
+#                  ex: nova tela, nova feature, integração externa
+# PATCH (0→0→1): correções de bugs
+#                  ex: fix de lógica, crash fix, correção visual
+# BUILD (+N):    incrementado a cada publicação/release
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

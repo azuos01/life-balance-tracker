@@ -77,7 +77,7 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '1.0.0';
+const String kAppVersion = '2.0.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // XP rewards
