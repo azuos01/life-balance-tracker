@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/activities_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/calendar_provider.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
 import '../l10n/app_l10n.dart';
@@ -200,6 +201,7 @@ class _SettingsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
     final up = context.watch<UserProvider>();
+    final calendar = context.watch<CalendarProvider>();
     final l10n = context.l10n;
     final isDark = settings.themeMode == ThemeMode.dark;
 
@@ -337,6 +339,120 @@ class _SettingsSheet extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 24),
+
+                    // ── Google Agenda ──────────────────────────────────────
+                    if (calendar.isGoogleUser) ...[
+                      _SectionHeader(
+                          icon: Icons.calendar_month_outlined,
+                          title: 'Google Agenda'),
+                      SizedBox(height: 10),
+                      Container(
+                        padding: EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceLight,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppTheme.divider),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  calendar.isAuthorized
+                                      ? Icons.check_circle_outline
+                                      : Icons.cancel_outlined,
+                                  size: 15,
+                                  color: calendar.isAuthorized
+                                      ? Color(0xFF34D399)
+                                      : AppTheme.textSecondary,
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  calendar.isAuthorized
+                                      ? 'Sincronização ativa'
+                                      : 'Aguardando autorização',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: calendar.isAuthorized
+                                        ? Color(0xFF34D399)
+                                        : AppTheme.textSecondary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (calendar.isAuthorized) ...[
+                              SizedBox(height: 14),
+                              Text(
+                                'Janela de sincronização',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textSecondary,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Eventos dos próximos N dias aparecem como tarefas planejadas.',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: CalendarProvider.syncDayOptions
+                                    .map((days) {
+                                  final selected =
+                                      calendar.syncDays == days;
+                                  return GestureDetector(
+                                    onTap: () =>
+                                        calendar.setSyncDays(days),
+                                    child: AnimatedContainer(
+                                      duration:
+                                          Duration(milliseconds: 180),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 14, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: selected
+                                            ? AppTheme.primary
+                                                .withOpacity(0.15)
+                                            : AppTheme.surface,
+                                        borderRadius:
+                                            BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: selected
+                                              ? AppTheme.primary
+                                              : AppTheme.divider,
+                                          width: selected ? 1.5 : 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '${days}d',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: selected
+                                              ? FontWeight.w700
+                                              : FontWeight.w400,
+                                          color: selected
+                                              ? AppTheme.primary
+                                              : AppTheme.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                    ],
 
                     // ── Conta ──────────────────────────────────────────────
                     _SectionHeader(

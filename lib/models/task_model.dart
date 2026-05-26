@@ -54,6 +54,15 @@ class TaskModel {
   final DateTime createdAt;
   DateTime? completedAt;
 
+  /// Indica que esta tarefa foi importada do Google Calendar.
+  /// Tarefas de calendário não são enviadas ao Firestore e não podem
+  /// ser excluídas — apenas seu status/quadrante/MIT podem ser alterados.
+  final bool isFromCalendar;
+
+  /// ID do evento no Google Calendar (sem prefixo 'cal_').
+  /// Usado como chave para persistir overrides locais.
+  final String? calendarEventId;
+
   TaskModel({
     required this.id,
     required this.userId,
@@ -68,6 +77,8 @@ class TaskModel {
     List<SubtaskModel>? subtasks,
     required this.createdAt,
     this.completedAt,
+    this.isFromCalendar = false,
+    this.calendarEventId,
   }) : subtasks = subtasks ?? [];
 
   /// Horas estimadas totais = soma das subtarefas (ou 0 se não houver)
@@ -106,6 +117,8 @@ class TaskModel {
         'subtasks': subtasks.map((s) => s.toJson()).toList(),
         'createdAt': createdAt.toIso8601String(),
         'completedAt': completedAt?.toIso8601String(),
+        'isFromCalendar': isFromCalendar,
+        'calendarEventId': calendarEventId,
       };
 
   factory TaskModel.fromJson(Map<String, dynamic> j) => TaskModel(
@@ -128,6 +141,8 @@ class TaskModel {
         completedAt: j['completedAt'] != null
             ? DateTime.parse(j['completedAt'] as String)
             : null,
+        isFromCalendar: j['isFromCalendar'] as bool? ?? false,
+        calendarEventId: j['calendarEventId'] as String?,
       );
 
   TaskModel copyWith({
@@ -141,6 +156,8 @@ class TaskModel {
     DateTime? dueDate,
     List<SubtaskModel>? subtasks,
     DateTime? completedAt,
+    bool? isFromCalendar,
+    String? calendarEventId,
   }) =>
       TaskModel(
         id: id,
@@ -156,5 +173,7 @@ class TaskModel {
         subtasks: subtasks ?? this.subtasks,
         createdAt: createdAt,
         completedAt: completedAt ?? this.completedAt,
+        isFromCalendar: isFromCalendar ?? this.isFromCalendar,
+        calendarEventId: calendarEventId ?? this.calendarEventId,
       );
 }

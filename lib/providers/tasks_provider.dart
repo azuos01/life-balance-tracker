@@ -1,23 +1,38 @@
 import 'package:flutter/foundation.dart';
 import '../models/task_model.dart';
+import '../models/calendar_event_model.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_service.dart';
+import '../constants/app_constants.dart';
 
 const String _kTasksKey = 'tasks_data';
+const String _kCalendarOverridesKey = 'calendar_task_overrides';
 
 class TasksProvider extends ChangeNotifier {
   List<TaskModel> _tasks = [];
+
+  /// Tarefas geradas automaticamente a partir de eventos do Google Calendar.
+  /// Não são salvas no Firestore — reconstruídas a cada sync.
+  List<TaskModel> _calendarTasks = [];
+
+  /// Overrides mutáveis para tarefas de calendário (status, MIT, quadrante).
+  /// Chave = calendarEventId (sem prefixo 'cal_'). Persistidos localmente.
+  Map<String, Map<String, dynamic>> _calendarOverrides = {};
+
   String? _uid;
   bool _isCloud = false;
-  // Último UID carregado do Firestore. Quando null, força recarga no próximo login.
   String? _lastLoadedUid;
 
-  List<TaskModel> get tasks => List.unmodifiable(_tasks);
+  // ── Lista combinada ───────────────────────────────────────────────────────
+
+  List<TaskModel> get _allTasks => [..._tasks, ..._calendarTasks];
+
+  List<TaskModel> get tasks => List.unmodifiable(_allTasks);
 
   // ── Queries ──────────────────────────────────────────────────────────────
 
   /// Tarefas MIT ativas ordenadas por mitOrder (1, 2, 3)
-  List<TaskModel> get activeMITs => _tasks
+  List<TaskModel> get activeMITs => _allTasks
       .where((t) => t.isMIT && t.status != 'completed')
       .toList()
     ..sort((a, b) => a.mitOrder.compareTo(b.mitOrder));
@@ -27,21 +42,20 @@ class TasksProvider extends ChangeNotifier {
   bool get canAddMIT => mitCount < 3;
 
   /// Tarefas ativas por quadrante Eisenhower
-  List<TaskModel> byQuadrant(int q) => _tasks
+  List<TaskModel> byQuadrant(int q) => _allTasks
       .where((t) => t.eisenhowerQ == q && t.status != 'completed')
       .toList()
     ..sort((a, b) {
-      // MIT primeiro
       if (a.isMIT != b.isMIT) return a.isMIT ? -1 : 1;
       return a.createdAt.compareTo(b.createdAt);
     });
 
   /// Todas as tarefas não concluídas (pending + in_progress)
   List<TaskModel> get pendingTasks =>
-      _tasks.where((t) => t.status != 'completed').toList();
+      _allTasks.where((t) => t.status != 'completed').toList();
 
   /// Tarefas planejadas (coluna Kanban "A Fazer")
-  List<TaskModel> get plannedTasks => _tasks
+  List<TaskModel> get plannedTasks => _allTasks
       .where((t) => t.status == 'pending')
       .toList()
     ..sort((a, b) {
@@ -53,7 +67,7 @@ class TasksProvider extends ChangeNotifier {
     });
 
   /// Tarefas em execução (coluna Kanban "Em Progresso")
-  List<TaskModel> get inProgressTasks => _tasks
+  List<TaskModel> get inProgressTasks => _allTasks
       .where((t) => t.status == 'in_progress')
       .toList()
     ..sort((a, b) {
@@ -62,19 +76,20 @@ class TasksProvider extends ChangeNotifier {
     });
 
   /// Tarefas concluídas
-  List<TaskModel> get completedTasks => _tasks
+  List<TaskModel> get completedTasks => _allTasks
       .where((t) => t.status == 'completed')
       .toList()
     ..sort((a, b) =>
         (b.completedAt ?? b.createdAt).compareTo(a.completedAt ?? a.createdAt));
 
-  int get totalTasks => _tasks.length;
+  int get totalTasks => _allTasks.length;
   int get completedCount => completedTasks.length;
 
   // ── Inicialização ─────────────────────────────────────────────────────────
 
   void initLocal() {
     _loadLocal();
+    _loadCalendarOverrides();
   }
 
   Future<void> init() async {
@@ -82,27 +97,63 @@ class TasksProvider extends ChangeNotifier {
   }
 
   /// Chamado pelo ProxyProvider toda vez que UserProvider notifica.
-  ///
-  /// Estratégia de recarga:
-  /// • Ao fazer logout (isCloud=false): reseta _lastLoadedUid → garante que o
-  ///   próximo login sempre busque dados frescos do Firestore.
-  /// • Ao fazer login (isCloud=true, uid≠_lastLoadedUid): dispara _loadFromCloud.
-  /// • Rebuilds intermediários com mesmo uid+isCloud: ignorados.
   void syncUser(String? uid, bool isCloud) {
-    _uid      = uid;
-    _isCloud  = isCloud;
+    _uid = uid;
+    _isCloud = isCloud;
 
     if (uid == null || !isCloud) {
-      // Deslogou ou modo demo — reseta o marcador de última carga
       _lastLoadedUid = null;
       return;
     }
 
-    // Login ou troca de conta: carrega dados do Firestore
     if (uid != _lastLoadedUid) {
       _lastLoadedUid = uid;
       _loadFromCloud(uid);
     }
+  }
+
+  // ── Sincronização com calendário ──────────────────────────────────────────
+
+  /// Reconstrói [_calendarTasks] a partir dos eventos próximos.
+  /// Chamado pelo ProxyProvider2 quando CalendarProvider notifica.
+  void syncCalendarTasks(
+      List<CalendarEventModel> upcomingEvents, String userId) {
+    final newCalendarTasks = <TaskModel>[];
+
+    for (final event in upcomingEvents) {
+      if (event.id == null) continue;
+
+      final eventId = event.id!;
+      final taskId = 'cal_$eventId';
+      final ov = _calendarOverrides[eventId];
+
+      final task = TaskModel(
+        id: taskId,
+        userId: userId,
+        title: event.title,
+        description: event.description.isNotEmpty
+            ? event.description
+            : (event.location.isNotEmpty ? '📍 ${event.location}' : ''),
+        areaId: kAreas.first.id,
+        eisenhowerQ: ov?['eisenhowerQ'] as int? ?? 2,
+        isMIT: ov?['isMIT'] as bool? ?? false,
+        mitOrder: ov?['mitOrder'] as int? ?? 0,
+        status: ov?['status'] as String? ?? 'pending',
+        dueDate: event.start,
+        createdAt: event.start,
+        completedAt: ov?['completedAt'] != null
+            ? DateTime.tryParse(ov!['completedAt'] as String)
+            : null,
+        isFromCalendar: true,
+        calendarEventId: eventId,
+      );
+
+      newCalendarTasks.add(task);
+    }
+
+    _calendarTasks = newCalendarTasks;
+    _normalizeMITs();
+    notifyListeners();
   }
 
   // ── Sincronização com Firestore ───────────────────────────────────────────
@@ -112,18 +163,15 @@ class TasksProvider extends ChangeNotifier {
 
     if (cloudTasks.isNotEmpty) {
       // Dados encontrados no Firestore → substitui tudo (local + memória)
-      _tasks = cloudTasks;
+      // Filtra tarefas de calendário que possam ter escapado para o Firestore
+      _tasks = cloudTasks.where((t) => !t.isFromCalendar).toList();
       await _saveLocal();
     } else if (_tasks.isNotEmpty) {
-      // Firestore vazio mas há dados locais em memória.
-      // Cenário típico: usuário antigo cujos dados foram salvos com UUID em vez
-      // do Firebase UID. Migra para o path correto no Firestore agora.
+      // Firestore vazio mas há dados locais em memória — migração.
       for (final task in _tasks) {
         await FirestoreService.instance.saveTask(uid, task);
       }
-      // Mantém _tasks como está (já são os dados corretos)
     }
-    // Se ambos estiverem vazios: usuário novo sem tarefas → lista vazia ✓
 
     notifyListeners();
   }
@@ -132,8 +180,24 @@ class TasksProvider extends ChangeNotifier {
 
   void _loadLocal() {
     final saved = StorageService.instance.getJsonList(_kTasksKey);
-    _tasks = saved.map((j) => TaskModel.fromJson(j)).toList()
+    _tasks = saved
+        .map((j) => TaskModel.fromJson(j))
+        .where((t) => !t.isFromCalendar) // garante que não há tarefas de cal
+        .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  void _loadCalendarOverrides() {
+    final saved =
+        StorageService.instance.getJsonList(_kCalendarOverridesKey);
+    _calendarOverrides = {};
+    for (final item in saved) {
+      final key = item['calendarEventId'] as String?;
+      if (key != null) {
+        _calendarOverrides[key] = Map<String, dynamic>.from(item)
+          ..remove('calendarEventId');
+      }
+    }
   }
 
   Future<void> _saveLocal() async {
@@ -143,6 +207,13 @@ class TasksProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> _saveCalendarOverrides() async {
+    final list = _calendarOverrides.entries
+        .map((e) => {'calendarEventId': e.key, ...e.value})
+        .toList();
+    await StorageService.instance.setJsonList(_kCalendarOverridesKey, list);
+  }
+
   Future<void> _persist(TaskModel task) async {
     await _saveLocal();
     if (_isCloud && _uid != null) {
@@ -150,7 +221,7 @@ class TasksProvider extends ChangeNotifier {
     }
   }
 
-  // ── CRUD ──────────────────────────────────────────────────────────────────
+  // ── CRUD — tarefas do usuário ─────────────────────────────────────────────
 
   Future<void> addTask(TaskModel task) async {
     _tasks.insert(0, task);
@@ -160,6 +231,10 @@ class TasksProvider extends ChangeNotifier {
   }
 
   Future<void> updateTask(TaskModel task) async {
+    if (task.isFromCalendar) {
+      _updateCalendarTaskOverride(task);
+      return;
+    }
     final i = _tasks.indexWhere((t) => t.id == task.id);
     if (i == -1) return;
     _tasks[i] = task;
@@ -169,6 +244,9 @@ class TasksProvider extends ChangeNotifier {
   }
 
   Future<void> deleteTask(String id) async {
+    // Tarefas de calendário não podem ser excluídas
+    if (id.startsWith('cal_')) return;
+
     _tasks.removeWhere((t) => t.id == id);
     _normalizeMITs();
     await _saveLocal();
@@ -179,18 +257,21 @@ class TasksProvider extends ChangeNotifier {
   }
 
   /// Marca/desmarca uma tarefa como MIT.
-  /// Respeita o limite de 3 MITs simultâneos.
+  /// Respeita o limite de 3 MITs simultâneos (user + calendar).
   Future<bool> toggleMIT(String taskId) async {
+    if (taskId.startsWith('cal_')) {
+      return _toggleCalendarMIT(taskId);
+    }
+
     final i = _tasks.indexWhere((t) => t.id == taskId);
     if (i == -1) return false;
 
     final task = _tasks[i];
 
     if (task.isMIT) {
-      // Remove MIT
       _tasks[i] = task.copyWith(isMIT: false, mitOrder: 0);
     } else {
-      if (!canAddMIT) return false; // limite atingido
+      if (!canAddMIT) return false;
       _tasks[i] = task.copyWith(isMIT: true, mitOrder: mitCount + 1);
     }
 
@@ -202,6 +283,8 @@ class TasksProvider extends ChangeNotifier {
 
   /// Alterna o estado de uma subtarefa. Completa a tarefa pai se todas prontas.
   Future<void> toggleSubtask(String taskId, String subtaskId) async {
+    if (taskId.startsWith('cal_')) return; // Tarefas de calendário não têm subtarefas
+
     final i = _tasks.indexWhere((t) => t.id == taskId);
     if (i == -1) return;
 
@@ -235,6 +318,9 @@ class TasksProvider extends ChangeNotifier {
 
   /// Move tarefa de 'pending' para 'in_progress' (Kanban: Planejada → Em Execução)
   Future<void> moveToInProgress(String taskId) async {
+    if (taskId.startsWith('cal_')) {
+      return _updateCalendarStatus(taskId, 'in_progress');
+    }
     final i = _tasks.indexWhere((t) => t.id == taskId);
     if (i == -1) return;
     _tasks[i] = _tasks[i].copyWith(status: 'in_progress');
@@ -244,6 +330,9 @@ class TasksProvider extends ChangeNotifier {
 
   /// Retorna tarefa para 'pending' (Kanban: Em Execução → Planejada ou reabertura)
   Future<void> moveToPending(String taskId) async {
+    if (taskId.startsWith('cal_')) {
+      return _updateCalendarStatus(taskId, 'pending', clearCompleted: true);
+    }
     final i = _tasks.indexWhere((t) => t.id == taskId);
     if (i == -1) return;
     final t = _tasks[i];
@@ -262,6 +351,8 @@ class TasksProvider extends ChangeNotifier {
       subtasks: t.subtasks,
       createdAt: t.createdAt,
       completedAt: null,
+      isFromCalendar: t.isFromCalendar,
+      calendarEventId: t.calendarEventId,
     );
     _normalizeMITs();
     await _persist(_tasks[i]);
@@ -270,6 +361,9 @@ class TasksProvider extends ChangeNotifier {
 
   /// Marca uma tarefa como concluída diretamente (sem subtarefas)
   Future<void> completeTask(String taskId) async {
+    if (taskId.startsWith('cal_')) {
+      return _updateCalendarStatus(taskId, 'completed');
+    }
     final i = _tasks.indexWhere((t) => t.id == taskId);
     if (i == -1) return;
 
@@ -285,42 +379,171 @@ class TasksProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── CRUD — tarefas de calendário (via overrides) ──────────────────────────
+
+  Future<void> _updateCalendarStatus(
+    String taskId,
+    String newStatus, {
+    bool clearCompleted = false,
+  }) async {
+    final i = _calendarTasks.indexWhere((t) => t.id == taskId);
+    if (i == -1) return;
+
+    final task = _calendarTasks[i];
+    final eventId = task.calendarEventId!;
+
+    final now = DateTime.now();
+    final completedAt =
+        newStatus == 'completed' ? now : null;
+
+    // Atualiza instância em memória
+    _calendarTasks[i] = TaskModel(
+      id: task.id,
+      userId: task.userId,
+      title: task.title,
+      description: task.description,
+      areaId: task.areaId,
+      eisenhowerQ: task.eisenhowerQ,
+      isMIT: newStatus == 'completed' ? false : task.isMIT,
+      mitOrder: newStatus == 'completed' ? 0 : task.mitOrder,
+      status: newStatus,
+      dueDate: task.dueDate,
+      createdAt: task.createdAt,
+      completedAt: completedAt,
+      isFromCalendar: true,
+      calendarEventId: eventId,
+    );
+
+    // Persiste override
+    _calendarOverrides[eventId] = {
+      ..._calendarOverrides[eventId] ?? {},
+      'status': newStatus,
+      'isMIT': _calendarTasks[i].isMIT,
+      'mitOrder': _calendarTasks[i].mitOrder,
+      'completedAt':
+          completedAt != null ? completedAt.toIso8601String() : null,
+    };
+
+    if (newStatus == 'completed' || clearCompleted) _normalizeMITs();
+    await _saveCalendarOverrides();
+    notifyListeners();
+  }
+
+  Future<bool> _toggleCalendarMIT(String taskId) async {
+    final i = _calendarTasks.indexWhere((t) => t.id == taskId);
+    if (i == -1) return false;
+
+    final task = _calendarTasks[i];
+    final eventId = task.calendarEventId!;
+
+    if (task.isMIT) {
+      _calendarTasks[i] = task.copyWith(isMIT: false, mitOrder: 0);
+    } else {
+      if (!canAddMIT) return false;
+      _calendarTasks[i] =
+          task.copyWith(isMIT: true, mitOrder: mitCount + 1);
+    }
+
+    _calendarOverrides[eventId] = {
+      ..._calendarOverrides[eventId] ?? {},
+      'isMIT': _calendarTasks[i].isMIT,
+      'mitOrder': _calendarTasks[i].mitOrder,
+    };
+
+    _normalizeMITs();
+    await _saveCalendarOverrides();
+    notifyListeners();
+    return true;
+  }
+
+  void _updateCalendarTaskOverride(TaskModel task) {
+    final eventId = task.calendarEventId;
+    if (eventId == null) return;
+
+    final i = _calendarTasks.indexWhere((t) => t.id == task.id);
+    if (i != -1) _calendarTasks[i] = task;
+
+    _calendarOverrides[eventId] = {
+      ..._calendarOverrides[eventId] ?? {},
+      'eisenhowerQ': task.eisenhowerQ,
+      'isMIT': task.isMIT,
+      'mitOrder': task.mitOrder,
+      'status': task.status,
+      if (task.completedAt != null)
+        'completedAt': task.completedAt!.toIso8601String(),
+    };
+
+    _normalizeMITs();
+    _saveCalendarOverrides();
+    notifyListeners();
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  /// Garante que mitOrder está correto e que não há mais de 3 MITs ativos
+  /// Garante que mitOrder está correto e que não há mais de 3 MITs ativos.
+  /// Opera sobre _tasks e _calendarTasks combinados.
   void _normalizeMITs() {
-    final mits = _tasks
-        .where((t) => t.isMIT && t.status != 'completed')
-        .toList()
-      ..sort((a, b) => a.mitOrder.compareTo(b.mitOrder));
-
-    // Remover MIT de tarefas concluídas
+    // 1. Remove MIT de tarefas concluídas
     for (var i = 0; i < _tasks.length; i++) {
       if (_tasks[i].isMIT && _tasks[i].status == 'completed') {
         _tasks[i] = _tasks[i].copyWith(isMIT: false, mitOrder: 0);
       }
     }
-
-    // Se mais de 3, remove os extras (os de maior mitOrder)
-    if (mits.length > 3) {
-      for (var i = 3; i < mits.length; i++) {
-        final idx = _tasks.indexWhere((t) => t.id == mits[i].id);
-        if (idx != -1) {
-          _tasks[idx] = _tasks[idx].copyWith(isMIT: false, mitOrder: 0);
-        }
+    for (var i = 0; i < _calendarTasks.length; i++) {
+      if (_calendarTasks[i].isMIT &&
+          _calendarTasks[i].status == 'completed') {
+        _calendarTasks[i] =
+            _calendarTasks[i].copyWith(isMIT: false, mitOrder: 0);
       }
     }
 
-    // Renumera mitOrder (1, 2, 3)
-    final validMits = _tasks
+    // 2. Coleta todos os MITs ativos em ordem
+    final allActive = _allTasks
+        .where((t) => t.isMIT && t.status != 'completed')
+        .toList()
+      ..sort((a, b) => a.mitOrder.compareTo(b.mitOrder));
+
+    // 3. Se mais de 3, remove os extras (maiores mitOrder)
+    if (allActive.length > 3) {
+      for (var i = 3; i < allActive.length; i++) {
+        _clearMITById(allActive[i].id);
+      }
+    }
+
+    // 4. Renumera mitOrder (1, 2, 3)
+    final validMits = _allTasks
         .where((t) => t.isMIT && t.status != 'completed')
         .toList()
       ..sort((a, b) => a.mitOrder.compareTo(b.mitOrder));
 
     for (var i = 0; i < validMits.length; i++) {
-      final idx = _tasks.indexWhere((t) => t.id == validMits[i].id);
-      if (idx != -1 && _tasks[idx].mitOrder != i + 1) {
-        _tasks[idx] = _tasks[idx].copyWith(mitOrder: i + 1);
+      final id = validMits[i].id;
+      if (id.startsWith('cal_')) {
+        final idx = _calendarTasks.indexWhere((t) => t.id == id);
+        if (idx != -1 && _calendarTasks[idx].mitOrder != i + 1) {
+          _calendarTasks[idx] =
+              _calendarTasks[idx].copyWith(mitOrder: i + 1);
+        }
+      } else {
+        final idx = _tasks.indexWhere((t) => t.id == id);
+        if (idx != -1 && _tasks[idx].mitOrder != i + 1) {
+          _tasks[idx] = _tasks[idx].copyWith(mitOrder: i + 1);
+        }
+      }
+    }
+  }
+
+  void _clearMITById(String id) {
+    if (id.startsWith('cal_')) {
+      final idx = _calendarTasks.indexWhere((t) => t.id == id);
+      if (idx != -1) {
+        _calendarTasks[idx] =
+            _calendarTasks[idx].copyWith(isMIT: false, mitOrder: 0);
+      }
+    } else {
+      final idx = _tasks.indexWhere((t) => t.id == id);
+      if (idx != -1) {
+        _tasks[idx] = _tasks[idx].copyWith(isMIT: false, mitOrder: 0);
       }
     }
   }

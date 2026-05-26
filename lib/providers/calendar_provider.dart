@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import '../models/calendar_event_model.dart';
 import '../services/calendar_service.dart';
 import '../services/auth_service.dart';
+import '../services/storage_service.dart';
+
+const String _kSyncDaysKey = 'calendar_sync_days';
 
 enum CalendarStatus { initial, loading, ready, unauthorized, error }
 
@@ -9,6 +12,7 @@ class CalendarProvider extends ChangeNotifier {
   // ── Estado ────────────────────────────────────────────────────────────────
 
   List<CalendarEventModel> _events = [];
+  List<CalendarEventModel> _syncEvents = [];
   CalendarStatus _status = CalendarStatus.initial;
   String? _errorMessage;
 
@@ -18,6 +22,14 @@ class CalendarProvider extends ChangeNotifier {
   DateTime _viewMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
   String _authProvider = '';
+
+  /// Janela de sincronização em dias (7 | 15 | 30 | 90 | 180 | 360)
+  int _syncDays;
+
+  CalendarProvider()
+      : _syncDays = int.tryParse(
+              StorageService.instance.getString(_kSyncDaysKey) ?? '') ??
+            7;
 
   // ── Getters ───────────────────────────────────────────────────────────────
 
@@ -30,6 +42,24 @@ class CalendarProvider extends ChangeNotifier {
   bool get isGoogleUser => _authProvider == 'google';
   bool get isAuthorized =>
       isGoogleUser && CalendarService.instance.hasToken;
+  int get syncDays => _syncDays;
+
+  static const List<int> syncDayOptions = [7, 15, 30, 90, 180, 360];
+
+  /// Eventos dentro da janela de sincronização (hoje → hoje + syncDays).
+  /// Usados por TasksProvider para criar tarefas automáticas.
+  List<CalendarEventModel> get upcomingEvents {
+    final today = _today();
+    final cutoff = DateTime(
+        today.year, today.month, today.day + _syncDays);
+    return List.unmodifiable(
+      _syncEvents
+          .where((e) =>
+              !e.start.isBefore(today) && e.start.isBefore(cutoff))
+          .toList()
+        ..sort((a, b) => a.start.compareTo(b.start)),
+    );
+  }
 
   /// Eventos do dia selecionado, ordenados por hora
   List<CalendarEventModel> get selectedDateEvents {
@@ -63,6 +93,7 @@ class CalendarProvider extends ChangeNotifier {
       // Re-check token in case it was just set by sign-in
       if (isGoogleUser && isAuthorized && _status == CalendarStatus.unauthorized) {
         loadEvents();
+        _loadSyncWindowEvents();
       }
       return;
     }
@@ -71,14 +102,49 @@ class CalendarProvider extends ChangeNotifier {
     if (isGoogleUser) {
       if (isAuthorized) {
         loadEvents();
+        _loadSyncWindowEvents();
       } else {
         _status = CalendarStatus.unauthorized;
         notifyListeners();
       }
     } else {
       _events = [];
+      _syncEvents = [];
       _status = CalendarStatus.unauthorized;
       notifyListeners();
+    }
+  }
+
+  // ── Janela de sincronização ───────────────────────────────────────────────
+
+  /// Define a janela de sincronização em dias e persiste localmente.
+  /// Dispara recarga dos eventos se o usuário tiver acesso ao calendário.
+  Future<void> setSyncDays(int days) async {
+    assert(syncDayOptions.contains(days),
+        'days deve ser um dos: $syncDayOptions');
+    _syncDays = days;
+    await StorageService.instance.setString(_kSyncDaysKey, days.toString());
+    if (isAuthorized) {
+      await _loadSyncWindowEvents();
+    }
+    notifyListeners();
+  }
+
+  /// Carrega eventos para a janela de sincronização (hoje → hoje + syncDays).
+  /// Armazenado em _syncEvents (separado de _events do calendário visual).
+  Future<void> _loadSyncWindowEvents() async {
+    if (!isAuthorized) return;
+    try {
+      final today = _today();
+      final to = DateTime(today.year, today.month, today.day + _syncDays + 1);
+      _syncEvents =
+          await CalendarService.instance.getEvents(from: today, to: to);
+      notifyListeners();
+    } on CalendarAuthException {
+      _status = CalendarStatus.unauthorized;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('[CalendarProvider] _loadSyncWindowEvents error: $e');
     }
   }
 
@@ -129,6 +195,7 @@ class CalendarProvider extends ChangeNotifier {
     final token = await AuthService.instance.requestCalendarAccess();
     if (token != null) {
       await loadEvents();
+      await _loadSyncWindowEvents();
       return true;
     }
     _status = CalendarStatus.unauthorized;
@@ -179,6 +246,7 @@ class CalendarProvider extends ChangeNotifier {
     try {
       await CalendarService.instance.deleteEvent(eventId);
       _events.removeWhere((e) => e.id == eventId);
+      _syncEvents.removeWhere((e) => e.id == eventId);
       notifyListeners();
       return true;
     } on CalendarAuthException {

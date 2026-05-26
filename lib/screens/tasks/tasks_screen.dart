@@ -307,6 +307,11 @@ class _EisenhowerCard extends StatelessWidget {
                     padding: EdgeInsets.only(right: 4),
                     child: Text('⭐', style: TextStyle(fontSize: 10)),
                   ),
+                if (task.isFromCalendar)
+                  Padding(
+                    padding: EdgeInsets.only(right: 4),
+                    child: Text('🗓️', style: TextStyle(fontSize: 10)),
+                  ),
                 Expanded(
                   child: Text(
                     task.title,
@@ -950,7 +955,7 @@ class _KanbanCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título + MIT
+            // Título + MIT + Calendário
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -958,6 +963,11 @@ class _KanbanCard extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.only(right: 3, top: 1),
                     child: Text('⭐', style: TextStyle(fontSize: 10)),
+                  ),
+                if (task.isFromCalendar)
+                  Padding(
+                    padding: EdgeInsets.only(right: 3, top: 1),
+                    child: Text('🗓️', style: TextStyle(fontSize: 10)),
                   ),
                 Expanded(
                   child: Text(
@@ -1096,7 +1106,8 @@ class _KanbanCard extends StatelessWidget {
       );
     }
 
-    // Coluna Concluídas → reabrir
+    // Coluna Concluídas → reabrir (não disponível para tarefas de calendário
+    // que não têm reabertura significativa, mas mantemos para consistência)
     return GestureDetector(
       onTap: () => context.read<TasksProvider>().moveToPending(task.id),
       child: Container(
@@ -1405,7 +1416,7 @@ class _TaskDetailSheet extends StatelessWidget {
               ],
             ),
             SizedBox(height: 8),
-            // Badges: área + Eisenhower + Kanban status + horas
+            // Badges: área + Eisenhower + Kanban status + horas + calendário
             Wrap(
               spacing: 8,
               runSpacing: 4,
@@ -1422,6 +1433,11 @@ class _TaskDetailSheet extends StatelessWidget {
                   text: _statusLabel(current.status),
                   color: _statusColor(current.status),
                 ),
+                if (current.isFromCalendar)
+                  _Badge(
+                    text: '🗓️ Google Agenda',
+                    color: Colors.blue,
+                  ),
                 if (current.totalEstimatedHours > 0)
                   _Badge(
                     text: '⏱ ${current.totalEstimatedHours}h',
@@ -1536,79 +1552,107 @@ class _TaskDetailSheet extends StatelessWidget {
                   )),
               SizedBox(height: 12),
             ],
-            // Editar / Excluir
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              TaskCreateScreen(existingTask: current),
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.edit_outlined, size: 16),
-                    label: Text('Editar'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.textPrimary,
-                      side: BorderSide(color: AppTheme.divider),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      final ok = await showDialog<bool>(
-                        context: context,
-                        builder: (c) => AlertDialog(
-                          backgroundColor: AppTheme.surface,
-                          title: Text('Excluir tarefa?',
-                              style:
-                                  TextStyle(color: AppTheme.textPrimary)),
-                          content: Text(
-                            'Esta ação não pode ser desfeita.',
-                            style:
-                                TextStyle(color: AppTheme.textSecondary),
+            // Editar / Excluir (oculto para tarefas de calendário)
+            if (!current.isFromCalendar) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                TaskCreateScreen(existingTask: current),
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.pop(c, false),
-                              child: const Text('Cancelar'),
-                            ),
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.pop(c, true),
-                              child: const Text('Excluir',
-                                  style: TextStyle(color: Colors.red)),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (ok == true && context.mounted) {
-                        await context
-                            .read<TasksProvider>()
-                            .deleteTask(current.id);
-                        if (context.mounted) Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(Icons.delete_outline,
-                        size: 16, color: Colors.red),
-                    label: const Text('Excluir',
-                        style: TextStyle(color: Colors.red)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                          color: Colors.red, width: 0.5),
+                        );
+                      },
+                      icon: Icon(Icons.edit_outlined, size: 16),
+                      label: Text('Editar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.textPrimary,
+                        side: BorderSide(color: AppTheme.divider),
+                      ),
                     ),
                   ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (c) => AlertDialog(
+                            backgroundColor: AppTheme.surface,
+                            title: Text('Excluir tarefa?',
+                                style:
+                                    TextStyle(color: AppTheme.textPrimary)),
+                            content: Text(
+                              'Esta ação não pode ser desfeita.',
+                              style:
+                                  TextStyle(color: AppTheme.textSecondary),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(c, false),
+                                child: const Text('Cancelar'),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(c, true),
+                                child: const Text('Excluir',
+                                    style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (ok == true && context.mounted) {
+                          await context
+                              .read<TasksProvider>()
+                              .deleteTask(current.id);
+                          if (context.mounted) Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(Icons.delete_outline,
+                          size: 16, color: Colors.red),
+                      label: const Text('Excluir',
+                          style: TextStyle(color: Colors.red)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                            color: Colors.red, width: 0.5),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              // Tarefa de calendário: mostra aviso de origem
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.07),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.withOpacity(0.2)),
                 ),
-              ],
-            ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline,
+                        size: 16, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Evento sincronizado do Google Agenda. '
+                        'Para editar ou excluir, acesse o Google Calendar.',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.blue.withOpacity(0.85)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
           ],
         ),

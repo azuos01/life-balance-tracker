@@ -67,21 +67,30 @@ void main() async {
           },
         ),
 
-        // TasksProvider: tarefas MIT + Matriz de Eisenhower
-        ChangeNotifierProxyProvider<UserProvider, TasksProvider>(
-          create: (_) => TasksProvider()..initLocal(),
-          update: (_, up, tp) {
-            tp!.syncUser(up.user?.id, up.isCloudUser);
-            return tp;
-          },
-        ),
-
         // CalendarProvider: Google Calendar integration
+        // Declarado ANTES de TasksProvider para ser usado pelo ProxyProvider2
         ChangeNotifierProxyProvider<UserProvider, CalendarProvider>(
           create: (_) => CalendarProvider(),
           update: (_, up, cp) {
             cp!.syncUser(up.authProvider);
             return cp;
+          },
+        ),
+
+        // TasksProvider: tarefas MIT + Matriz de Eisenhower + eventos de calendário
+        ChangeNotifierProxyProvider2<UserProvider, CalendarProvider,
+            TasksProvider>(
+          create: (_) => TasksProvider()..initLocal(),
+          update: (_, up, cp, tp) {
+            tp!.syncUser(up.user?.id, up.isCloudUser);
+            // Sincroniza eventos do calendário se o usuário tiver acesso
+            if (cp.isAuthorized && up.user != null) {
+              tp.syncCalendarTasks(cp.upcomingEvents, up.user!.id);
+            } else if (!cp.isAuthorized) {
+              // Limpa tarefas de calendário quando perde acesso
+              tp.syncCalendarTasks([], up.user?.id ?? '');
+            }
+            return tp;
           },
         ),
       ],
