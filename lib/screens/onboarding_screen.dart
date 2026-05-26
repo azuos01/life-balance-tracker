@@ -154,41 +154,119 @@ class _WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 24),
-          const Text('⚖️', style: TextStyle(fontSize: 56)),
-          const SizedBox(height: 16),
-          const Text(
-            'Bem-vindo ao\nLife Balance Tracker',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
-              height: 1.2,
+          const SizedBox(height: 20),
+
+          // ── Logo ──────────────────────────────────────────────────────────
+          Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: AppTheme.primaryGradient,
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primary.withOpacity(0.35),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('⚖️', style: TextStyle(fontSize: 42)),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 18),
+
+          // ── App name ──────────────────────────────────────────────────────
+          ShaderMask(
+            shaderCallback: (bounds) =>
+                AppTheme.primaryGradient.createShader(bounds),
+            blendMode: BlendMode.srcIn,
+            child: const Text(
+              kAppName,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                color: Colors.white, // masked by ShaderMask
+                height: 1.15,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // ── Version badge ─────────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppTheme.primary.withOpacity(0.30),
+              ),
+            ),
+            child: Text(
+              'v$kAppVersion',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primary,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // ── Tagline ───────────────────────────────────────────────────────
           const Text(
-            'Monitore e melhore as 10 áreas fundamentais\nda sua vida com gamificação e insights.',
+            kAppTagline,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               color: AppTheme.textSecondary,
-              height: 1.5,
+              height: 1.55,
             ),
           ),
-          const SizedBox(height: 40),
-          const Text(
-            'Como você quer ser chamado?',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
+          const SizedBox(height: 28),
+
+          // ── Divider ───────────────────────────────────────────────────────
+          Row(
+            children: [
+              Expanded(child: Divider(color: AppTheme.divider, height: 1)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  'Vamos começar',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Expanded(child: Divider(color: AppTheme.divider, height: 1)),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // ── Name input ────────────────────────────────────────────────────
+          Align(
+            alignment: Alignment.centerLeft,
+            child: const Text(
+              'Como você quer ser chamado?',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           TextField(
             controller: controller,
             autofocus: true,
@@ -198,8 +276,11 @@ class _WelcomePage extends StatelessWidget {
               prefixIcon: Icon(Icons.person_outline, color: AppTheme.primary),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
+
+          // ── Area chips ────────────────────────────────────────────────────
           const _AreaPreviewGrid(),
+          const SizedBox(height: 16),
         ],
       ),
     );
