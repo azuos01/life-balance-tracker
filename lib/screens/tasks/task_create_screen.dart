@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/task_model.dart';
@@ -196,12 +196,12 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
           TextButton(
             onPressed: _saving ? null : _save,
             child: _saving
-                ? const SizedBox(
+                ? SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text(
+                : Text(
                     'Salvar',
                     style: TextStyle(
                       color: AppTheme.primary,
@@ -212,7 +212,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -220,23 +220,23 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
             TextField(
               controller: _titleCtrl,
               onChanged: _onTitleChanged,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Título da tarefa *',
                 hintText: 'Ex: Preparar apresentação do trimestre',
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
             // ── Descrição ──────────────────────────────────────────────────
             TextField(
               controller: _descCtrl,
               maxLines: 2,
-              style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+              style: TextStyle(color: AppTheme.textPrimary, fontSize: 14),
               decoration: const InputDecoration(
                 labelText: 'Descrição (opcional)',
               ),
@@ -258,7 +258,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                   activeColor: Colors.orange,
                   onTap: () => setState(() => _isUrgent = !_isUrgent),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 _ToggleChip(
                   label: 'Importante',
                   selected: _isImportant,
@@ -267,9 +267,9 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _EisenhowerBadge(q: _eisenhowerQ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // ── Área da Vida ───────────────────────────────────────────────
             _SectionLabel(
@@ -277,9 +277,9 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
               title: 'Área da Vida',
               subtitle: 'Auto-sugerido: ${kAreas.firstWhere((a) => a.id == _autoAreaId, orElse: () => kAreas.first).name}',
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: AppTheme.surface,
                 borderRadius: BorderRadius.circular(12),
@@ -296,10 +296,10 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                       child: Row(
                         children: [
                           Text(a.icon),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text(
                             a.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppTheme.textPrimary,
                               fontSize: 14,
                             ),
@@ -329,7 +329,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // ── MIT ─────────────────────────────────────────────────────────
             _SectionLabel(
@@ -337,12 +337,12 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
               title: 'MIT — Tarefa Mais Importante',
               subtitle: 'Máx. 3 MITs simultâneos',
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             GestureDetector(
               onTap: () {
                 if (!canMIT && !_isMIT) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text('Limite de 3 MITs atingido. Conclua ou remova uma antes.'),
                     ),
                   );
@@ -351,7 +351,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 setState(() => _isMIT = !_isMIT);
               },
               child: Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: _isMIT
                       ? AppTheme.accent.withOpacity(0.12)
@@ -369,7 +369,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                       _isMIT ? Icons.star : Icons.star_outline,
                       color: _isMIT ? AppTheme.accent : AppTheme.textSecondary,
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,7 +385,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                           ),
                           Text(
                             'MIT = Most Important Task. Foco total nela hoje.',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               color: AppTheme.textSecondary,
                             ),
@@ -397,21 +397,21 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // ── Data de prazo ───────────────────────────────────────────────
             _SectionLabel(icon: '📅', title: 'Prazo', subtitle: 'Opcional'),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             GestureDetector(
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 7)),
+                  initialDate: _dueDate ?? DateTime.now().add(Duration(days: 7)),
                   firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  lastDate: DateTime.now().add(Duration(days: 365)),
                   builder: (ctx, child) => Theme(
                     data: ThemeData.dark().copyWith(
-                      colorScheme: const ColorScheme.dark(
+                      colorScheme: ColorScheme.dark(
                         primary: AppTheme.primary,
                         onPrimary: Colors.white,
                         surface: AppTheme.surface,
@@ -423,16 +423,16 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 if (picked != null) setState(() => _dueDate = picked);
               },
               child: Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: AppTheme.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_today_outlined,
+                    Icon(Icons.calendar_today_outlined,
                         color: AppTheme.textSecondary, size: 18),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Text(
                       _dueDate != null
                           ? '${_dueDate!.day.toString().padLeft(2, '0')}/${_dueDate!.month.toString().padLeft(2, '0')}/${_dueDate!.year}'
@@ -445,10 +445,10 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                       ),
                     ),
                     if (_dueDate != null) ...[
-                      const Spacer(),
+                      Spacer(),
                       GestureDetector(
                         onTap: () => setState(() => _dueDate = null),
-                        child: const Icon(Icons.close,
+                        child: Icon(Icons.close,
                             size: 16, color: AppTheme.textSecondary),
                       ),
                     ],
@@ -456,7 +456,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // ── Subtarefas ──────────────────────────────────────────────────
             Row(
@@ -469,8 +469,8 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 ),
                 TextButton.icon(
                   onPressed: _addSubtask,
-                  icon: const Icon(Icons.add, size: 16),
-                  label: const Text('Adicionar'),
+                  icon: Icon(Icons.add, size: 16),
+                  label: Text('Adicionar'),
                   style: TextButton.styleFrom(
                     foregroundColor: AppTheme.primary,
                   ),
@@ -479,10 +479,10 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
             ),
             if (_subtasks.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: EdgeInsets.symmetric(vertical: 8),
                 child: Text(
                   'Quebre a tarefa em etapas de 2–8 horas para facilitar a execução.',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppTheme.textSecondary,
                   ),
@@ -503,7 +503,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 padding: const EdgeInsets.only(top: 8, bottom: 4),
                 child: Text(
                   'Total estimado: ${_subtasks.fold(0, (sum, s) => sum + s.hours)}h',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppTheme.primary,
                     fontWeight: FontWeight.w600,
@@ -530,7 +530,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                         widget.existingTask == null
                             ? 'Criar Tarefa'
                             : 'Salvar Alterações',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
@@ -550,7 +550,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
 
 class _EisenhowerBadge extends StatelessWidget {
   final int q;
-  const _EisenhowerBadge({required this.q});
+  _EisenhowerBadge({required this.q});
 
   @override
   Widget build(BuildContext context) {
@@ -563,7 +563,7 @@ class _EisenhowerBadge extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(10),
@@ -575,9 +575,9 @@ class _EisenhowerBadge extends StatelessWidget {
           Text(label,
               style: TextStyle(
                   fontWeight: FontWeight.w700, color: color, fontSize: 13)),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text(desc,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 11, color: AppTheme.textSecondary)),
         ],
       ),
@@ -592,25 +592,25 @@ class _SectionLabel extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _SectionLabel(
+  _SectionLabel(
       {required this.icon, required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 16)),
-        const SizedBox(width: 6),
+        Text(icon, style: TextStyle(fontSize: 16)),
+        SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
                     fontSize: 14)),
             Text(subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 11, color: AppTheme.textSecondary)),
           ],
         ),
@@ -627,7 +627,7 @@ class _ToggleChip extends StatelessWidget {
   final Color activeColor;
   final VoidCallback onTap;
 
-  const _ToggleChip({
+  _ToggleChip({
     required this.label,
     required this.selected,
     required this.activeColor,
@@ -639,8 +639,8 @@ class _ToggleChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? activeColor.withOpacity(0.15) : AppTheme.surface,
           borderRadius: BorderRadius.circular(10),
@@ -678,7 +678,7 @@ class _SubtaskEditor extends StatefulWidget {
   final VoidCallback onRemove;
   final VoidCallback onChanged;
 
-  const _SubtaskEditor({
+  _SubtaskEditor({
     super.key,
     required this.entry,
     required this.onRemove,
@@ -700,8 +700,8 @@ class _SubtaskEditorState extends State<_SubtaskEditor> {
             : Colors.orange;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -714,9 +714,9 @@ class _SubtaskEditorState extends State<_SubtaskEditor> {
                 child: TextField(
                   controller: widget.entry.titleCtrl,
                   onChanged: (_) => widget.onChanged(),
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppTheme.textPrimary, fontSize: 13),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Título da subtarefa',
                     border: InputBorder.none,
                     isDense: true,
@@ -726,19 +726,19 @@ class _SubtaskEditorState extends State<_SubtaskEditor> {
               ),
               IconButton(
                 onPressed: widget.onRemove,
-                icon: const Icon(Icons.delete_outline,
+                icon: Icon(Icons.delete_outline,
                     size: 18, color: AppTheme.textSecondary),
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+                constraints: BoxConstraints(),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Row(
             children: [
               Text(
                 'Estimativa: ',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 12, color: AppTheme.textSecondary),
               ),
               IconButton(
@@ -748,12 +748,12 @@ class _SubtaskEditorState extends State<_SubtaskEditor> {
                         widget.onChanged();
                       }
                     : null,
-                icon: const Icon(Icons.remove_circle_outline, size: 18),
+                icon: Icon(Icons.remove_circle_outline, size: 18),
                 color: AppTheme.textSecondary,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+                constraints: BoxConstraints(),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               Text(
                 '${h}h',
                 style: TextStyle(
@@ -762,7 +762,7 @@ class _SubtaskEditorState extends State<_SubtaskEditor> {
                   color: hoursColor,
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               IconButton(
                 onPressed: h < 16
                     ? () {
@@ -770,7 +770,7 @@ class _SubtaskEditorState extends State<_SubtaskEditor> {
                         widget.onChanged();
                       }
                     : null,
-                icon: const Icon(Icons.add_circle_outline, size: 18),
+                icon: Icon(Icons.add_circle_outline, size: 18),
                 color: AppTheme.textSecondary,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),

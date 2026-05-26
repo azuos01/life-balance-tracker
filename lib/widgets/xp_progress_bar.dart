@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
 
@@ -41,14 +41,14 @@ class XpProgressBar extends StatelessWidget {
                 ),
                 child: Text(
                   'Nv $level',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -62,14 +62,14 @@ class XpProgressBar extends StatelessWidget {
                   ),
                   Text(
                     '$totalXP XP acumulados',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       color: AppTheme.textSecondary,
                     ),
                   ),
                 ],
               ),
-              const Spacer(),
+              Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -83,7 +83,7 @@ class XpProgressBar extends StatelessWidget {
                   ),
                   Text(
                     'para nv ${level + 1}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       color: AppTheme.textSecondary,
                     ),

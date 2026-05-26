@@ -18,20 +18,27 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       children: [
         // ── Gradiente de fundo ───────────────────────────────────────────
         Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF07071A),
-                Color(0xFF0C0C25),
-                Color(0xFF0A0A1F),
-              ],
-              stops: [0.0, 0.5, 1.0],
+              colors: isDark
+                  ? const [
+                      Color(0xFF07071A),
+                      Color(0xFF0C0C25),
+                      Color(0xFF0A0A1F),
+                    ]
+                  : const [
+                      Color(0xFFF2F2FF),
+                      Color(0xFFEAEAFF),
+                      Color(0xFFF5F5FF),
+                    ],
+              stops: const [0.0, 0.5, 1.0],
             ),
           ),
         ),
@@ -40,7 +47,7 @@ class AppBackground extends StatelessWidget {
         if (showOrbs)
           RepaintBoundary(
             child: CustomPaint(
-              painter: _BalanceBackgroundPainter(),
+              painter: _BalanceBackgroundPainter(isDark: isDark),
               child: const SizedBox.expand(),
             ),
           ),
@@ -53,6 +60,12 @@ class AppBackground extends StatelessWidget {
 }
 
 class _BalanceBackgroundPainter extends CustomPainter {
+  final bool isDark;
+  const _BalanceBackgroundPainter({required this.isDark});
+
+  @override
+  bool shouldRepaint(_BalanceBackgroundPainter old) => old.isDark != isDark;
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
@@ -68,12 +81,13 @@ class _BalanceBackgroundPainter extends CustomPainter {
       (w * 0.5, h * 0.4, w * 0.35, AppTheme.areaColors[7]), // Espiritualidade - dourado
     ];
 
+    final orbAlpha = isDark ? 0.10 : 0.08;
     for (final (cx, cy, r, color) in orbData) {
       final paint = Paint()
         ..shader = RadialGradient(
           colors: [
-            color.withOpacity(0.10),
-            color.withOpacity(0.03),
+            color.withOpacity(orbAlpha),
+            color.withOpacity(orbAlpha * 0.3),
             color.withOpacity(0.0),
           ],
           stops: const [0.0, 0.5, 1.0],
@@ -148,7 +162,9 @@ class _BalanceBackgroundPainter extends CustomPainter {
 
     // ── Partículas (grid de pontos) ──────────────────────────────────────
     final dotPaint = Paint()
-      ..color = Colors.white.withOpacity(0.04)
+      ..color = isDark
+          ? Colors.white.withOpacity(0.04)
+          : AppTheme.primary.withOpacity(0.05)
       ..style = PaintingStyle.fill;
 
     const spacing = 38.0;
@@ -168,7 +184,9 @@ class _BalanceBackgroundPainter extends CustomPainter {
 
     // ── Estrelas brilhantes (pontos maiores, aleatórios) ─────────────────
     final starPaint = Paint()
-      ..color = Colors.white.withOpacity(0.12)
+      ..color = isDark
+          ? Colors.white.withOpacity(0.12)
+          : AppTheme.primary.withOpacity(0.10)
       ..style = PaintingStyle.fill;
 
     final starPositions = [
@@ -188,8 +206,6 @@ class _BalanceBackgroundPainter extends CustomPainter {
     }
   }
 
-  @override
-  bool shouldRepaint(_BalanceBackgroundPainter old) => false;
 }
 
 /// Fundo dedicado para a tela de login — mais imersivo
@@ -199,24 +215,31 @@ class LoginBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       children: [
         Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF06061A),
-                Color(0xFF0D0D2B),
-                Color(0xFF0A0A20),
-              ],
+              colors: isDark
+                  ? const [
+                      Color(0xFF06061A),
+                      Color(0xFF0D0D2B),
+                      Color(0xFF0A0A20),
+                    ]
+                  : const [
+                      Color(0xFFF0F0FF),
+                      Color(0xFFE8E8FF),
+                      Color(0xFFF0F0FF),
+                    ],
             ),
           ),
         ),
         RepaintBoundary(
           child: CustomPaint(
-            painter: _LoginBackgroundPainter(),
+            painter: _LoginBackgroundPainter(isDark: isDark),
             child: const SizedBox.expand(),
           ),
         ),
@@ -227,6 +250,12 @@ class LoginBackground extends StatelessWidget {
 }
 
 class _LoginBackgroundPainter extends CustomPainter {
+  final bool isDark;
+  const _LoginBackgroundPainter({required this.isDark});
+
+  @override
+  bool shouldRepaint(_LoginBackgroundPainter old) => old.isDark != isDark;
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
@@ -272,7 +301,9 @@ class _LoginBackgroundPainter extends CustomPainter {
     // Partículas
     final dotPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = Colors.white.withOpacity(0.05);
+      ..color = isDark
+          ? Colors.white.withOpacity(0.05)
+          : AppTheme.primary.withOpacity(0.06);
     final rng = math.Random(99);
     for (int i = 0; i < 60; i++) {
       final px = rng.nextDouble() * w;
@@ -281,9 +312,6 @@ class _LoginBackgroundPainter extends CustomPainter {
       canvas.drawCircle(Offset(px, py), r, dotPaint);
     }
   }
-
-  @override
-  bool shouldRepaint(_LoginBackgroundPainter old) => false;
 }
 
 /// Widget de card glassmorphism reutilizável
@@ -305,6 +333,7 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final br = borderRadius ?? BorderRadius.circular(20);
     return ClipRRect(
       borderRadius: br,
@@ -313,10 +342,13 @@ class GlassCard extends StatelessWidget {
         child: Container(
           padding: padding ?? const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: (tintColor ?? Colors.white).withOpacity(opacity),
+            color: (tintColor ?? Colors.white)
+                .withOpacity(isDark ? opacity : 0.60),
             borderRadius: br,
             border: Border.all(
-              color: Colors.white.withOpacity(0.10),
+              color: isDark
+                  ? Colors.white.withOpacity(0.10)
+                  : AppTheme.primary.withOpacity(0.12),
               width: 1,
             ),
           ),

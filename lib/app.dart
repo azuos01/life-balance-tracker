@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'providers/user_provider.dart';
+import 'providers/settings_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -12,22 +13,19 @@ class LifeBalanceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+
     return MaterialApp(
       title: 'Life Balance Tracker',
-      theme: AppTheme.dark(),
       debugShowCheckedModeBanner: false,
+      theme: settings.themeMode == ThemeMode.dark
+          ? AppTheme.dark()
+          : AppTheme.light(),
       home: Consumer<UserProvider>(
         builder: (context, userProvider, _) {
-          // Ainda carregando dados locais
           if (!userProvider.isInitialized) return const SplashScreen();
-
-          // Usuário não autenticado → Login
           if (!userProvider.isAuthenticated) return const LoginScreen();
-
-          // Autenticado, mas não fez onboarding → Wizard
           if (!userProvider.onboardingComplete) return const OnboardingScreen();
-
-          // Tudo pronto → App principal
           return const MainScreen();
         },
       ),

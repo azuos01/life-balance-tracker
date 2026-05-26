@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
@@ -154,14 +154,14 @@ class _HeroSection extends StatelessWidget {
           animation: pulseAnim,
           builder: (_, __) => Transform.scale(
             scale: pulseAnim.value,
-            child: const _BalanceLogo(),
+            child: _BalanceLogo(),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         // Título
         ShaderMask(
           shaderCallback: (bounds) => AppTheme.primaryGradient.createShader(bounds),
-          child: const Text(
+          child: Text(
             'Life Balance',
             style: TextStyle(
               fontSize: 32,
@@ -171,7 +171,7 @@ class _HeroSection extends StatelessWidget {
             ),
           ),
         ),
-        const Text(
+        Text(
           'T R A C K E R',
           style: TextStyle(
             fontSize: 13,
@@ -180,8 +180,8 @@ class _HeroSection extends StatelessWidget {
             letterSpacing: 6,
           ),
         ),
-        const SizedBox(height: 10),
-        const Padding(
+        SizedBox(height: 10),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 40),
           child: Text(
             'Execute o que importa.\nViva uma vida equilibrada.',
@@ -327,7 +327,7 @@ class _LoginCard extends StatelessWidget {
   final String? loadingProvider;
   final void Function(String) onSignIn;
 
-  const _LoginCard({
+  _LoginCard({
     required this.loadingProvider,
     required this.onSignIn,
   });
@@ -335,16 +335,16 @@ class _LoginCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: GlassCard(
         opacity: 0.08,
         borderRadius: BorderRadius.circular(28),
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+        padding: EdgeInsets.fromLTRB(24, 24, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Entrar na sua conta',
               style: TextStyle(
                 color: AppTheme.textPrimary,
@@ -352,8 +352,8 @@ class _LoginCard extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(height: 4),
-            const Text(
+            SizedBox(height: 4),
+            Text(
               'Seus dados sincronizados em qualquer dispositivo',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
             ),
@@ -392,12 +392,12 @@ class _LoginCard extends StatelessWidget {
                     compact: true,
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 Expanded(
                   child: _ProviderButton(
                     label: 'Facebook',
                     icon: _FacebookIcon(),
-                    color: const Color(0xFF1877F2),
+                    color: Color(0xFF1877F2),
                     isLoading: loadingProvider == 'facebook',
                     onTap: () => onSignIn('facebook'),
                     compact: true,
@@ -408,7 +408,7 @@ class _LoginCard extends StatelessWidget {
 
             // Divider
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16),
               child: Row(
                 children: [
                   Expanded(
@@ -418,7 +418,7 @@ class _LoginCard extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       'ou explore sem cadastro',
                       style: TextStyle(
@@ -468,7 +468,7 @@ class _LoginCard extends StatelessWidget {
                           ),
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text('🎮', style: TextStyle(fontSize: 16)),
@@ -486,7 +486,7 @@ class _LoginCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Center(
               child: Text(
                 'Ao entrar você concorda com os Termos de Uso.',
@@ -565,7 +565,7 @@ class _ProviderButton extends StatelessWidget {
                   Flexible(
                     child: Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,

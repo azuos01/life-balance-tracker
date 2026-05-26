@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/areas_provider.dart';
@@ -45,7 +45,7 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Olá, ${user.name.split(' ').first}!',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -54,33 +54,33 @@ class DashboardScreen extends StatelessWidget {
             ),
             actions: [
               _StreakChip(streak: user.currentStreak),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
             ],
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 children: [
                   // ── Hero: descrição do app ──────────────────────────────
                   _AppHeroCard(),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
 
                   // ── Frase filosófica do dia ─────────────────────────────
                   _DailyQuoteCard(),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // ── Check-in cards ──────────────────────────────────────
                   _CheckInBanners(acts: acts),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // ── Bloco MIT ───────────────────────────────────────────
                   _MITBlock(tasks: tasks),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // ── XP bar ──────────────────────────────────────────────
                   Container(
-                    padding: const EdgeInsets.all(18),
+                    padding: EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       color: AppTheme.surface,
                       borderRadius: BorderRadius.circular(20),
@@ -215,7 +215,7 @@ class _HeroPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
           fontSize: 10,
           fontWeight: FontWeight.w600,
@@ -243,15 +243,15 @@ class _DailyQuoteCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text('💭', style: TextStyle(fontSize: 14)),
+                child: Text('💭', style: TextStyle(fontSize: 14)),
               ),
-              const SizedBox(width: 10),
-              const Text(
+              SizedBox(width: 10),
+              Text(
                 'Reflexão do Dia',
                 style: TextStyle(
                   color: AppTheme.primaryLight,
@@ -262,10 +262,10 @@ class _DailyQuoteCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             '"${quote.text}"',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textPrimary,
               fontSize: 15,
               fontStyle: FontStyle.italic,
@@ -284,7 +284,7 @@ class _DailyQuoteCard extends StatelessWidget {
                 ),
                 child: Text(
                   '— ${quote.author}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.primaryLight,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -303,14 +303,14 @@ class _DailyQuoteCard extends StatelessWidget {
 
 class _MITBlock extends StatelessWidget {
   final TasksProvider tasks;
-  const _MITBlock({required this.tasks});
+  _MITBlock({required this.tasks});
 
   @override
   Widget build(BuildContext context) {
     final mits = tasks.activeMITs;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -326,12 +326,12 @@ class _MITBlock extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Text('⭐', style: TextStyle(fontSize: 16)),
-                  const SizedBox(width: 8),
+                  Text('⭐', style: TextStyle(fontSize: 16)),
+                  SizedBox(width: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Tarefas MIT do Dia',
                         style: TextStyle(
                           color: AppTheme.textPrimary,
@@ -341,7 +341,7 @@ class _MITBlock extends StatelessWidget {
                       ),
                       Text(
                         'Most Important Tasks · ${mits.length}/3',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 10,
                         ),
@@ -378,7 +378,7 @@ class _MITBlock extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           if (mits.isEmpty)
             _EmptyMIT()
           else
@@ -393,12 +393,12 @@ class _EmptyMIT extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
-          const Text('🎯', style: TextStyle(fontSize: 32)),
-          const SizedBox(height: 8),
-          const Text(
+          Text('🎯', style: TextStyle(fontSize: 32)),
+          SizedBox(height: 8),
+          Text(
             'Defina suas 3 tarefas MIT',
             style: TextStyle(
               color: AppTheme.textPrimary,
@@ -406,8 +406,8 @@ class _EmptyMIT extends StatelessWidget {
               fontSize: 13,
             ),
           ),
-          const SizedBox(height: 4),
-          const Text(
+          SizedBox(height: 4),
+          Text(
             'As 3 tarefas mais importantes do dia.\nSe só essas forem feitas, o dia terá valido a pena.',
             style: TextStyle(
               color: AppTheme.textSecondary,
@@ -443,7 +443,7 @@ class _EmptyMIT extends StatelessWidget {
 
 class _MITTile extends StatelessWidget {
   final TaskModel task;
-  const _MITTile({required this.task});
+  _MITTile({required this.task});
 
   @override
   Widget build(BuildContext context) {
@@ -459,8 +459,8 @@ class _MITTile extends StatelessWidget {
     };
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(12),
@@ -479,7 +479,7 @@ class _MITTile extends StatelessWidget {
             child: Center(
               child: Text(
                 '${task.mitOrder}',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.accent,
                   fontWeight: FontWeight.w900,
                   fontSize: 12,
@@ -487,14 +487,14 @@ class _MITTile extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   task.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -502,14 +502,14 @@ class _MITTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Row(
                   children: [
-                    Text(area.icon, style: const TextStyle(fontSize: 10)),
-                    const SizedBox(width: 3),
+                    Text(area.icon, style: TextStyle(fontSize: 10)),
+                    SizedBox(width: 3),
                     Text(
                       area.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
                         color: AppTheme.textSecondary,
                       ),
@@ -554,7 +554,7 @@ class _MITTile extends StatelessWidget {
                   Center(
                     child: Text(
                       '${(task.progress * 100).toInt()}%',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 8,
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w700,
@@ -574,35 +574,35 @@ class _MITTile extends StatelessWidget {
 
 class _StreakChip extends StatelessWidget {
   final int streak;
-  const _StreakChip({required this.streak});
+  _StreakChip({required this.streak});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: streak > 0
-            ? const Color(0xFFFF6348).withOpacity(0.15)
+            ? Color(0xFFFF6348).withOpacity(0.15)
             : AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: streak > 0
-              ? const Color(0xFFFF6348).withOpacity(0.4)
+              ? Color(0xFFFF6348).withOpacity(0.4)
               : Colors.transparent,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🔥', style: TextStyle(fontSize: 14)),
-          const SizedBox(width: 4),
+          Text('🔥', style: TextStyle(fontSize: 14)),
+          SizedBox(width: 4),
           Text(
             '$streak dias',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: streak > 0
-                  ? const Color(0xFFFF6348)
+                  ? Color(0xFFFF6348)
                   : AppTheme.textSecondary,
             ),
           ),
@@ -675,7 +675,7 @@ class _BannerCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(14),
@@ -683,8 +683,8 @@ class _BannerCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 28)),
-            const SizedBox(width: 12),
+            Text(emoji, style: TextStyle(fontSize: 28)),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -699,7 +699,7 @@ class _BannerCard extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: AppTheme.textSecondary,
                     ),
@@ -721,7 +721,7 @@ class _LifeWheelSection extends StatelessWidget {
   final List areas;
   final double balance;
 
-  const _LifeWheelSection({required this.areas, required this.balance});
+  _LifeWheelSection({required this.areas, required this.balance});
 
   @override
   Widget build(BuildContext context) {
@@ -730,7 +730,7 @@ class _LifeWheelSection extends StatelessWidget {
     final icons = areas.map((a) => a.icon as String).toList();
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
@@ -740,7 +740,7 @@ class _LifeWheelSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Roda da Vida',
                 style: TextStyle(
                   fontSize: 16,
@@ -757,7 +757,7 @@ class _LifeWheelSection extends StatelessWidget {
                 ),
                 child: Text(
                   '${balance.toStringAsFixed(0)}% equilíbrio',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
@@ -785,17 +785,17 @@ class _LifeWheelSection extends StatelessWidget {
 
 class _TodayActivities extends StatelessWidget {
   final ActivitiesProvider acts;
-  const _TodayActivities({required this.acts});
+  _TodayActivities({required this.acts});
 
   @override
   Widget build(BuildContext context) {
     final todayActs = acts.todayActivities;
-    if (todayActs.isEmpty) return const SizedBox();
+    if (todayActs.isEmpty) return SizedBox();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Atividades de Hoje',
           style: TextStyle(
             fontSize: 16,
@@ -803,30 +803,30 @@ class _TodayActivities extends StatelessWidget {
             color: AppTheme.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         ...todayActs.take(3).map((a) {
           final areaConfig = kAreas.firstWhere(
             (c) => c.id == a.areaId,
             orElse: () => kAreas.first,
           );
           return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
+            margin: EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppTheme.surface,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Text(areaConfig.icon, style: const TextStyle(fontSize: 20)),
-                const SizedBox(width: 10),
+                Text(areaConfig.icon, style: TextStyle(fontSize: 20)),
+                SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         a.description,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           color: AppTheme.textPrimary,
                         ),
@@ -835,7 +835,7 @@ class _TodayActivities extends StatelessWidget {
                       ),
                       Text(
                         '${a.durationMinutes} min • ${a.difficulty}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           color: AppTheme.textSecondary,
                         ),
@@ -851,7 +851,7 @@ class _TodayActivities extends StatelessWidget {
                   ),
                   child: Text(
                     '+${a.xpEarned} XP',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.primary,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -871,14 +871,14 @@ class _TodayActivities extends StatelessWidget {
 
 class _AreasGrid extends StatelessWidget {
   final List areas;
-  const _AreasGrid({required this.areas});
+  _AreasGrid({required this.areas});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Suas Áreas',
           style: TextStyle(
             fontSize: 16,

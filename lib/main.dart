@@ -9,6 +9,7 @@ import 'providers/areas_provider.dart';
 import 'providers/activities_provider.dart';
 import 'providers/tasks_provider.dart';
 import 'providers/calendar_provider.dart';
+import 'providers/settings_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -31,6 +32,10 @@ void main() async {
     debugPrint('Firebase não configurado — modo demo ativo: $e');
   }
 
+  // SettingsProvider: tema e idioma (inicializado antes do UserProvider)
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.init();
+
   // UserProvider inicializado antes do runApp (routing depende de isInitialized)
   final userProvider = UserProvider();
   await userProvider.init();
@@ -38,6 +43,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        // SettingsProvider: tema e idioma
+        ChangeNotifierProvider.value(value: settingsProvider),
+
         // UserProvider: fonte de verdade de autenticação
         ChangeNotifierProvider.value(value: userProvider),
 

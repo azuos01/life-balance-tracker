@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/activities_provider.dart';
@@ -49,7 +49,7 @@ class _MorningCheckInScreenState extends State<MorningCheckInScreen> {
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('✅ Check-in matinal salvo! +10 XP'),
           backgroundColor: AppTheme.primary,
         ),
@@ -61,15 +61,15 @@ class _MorningCheckInScreenState extends State<MorningCheckInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('☀️ Check-in Matinal'),
-        leading: const CloseButton(),
+        title: Text('☀️ Check-in Matinal'),
+        leading: CloseButton(),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Como você está hoje?',
               style: TextStyle(
                 fontSize: 22,
@@ -77,22 +77,22 @@ class _MorningCheckInScreenState extends State<MorningCheckInScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             _EmojiRatingRow(
               label: 'Humor',
               value: _mood,
-              emojis: const ['😔', '😕', '😐', '😊', '😄'],
+              emojis: ['😔', '😕', '😐', '😊', '😄'],
               onChanged: (v) => setState(() => _mood = v),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             _EmojiRatingRow(
               label: 'Energia',
               value: _energy,
-              emojis: const ['🪫', '😴', '⚡', '🔋', '⚡⚡'],
+              emojis: ['🪫', '😴', '⚡', '🔋', '⚡⚡'],
               onChanged: (v) => setState(() => _energy = v),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: 24),
+            Text(
               'Intenções do dia',
               style: TextStyle(
                 fontSize: 15,
@@ -100,17 +100,17 @@ class _MorningCheckInScreenState extends State<MorningCheckInScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _intentionController,
               maxLines: 3,
-              style: const TextStyle(color: AppTheme.textPrimary),
-              decoration: const InputDecoration(
+              style: TextStyle(color: AppTheme.textPrimary),
+              decoration: InputDecoration(
                 hintText: 'Uma intenção por linha...',
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'Gratidão (opcional)',
               style: TextStyle(
                 fontSize: 15,
@@ -118,11 +118,11 @@ class _MorningCheckInScreenState extends State<MorningCheckInScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _gratitudeController,
               maxLines: 2,
-              style: const TextStyle(color: AppTheme.textPrimary),
+              style: TextStyle(color: AppTheme.textPrimary),
               decoration: const InputDecoration(
                 hintText: 'Hoje sou grato(a) por...',
               ),
@@ -154,7 +154,7 @@ class _EmojiRatingRow extends StatelessWidget {
   final List<String> emojis;
   final ValueChanged<int> onChanged;
 
-  const _EmojiRatingRow({
+  _EmojiRatingRow({
     required this.label,
     required this.value,
     required this.emojis,
@@ -168,13 +168,13 @@ class _EmojiRatingRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
             color: AppTheme.textPrimary,
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(5, (i) {
@@ -182,8 +182,8 @@ class _EmojiRatingRow extends StatelessWidget {
             return GestureDetector(
               onTap: () => onChanged(i + 1),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.all(10),
+                duration: Duration(milliseconds: 200),
+                padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: selected
                       ? AppTheme.primary.withOpacity(0.2)

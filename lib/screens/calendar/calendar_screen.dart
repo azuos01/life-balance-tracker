@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/calendar_event_model.dart';
 import '../../providers/calendar_provider.dart';
@@ -66,7 +66,7 @@ class CalendarScreen extends StatelessWidget {
 
 class _CalendarBody extends StatelessWidget {
   final CalendarProvider cp;
-  const _CalendarBody({required this.cp});
+  _CalendarBody({required this.cp});
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +75,10 @@ class _CalendarBody extends StatelessWidget {
         _MonthHeader(cp: cp),
         _WeekdayLabels(),
         _MonthGrid(cp: cp),
-        const Divider(height: 1, color: AppTheme.divider),
+        Divider(height: 1, color: AppTheme.divider),
         Expanded(child: _DayEventsList(cp: cp)),
         if (cp.isLoading)
-          const LinearProgressIndicator(
+          LinearProgressIndicator(
             backgroundColor: AppTheme.surface,
             color: AppTheme.primary,
           ),
@@ -91,7 +91,7 @@ class _CalendarBody extends StatelessWidget {
 
 class _MonthHeader extends StatelessWidget {
   final CalendarProvider cp;
-  const _MonthHeader({required this.cp});
+  _MonthHeader({required this.cp});
 
   static const _months = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -102,17 +102,17 @@ class _MonthHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final m = cp.viewMonth;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+      padding: EdgeInsets.fromLTRB(8, 8, 8, 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             onPressed: cp.isLoading ? null : cp.prevMonth,
-            icon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary),
+            icon: Icon(Icons.chevron_left, color: AppTheme.textPrimary),
           ),
           Text(
             '${_months[m.month - 1]} ${m.year}',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textPrimary,
               fontSize: 17,
               fontWeight: FontWeight.w700,
@@ -120,7 +120,7 @@ class _MonthHeader extends StatelessWidget {
           ),
           IconButton(
             onPressed: cp.isLoading ? null : cp.nextMonth,
-            icon: const Icon(Icons.chevron_right, color: AppTheme.textPrimary),
+            icon: Icon(Icons.chevron_right, color: AppTheme.textPrimary),
           ),
         ],
       ),
@@ -136,7 +136,7 @@ class _WeekdayLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         children: _labels
             .map((l) => Expanded(
@@ -200,7 +200,7 @@ class _MonthGrid extends StatelessWidget {
                   onTap: () => cp.selectDate(date),
                   child: Container(
                     height: 44,
-                    margin: const EdgeInsets.all(2),
+                    margin: EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppTheme.primary
@@ -257,7 +257,7 @@ class _MonthGrid extends StatelessWidget {
 
 class _DayEventsList extends StatelessWidget {
   final CalendarProvider cp;
-  const _DayEventsList({required this.cp});
+  _DayEventsList({required this.cp});
 
   static const _weekdays = [
     '', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'
@@ -278,10 +278,10 @@ class _DayEventsList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 6),
           child: Text(
             _fmtDay(cp.selectedDate),
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -293,9 +293,9 @@ class _DayEventsList extends StatelessWidget {
           child: events.isEmpty
               ? _EmptyDay()
               : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
+                  padding: EdgeInsets.fromLTRB(12, 0, 12, 80),
                   itemCount: events.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 6),
+                  separatorBuilder: (_, __) => SizedBox(height: 6),
                   itemBuilder: (context, i) => _EventTile(
                     event: events[i],
                     cp: cp,
@@ -319,7 +319,7 @@ class _EmptyDay extends StatelessWidget {
             size: 40,
             color: AppTheme.textSecondary.withOpacity(0.4),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text(
             'Nenhum compromisso',
             style: TextStyle(
@@ -336,7 +336,7 @@ class _EmptyDay extends StatelessWidget {
 class _EventTile extends StatelessWidget {
   final CalendarEventModel event;
   final CalendarProvider cp;
-  const _EventTile({required this.event, required this.cp});
+  _EventTile({required this.event, required this.cp});
 
   String _fmtTime(DateTime dt) {
     final h = dt.hour.toString().padLeft(2, '0');
@@ -349,7 +349,7 @@ class _EventTile extends StatelessWidget {
     return GestureDetector(
       onTap: () => _openEdit(context),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppTheme.surface,
           borderRadius: BorderRadius.circular(14),
@@ -366,7 +366,7 @@ class _EventTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             // Event info
             Expanded(
               child: Column(
@@ -374,7 +374,7 @@ class _EventTile extends StatelessWidget {
                 children: [
                   Text(
                     event.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -382,7 +382,7 @@ class _EventTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   Row(
                     children: [
                       Icon(
@@ -392,25 +392,25 @@ class _EventTile extends StatelessWidget {
                         size: 12,
                         color: AppTheme.textSecondary,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text(
                         event.isAllDay
                             ? 'Dia inteiro'
                             : '${_fmtTime(event.start)} – ${_fmtTime(event.end)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 12,
                         ),
                       ),
                       if (event.location.isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        const Icon(Icons.location_on_outlined,
+                        SizedBox(width: 8),
+                        Icon(Icons.location_on_outlined,
                             size: 12, color: AppTheme.textSecondary),
-                        const SizedBox(width: 2),
+                        SizedBox(width: 2),
                         Expanded(
                           child: Text(
                             event.location,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppTheme.textSecondary,
                               fontSize: 12,
                             ),
@@ -424,7 +424,7 @@ class _EventTile extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right,
+            Icon(Icons.chevron_right,
                 size: 18, color: AppTheme.textSecondary),
           ],
         ),
@@ -495,7 +495,7 @@ class _InfoCard extends StatelessWidget {
   final String? buttonLabel;
   final VoidCallback? onButton;
 
-  const _InfoCard({
+  _InfoCard({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -507,7 +507,7 @@ class _InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -520,20 +520,20 @@ class _InfoCard extends StatelessWidget {
               ),
               child: Icon(icon, size: 38, color: Colors.white),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
               subtitle,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 14,
                 height: 1.55,
@@ -551,7 +551,7 @@ class _InfoCard extends StatelessWidget {
                       color: Colors.white, size: 18),
                   label: Text(
                     buttonLabel!,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.w700),

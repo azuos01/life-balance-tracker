@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../models/area_model.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
@@ -8,7 +8,7 @@ class AreaCard extends StatelessWidget {
   final int colorIndex;
   final VoidCallback? onTap;
 
-  const AreaCard({
+  AreaCard({
     super.key,
     required this.area,
     required this.colorIndex,
@@ -54,34 +54,34 @@ class AreaCard extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [color, color.withOpacity(0.4)],
                 ),
-                borderRadius: const BorderRadius.vertical(
+                borderRadius: BorderRadius.vertical(
                   top: Radius.circular(18),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+              padding: EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: color.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           area.icon,
-                          style: const TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 16),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           config.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                             color: AppTheme.textPrimary,

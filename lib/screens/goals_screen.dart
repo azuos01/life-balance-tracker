@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../providers/areas_provider.dart';
@@ -18,21 +18,21 @@ class GoalsScreen extends StatelessWidget {
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: const Text('🎯 Objetivos')),
+        appBar: AppBar(title: Text('🎯 Objetivos')),
         body: ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           itemCount: areas.length,
           itemBuilder: (context, i) {
             final area = areas[i];
-            if (area.goals.isEmpty) return const SizedBox();
+            if (area.goals.isEmpty) return SizedBox();
             return _AreaGoalsSection(area: area, colorIndex: i);
           },
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _showAddGoalSheet(context),
           backgroundColor: AppTheme.primary,
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
+          icon: Icon(Icons.add, color: Colors.white),
+          label: Text(
             'Novo Objetivo',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
@@ -76,7 +76,7 @@ class _AreaGoalsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              Text(area.icon, style: const TextStyle(fontSize: 18)),
+              Text(area.icon, style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
                 area.name,
@@ -90,7 +90,7 @@ class _AreaGoalsSection extends StatelessWidget {
           ),
         ),
         ...area.goals.map((goal) => _GoalTile(goal: goal, area: area, color: color)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
       ],
     );
   }
@@ -101,7 +101,7 @@ class _GoalTile extends StatelessWidget {
   final AreaModel area;
   final Color color;
 
-  const _GoalTile({
+  _GoalTile({
     required this.goal,
     required this.area,
     required this.color,
@@ -111,8 +111,8 @@ class _GoalTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isCompleted = goal.status == 'completed';
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -140,7 +140,7 @@ class _GoalTile extends StatelessWidget {
                 ),
               ),
               _GoalTypeBadge(type: goal.type, color: color),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               GestureDetector(
                 onTap: () => _toggleComplete(context),
                 child: Icon(
@@ -154,16 +154,16 @@ class _GoalTile extends StatelessWidget {
             ],
           ),
           if (goal.description.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               goal.description,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
               ),
             ),
           ],
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -268,7 +268,7 @@ class _AddGoalSheetState extends State<_AddGoalSheet> {
   Future<void> _save() async {
     if (_titleController.text.trim().isEmpty) return;
     final goal = GoalModel(
-      id: const Uuid().v4(),
+      id: Uuid().v4(),
       areaId: _selectedAreaId,
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
@@ -292,7 +292,7 @@ class _AddGoalSheetState extends State<_AddGoalSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Novo Objetivo',
             style: TextStyle(
               fontSize: 20,
@@ -300,17 +300,17 @@ class _AddGoalSheetState extends State<_AddGoalSheet> {
               color: AppTheme.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: _selectedAreaId,
             dropdownColor: AppTheme.surface,
-            decoration: const InputDecoration(labelText: 'Área'),
+            decoration: InputDecoration(labelText: 'Área'),
             items: kAreas.map((a) {
               return DropdownMenuItem(
                 value: a.id,
                 child: Text(
                   '${a.icon} ${a.name}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 14,
                   ),
@@ -319,24 +319,24 @@ class _AddGoalSheetState extends State<_AddGoalSheet> {
             }).toList(),
             onChanged: (v) => setState(() => _selectedAreaId = v!),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           TextField(
             controller: _titleController,
-            style: const TextStyle(color: AppTheme.textPrimary),
-            decoration: const InputDecoration(labelText: 'Título do objetivo'),
+            style: TextStyle(color: AppTheme.textPrimary),
+            decoration: InputDecoration(labelText: 'Título do objetivo'),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           TextField(
             controller: _descController,
-            style: const TextStyle(color: AppTheme.textPrimary),
-            decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
+            style: TextStyle(color: AppTheme.textPrimary),
+            decoration: InputDecoration(labelText: 'Descrição (opcional)'),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           DropdownButtonFormField<String>(
             value: _type,
             dropdownColor: AppTheme.surface,
-            decoration: const InputDecoration(labelText: 'Prazo'),
-            items: const [
+            decoration: InputDecoration(labelText: 'Prazo'),
+            items: [
               DropdownMenuItem(
                 value: 'monthly',
                 child: Text('Mensal', style: TextStyle(color: AppTheme.textPrimary)),

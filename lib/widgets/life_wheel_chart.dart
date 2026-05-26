@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
@@ -172,7 +172,7 @@ class _LifeWheelPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: icons[i],
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 14),
         ),
         textDirection: TextDirection.ltr,
       )..layout();

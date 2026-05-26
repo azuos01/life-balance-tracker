@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/calendar_event_model.dart';
 import '../../providers/calendar_provider.dart';
@@ -73,13 +73,13 @@ class _EventFormScreenState extends State<EventFormScreen> {
           actions: [
             if (_isEditing)
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                icon: Icon(Icons.delete_outline, color: Colors.red),
                 onPressed: _confirmDelete,
               ),
           ],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: Form(
             key: _formKey,
             child: Column(
@@ -89,7 +89,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                 _SectionLabel('Título'),
                 TextFormField(
                   controller: _titleCtrl,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppTheme.textPrimary, fontSize: 16),
                   decoration: const InputDecoration(
                     hintText: 'Nome do compromisso',
@@ -124,7 +124,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                     ],
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
 
                 // ── Data e hora de fim ─────────────────────────────────────
                 _SectionLabel('Término'),
@@ -137,7 +137,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                       ),
                     ),
                     if (!_isAllDay) ...[
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       _TimeButton(
                         label: _endTime.format(context),
                         onTap: () => _pickTime(isStart: false),
@@ -145,27 +145,27 @@ class _EventFormScreenState extends State<EventFormScreen> {
                     ],
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // ── Local ──────────────────────────────────────────────────
                 _SectionLabel('Local (opcional)'),
                 TextFormField(
                   controller: _locationCtrl,
-                  style: const TextStyle(color: AppTheme.textPrimary),
-                  decoration: const InputDecoration(
+                  style: TextStyle(color: AppTheme.textPrimary),
+                  decoration: InputDecoration(
                     hintText: 'Endereço ou link',
                     prefixIcon:
                         Icon(Icons.location_on_outlined, color: AppTheme.primary),
                   ),
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // ── Descrição ──────────────────────────────────────────────
                 _SectionLabel('Descrição (opcional)'),
                 TextFormField(
                   controller: _descCtrl,
-                  style: const TextStyle(color: AppTheme.textPrimary),
+                  style: TextStyle(color: AppTheme.textPrimary),
                   decoration: const InputDecoration(
                     hintText: 'Notas sobre o compromisso',
                     prefixIcon: Icon(Icons.notes_outlined,
@@ -195,14 +195,14 @@ class _EventFormScreenState extends State<EventFormScreen> {
                             color: Colors.white),
                     label: Text(
                       _isEditing ? 'Salvar alterações' : 'Criar compromisso',
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: 40),
               ],
             ),
           ),
@@ -215,7 +215,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
 
   Widget _toggleAllDay() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -223,10 +223,10 @@ class _EventFormScreenState extends State<EventFormScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.wb_sunny_outlined,
+          Icon(Icons.wb_sunny_outlined,
               size: 18, color: AppTheme.primary),
-          const SizedBox(width: 10),
-          const Expanded(
+          SizedBox(width: 10),
+          Expanded(
             child: Text(
               'Dia inteiro',
               style: TextStyle(
@@ -254,7 +254,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
       lastDate: DateTime(2030),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.dark(
+          colorScheme: ColorScheme.dark(
             primary: AppTheme.primary,
             onPrimary: Colors.white,
             surface: AppTheme.surface,
@@ -285,7 +285,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
       initialTime: initial,
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.dark(
+          colorScheme: ColorScheme.dark(
             primary: AppTheme.primary,
             onPrimary: Colors.white,
             surface: AppTheme.surface,
@@ -370,9 +370,9 @@ class _EventFormScreenState extends State<EventFormScreen> {
       context: context,
       builder: (c) => AlertDialog(
         backgroundColor: AppTheme.surface,
-        title: const Text('Excluir compromisso?',
+        title: Text('Excluir compromisso?',
             style: TextStyle(color: AppTheme.textPrimary)),
-        content: const Text('Esta ação não pode ser desfeita.',
+        content: Text('Esta ação não pode ser desfeita.',
             style: TextStyle(color: AppTheme.textSecondary)),
         actions: [
           TextButton(
@@ -418,15 +418,15 @@ class _EventFormScreenState extends State<EventFormScreen> {
 
 class _SectionLabel extends StatelessWidget {
   final String text;
-  const _SectionLabel(this.text);
+  _SectionLabel(this.text);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: 6),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: AppTheme.textSecondary,
@@ -440,14 +440,14 @@ class _SectionLabel extends StatelessWidget {
 class _DateButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-  const _DateButton({required this.label, required this.onTap});
+  _DateButton({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(14),
@@ -455,13 +455,13 @@ class _DateButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_outlined,
+            Icon(Icons.calendar_today_outlined,
                 size: 16, color: AppTheme.primary),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppTheme.textPrimary, fontSize: 13),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -476,14 +476,14 @@ class _DateButton extends StatelessWidget {
 class _TimeButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-  const _TimeButton({required this.label, required this.onTap});
+  _TimeButton({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(14),
@@ -491,11 +491,11 @@ class _TimeButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.access_time_outlined,
+            Icon(Icons.access_time_outlined,
                 size: 16, color: AppTheme.primary),
-            const SizedBox(width: 6),
+            SizedBox(width: 6),
             Text(label,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppTheme.textPrimary, fontSize: 13)),
           ],
         ),

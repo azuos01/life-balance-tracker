@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/activities_provider.dart';
 import '../constants/app_constants.dart';
@@ -38,19 +38,19 @@ class ActivitiesScreen extends StatelessWidget {
                   direction: DismissDirection.endToStart,
                   background: Container(
                     alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
+                    padding: EdgeInsets.only(right: 20),
                     color: Colors.red.withOpacity(0.2),
-                    child: const Icon(Icons.delete_outline, color: Colors.red),
+                    child: Icon(Icons.delete_outline, color: Colors.red),
                   ),
                   onDismissed: (_) {
                     context.read<ActivitiesProvider>().deleteActivity(act.id);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Atividade removida')),
+                      SnackBar(content: Text('Atividade removida')),
                     );
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
+                    margin: EdgeInsets.only(bottom: 10),
+                    padding: EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppTheme.surface,
                       borderRadius: BorderRadius.circular(14),
@@ -71,24 +71,24 @@ class ActivitiesScreen extends StatelessWidget {
                           child: Center(
                             child: Text(
                               areaConfig.icon,
-                              style: const TextStyle(fontSize: 18),
+                              style: TextStyle(fontSize: 18),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 act.description,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: AppTheme.textPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Row(
                                 children: [
                                   Text(
@@ -99,7 +99,7 @@ class ActivitiesScreen extends StatelessWidget {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  const Text(
+                                  Text(
                                     ' • ',
                                     style: TextStyle(
                                       fontSize: 11,
@@ -108,12 +108,12 @@ class ActivitiesScreen extends StatelessWidget {
                                   ),
                                   Text(
                                     '${act.durationMinutes} min',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       color: AppTheme.textSecondary,
                                     ),
                                   ),
-                                  const Text(
+                                  Text(
                                     ' • ',
                                     style: TextStyle(
                                       fontSize: 11,
@@ -130,7 +130,7 @@ class ActivitiesScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 3,
                               ),
@@ -140,17 +140,17 @@ class ActivitiesScreen extends StatelessWidget {
                               ),
                               child: Text(
                                 '+${act.xpEarned} XP',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppTheme.primary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Text(
                               _formatDate(act.createdAt),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
                                 color: AppTheme.textSecondary,
                               ),
@@ -188,14 +188,14 @@ class ActivitiesScreen extends StatelessWidget {
 
 class _DifficultyChip extends StatelessWidget {
   final String difficulty;
-  const _DifficultyChip({required this.difficulty});
+  _DifficultyChip({required this.difficulty});
 
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (difficulty) {
-      'easy' => ('Fácil', const Color(0xFF2ED573)),
-      'hard' => ('Difícil', const Color(0xFFFF4757)),
-      _ => ('Médio', const Color(0xFFFFD32A)),
+      'easy' => ('Fácil', Color(0xFF2ED573)),
+      'hard' => ('Difícil', Color(0xFFFF4757)),
+      _ => ('Médio', Color(0xFFFFD32A)),
     };
     return Text(
       label,
@@ -207,7 +207,7 @@ class _DifficultyChip extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

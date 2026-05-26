@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/areas_provider.dart';
@@ -104,13 +104,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildProgress() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: List.generate(3, (i) {
           return Expanded(
             child: Container(
               height: 4,
-              margin: const EdgeInsets.symmetric(horizontal: 3),
+              margin: EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
                 color: i <= _currentPage
                     ? AppTheme.primary
@@ -198,11 +198,11 @@ class _WelcomePage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           // ── Version badge ─────────────────────────────────────────────────
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               color: AppTheme.primary.withOpacity(0.12),
               borderRadius: BorderRadius.circular(20),
@@ -212,7 +212,7 @@ class _WelcomePage extends StatelessWidget {
             ),
             child: Text(
               'v$kAppVersion',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.primary,
@@ -220,10 +220,10 @@ class _WelcomePage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           // ── Tagline ───────────────────────────────────────────────────────
-          const Text(
+          Text(
             kAppTagline,
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -232,14 +232,14 @@ class _WelcomePage extends StatelessWidget {
               height: 1.55,
             ),
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: 28),
 
           // ── Divider ───────────────────────────────────────────────────────
           Row(
             children: [
               Expanded(child: Divider(color: AppTheme.divider, height: 1)),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   'Vamos começar',
                   style: TextStyle(
@@ -252,12 +252,12 @@ class _WelcomePage extends StatelessWidget {
               Expanded(child: Divider(color: AppTheme.divider, height: 1)),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // ── Name input ────────────────────────────────────────────────────
           Align(
             alignment: Alignment.centerLeft,
-            child: const Text(
+            child: Text(
               'Como você quer ser chamado?',
               style: TextStyle(
                 fontSize: 15,
@@ -266,21 +266,21 @@ class _WelcomePage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           TextField(
             controller: controller,
             autofocus: true,
-            style: const TextStyle(color: AppTheme.textPrimary),
-            decoration: const InputDecoration(
+            style: TextStyle(color: AppTheme.textPrimary),
+            decoration: InputDecoration(
               hintText: 'Seu nome',
               prefixIcon: Icon(Icons.person_outline, color: AppTheme.primary),
             ),
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: 28),
 
           // ── Area chips ────────────────────────────────────────────────────
-          const _AreaPreviewGrid(),
-          const SizedBox(height: 16),
+          _AreaPreviewGrid(),
+          SizedBox(height: 16),
         ],
       ),
     );
@@ -288,7 +288,7 @@ class _WelcomePage extends StatelessWidget {
 }
 
 class _AreaPreviewGrid extends StatelessWidget {
-  const _AreaPreviewGrid();
+  _AreaPreviewGrid();
 
   @override
   Widget build(BuildContext context) {
@@ -297,14 +297,14 @@ class _AreaPreviewGrid extends StatelessWidget {
       runSpacing: 8,
       children: kAreas.map((a) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: AppTheme.surfaceLight,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             '${a.icon} ${a.name}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               color: AppTheme.textSecondary,
             ),
@@ -320,17 +320,17 @@ class _ScoresPage extends StatelessWidget {
   final Map<String, double> scores;
   final void Function(String id, double value) onChanged;
 
-  const _ScoresPage({required this.scores, required this.onChanged});
+  _ScoresPage({required this.scores, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             'Como está cada área?',
             style: TextStyle(
               fontSize: 24,
@@ -338,8 +338,8 @@ class _ScoresPage extends StatelessWidget {
               color: AppTheme.textPrimary,
             ),
           ),
-          const SizedBox(height: 6),
-          const Text(
+          SizedBox(height: 6),
+          Text(
             'Avalie sua satisfação atual em cada área (1 = péssimo, 10 = excelente)',
             style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
           ),
@@ -370,7 +370,7 @@ class _ScoreSlider extends StatelessWidget {
   final Color color;
   final ValueChanged<double> onChanged;
 
-  const _ScoreSlider({
+  _ScoreSlider({
     required this.icon,
     required this.name,
     required this.value,
@@ -381,17 +381,17 @@ class _ScoreSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
           Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: 8),
+              Text(icon, style: TextStyle(fontSize: 20)),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -441,17 +441,17 @@ class _ScoreSlider extends StatelessWidget {
 // --- Page 3: Goals ---
 class _GoalsPage extends StatelessWidget {
   final Map<String, TextEditingController> controllers;
-  const _GoalsPage({required this.controllers});
+  _GoalsPage({required this.controllers});
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             'Defina seus objetivos',
             style: TextStyle(
               fontSize: 24,
@@ -459,17 +459,17 @@ class _GoalsPage extends StatelessWidget {
               color: AppTheme.textPrimary,
             ),
           ),
-          const SizedBox(height: 6),
-          const Text(
+          SizedBox(height: 6),
+          Text(
             'Opcional — adicione um objetivo principal por área. Você pode editar depois.',
             style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           ...kAreas.map((area) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
+                padding: EdgeInsets.only(bottom: 14),
                 child: TextField(
                   controller: controllers[area.id],
-                  style: const TextStyle(color: AppTheme.textPrimary),
+                  style: TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     hintText: '${area.icon} ${area.name}',
                     prefixText: '  ',

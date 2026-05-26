@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/activities_provider.dart';
+import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
+import '../l10n/app_l10n.dart';
 import '../widgets/xp_progress_bar.dart';
 import '../widgets/app_background.dart';
 
@@ -15,6 +17,7 @@ class ProfileScreen extends StatelessWidget {
     final user = context.watch<UserProvider>().user;
     final achievements = context.watch<UserProvider>().achievements;
     final acts = context.watch<ActivitiesProvider>();
+    final l10n = context.l10n;
 
     if (user == null) return const SizedBox();
 
@@ -22,7 +25,7 @@ class ProfileScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Perfil'),
+          title: Text(l10n.profile),
           actions: [
             IconButton(
               icon: const Icon(Icons.settings_outlined),
@@ -31,286 +34,657 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
         body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hero card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.primary.withOpacity(0.8),
-                    AppTheme.primary.withOpacity(0.4),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Hero card
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primary.withOpacity(0.8),
+                      AppTheme.primary.withOpacity(0.4),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            user.name.isNotEmpty
-                                ? user.name[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user.name,
-                              style: const TextStyle(
-                                fontSize: 20,
+                          child: Center(
+                            child: Text(
+                              user.name.isNotEmpty
+                                  ? user.name[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
                               ),
                             ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                '${l10n.level} ${user.level} • ${user.tier}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white.withOpacity(0.85),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            const Text('🔥', style: TextStyle(fontSize: 22)),
                             Text(
-                              'Nível ${user.level} • ${user.tier}',
+                              '${user.currentStreak}',
                               style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              l10n.days,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 10,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Column(
-                        children: [
-                          const Text('🔥', style: TextStyle(fontSize: 22)),
-                          Text(
-                            '${user.currentStreak}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            'dias',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  XpProgressBar(totalXP: user.totalXP),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    XpProgressBar(totalXP: user.totalXP),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Stats row
+              Row(
+                children: [
+                  _StatCard(label: l10n.activities, value: '${acts.totalActivities}', emoji: '📝'),
+                  SizedBox(width: 10),
+                  _StatCard(label: l10n.totalXP, value: '${user.totalXP}', emoji: '⭐'),
+                  SizedBox(width: 10),
+                  _StatCard(label: l10n.record, value: '${user.longestStreak}d', emoji: '🏆'),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            // Stats row
-            Row(
-              children: [
-                _StatCard(
-                  label: 'Atividades',
-                  value: '${acts.totalActivities}',
-                  emoji: '📝',
-                ),
-                const SizedBox(width: 10),
-                _StatCard(
-                  label: 'XP Total',
-                  value: '${user.totalXP}',
-                  emoji: '⭐',
-                ),
-                const SizedBox(width: 10),
-                _StatCard(
-                  label: 'Recorde',
-                  value: '${user.longestStreak}d',
-                  emoji: '🏆',
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Achievements
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Conquistas',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+              SizedBox(height: 20),
+              // Achievements
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.achievements,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
-                ),
-                Text(
-                  '${achievements.where((a) => a.isUnlocked).length}/${achievements.length}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
+                  Text(
+                    '${achievements.where((a) => a.isUnlocked).length}/${achievements.length}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.9,
+                ],
               ),
-              itemCount: achievements.length,
-              itemBuilder: (context, i) {
-                final ach = achievements[i];
-                return _AchievementCard(achievement: ach);
-              },
-            ),
-            const SizedBox(height: 80),
-          ],
+              const SizedBox(height: 10),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.9,
+                ),
+                itemCount: achievements.length,
+                itemBuilder: (context, i) =>
+                    _AchievementCard(achievement: achievements[i]),
+              ),
+              const SizedBox(height: 80),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
 
   void _showSettings(BuildContext context) {
-    final provider = context.read<UserProvider>().authProvider;
-    final providerLabel = switch (provider) {
-      'google' => '🔵 Google',
-      'github' => '🐙 GitHub',
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _SettingsSheet(),
+    );
+  }
+}
+
+// ── Settings bottom sheet ──────────────────────────────────────────────────────
+
+class _SettingsSheet extends StatelessWidget {
+  const _SettingsSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final up = context.watch<UserProvider>();
+    final l10n = context.l10n;
+    final isDark = settings.themeMode == ThemeMode.dark;
+
+    final providerLabel = switch (up.authProvider) {
+      'google'   => '🔵 Google',
+      'github'   => '🐙 GitHub',
       'linkedin' => '🔷 LinkedIn',
       'facebook' => '📘 Facebook',
-      'demo' => '🎮 Modo Demo',
-      _ => 'Desconhecido',
+      'demo'     => '🎮 Modo Demo',
+      _          => '—',
     };
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.surface,
-        title: const Text(
-          'Configurações',
-          style: TextStyle(color: AppTheme.textPrimary),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Conectado via $providerLabel',
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 13,
+    return DraggableScrollableSheet(
+      initialChildSize: 0.72,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      builder: (ctx, scroll) {
+        return Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 30,
+                offset: Offset(0, -8),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Fechar'),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await context.read<UserProvider>().signOut();
-            },
-            child: const Text(
-              'Sair da conta',
-              style: TextStyle(color: AppTheme.accent),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (c) => AlertDialog(
-                  backgroundColor: AppTheme.surface,
-                  title: const Text(
-                    'Resetar dados?',
-                    style: TextStyle(color: AppTheme.textPrimary),
+          child: Column(
+            children: [
+              // Handle
+              Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 4),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.divider,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  content: const Text(
-                    'Todos os dados serão apagados permanentemente.',
-                    style: TextStyle(color: AppTheme.textSecondary),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(c, false),
-                      child: const Text('Cancelar'),
+                ),
+              ),
+              // Title
+              Padding(
+                padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.primaryGradient,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.settings_outlined,
+                          color: Colors.white, size: 18),
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(c, true),
-                      child: const Text(
-                        'Resetar',
-                        style: TextStyle(color: Colors.red),
+                    SizedBox(width: 12),
+                    Text(
+                      l10n.settings,
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                   ],
                 ),
-              );
-              if (confirm == true && context.mounted) {
-                await context.read<UserProvider>().resetAll();
-              }
-            },
-            child: const Text(
-              'Resetar dados',
-              style: TextStyle(color: Colors.red),
+              ),
+              Divider(color: AppTheme.divider, height: 16),
+              Expanded(
+                child: ListView(
+                  controller: scroll,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  children: [
+                    // ── Aparência ──────────────────────────────────────────
+                    _SectionHeader(
+                        icon: Icons.palette_outlined, title: l10n.appearance),
+                    SizedBox(height: 10),
+
+                    // Tema (Dark / Light)
+                    Text(l10n.theme,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textSecondary,
+                            letterSpacing: 0.3)),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _ThemeChip(
+                          icon: Icons.dark_mode_outlined,
+                          label: l10n.themeDark,
+                          selected: isDark,
+                          onTap: () =>
+                              settings.setThemeMode(ThemeMode.dark),
+                        ),
+                        SizedBox(width: 10),
+                        _ThemeChip(
+                          icon: Icons.light_mode_outlined,
+                          label: l10n.themeLight,
+                          selected: !isDark,
+                          onTap: () =>
+                              settings.setThemeMode(ThemeMode.light),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+
+                    // Idioma
+                    Text(l10n.language,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textSecondary,
+                            letterSpacing: 0.3)),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _LangChip(
+                          flag: '🇧🇷',
+                          label: 'Português',
+                          selected: settings.locale == 'pt',
+                          onTap: () => settings.setLocale('pt'),
+                        ),
+                        SizedBox(width: 10),
+                        _LangChip(
+                          flag: '🇺🇸',
+                          label: 'English',
+                          selected: settings.locale == 'en',
+                          onTap: () => settings.setLocale('en'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24),
+
+                    // ── Conta ──────────────────────────────────────────────
+                    _SectionHeader(
+                        icon: Icons.manage_accounts_outlined,
+                        title: l10n.account),
+                    SizedBox(height: 10),
+                    Container(
+                      padding: EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceLight,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppTheme.divider),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.link,
+                                  size: 16, color: AppTheme.textSecondary),
+                              SizedBox(width: 8),
+                              Text(
+                                '${l10n.connectedVia} $providerLabel',
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppTheme.textSecondary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _ActionButton(
+                                  label: l10n.signOut,
+                                  icon: Icons.logout,
+                                  color: AppTheme.accent,
+                                  onTap: () async {
+                                    Navigator.pop(context);
+                                    await context
+                                        .read<UserProvider>()
+                                        .signOut();
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: _ActionButton(
+                                  label: l10n.resetData,
+                                  icon: Icons.delete_forever_outlined,
+                                  color: Colors.red,
+                                  onTap: () =>
+                                      _confirmReset(context, l10n),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 24),
+
+                    // ── Info do app ────────────────────────────────────────
+                    _SectionHeader(
+                        icon: Icons.info_outline, title: l10n.appInfoSection),
+                    SizedBox(height: 10),
+                    Container(
+                      padding: EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceLight,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppTheme.divider),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: AppTheme.primaryGradient,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Text('⚖️',
+                                  style: TextStyle(fontSize: 22)),
+                            ),
+                          ),
+                          SizedBox(width: 14),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                kAppName,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                'v$kAppVersion',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 32),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _confirmReset(BuildContext context, L10n l10n) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        title: Text(l10n.resetTitle,
+            style: TextStyle(color: AppTheme.textPrimary)),
+        content: Text(l10n.resetBody,
+            style: TextStyle(color: AppTheme.textSecondary)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(c, false),
+              child: Text(l10n.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(l10n.resetData,
+                  style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (ok == true && context.mounted) {
+      Navigator.pop(context);
+      await context.read<UserProvider>().resetAll();
+    }
+  }
+}
+
+// ── Componentes ───────────────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  _SectionHeader({required this.icon, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppTheme.primary),
+        SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(child: Divider(color: AppTheme.divider)),
+      ],
+    );
+  }
+}
+
+class _ThemeChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  _ThemeChip(
+      {required this.icon,
+      required this.label,
+      required this.selected,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppTheme.primary.withOpacity(0.15)
+                : AppTheme.surfaceLight,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected ? AppTheme.primary : AppTheme.divider,
+              width: selected ? 1.5 : 1,
             ),
           ),
-        ],
+          child: Column(
+            children: [
+              Icon(icon,
+                  size: 22,
+                  color: selected ? AppTheme.primary : AppTheme.textSecondary),
+              SizedBox(height: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight:
+                      selected ? FontWeight.w700 : FontWeight.w400,
+                  color: selected ? AppTheme.primary : AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+
+class _LangChip extends StatelessWidget {
+  final String flag;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  _LangChip(
+      {required this.flag,
+      required this.label,
+      required this.selected,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppTheme.primary.withOpacity(0.15)
+                : AppTheme.surfaceLight,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected ? AppTheme.primary : AppTheme.divider,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Text(flag, style: TextStyle(fontSize: 24)),
+              SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight:
+                      selected ? FontWeight.w700 : FontWeight.w400,
+                  color: selected ? AppTheme.primary : AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  const _ActionButton(
+      {required this.label,
+      required this.icon,
+      required this.color,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.10),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.30)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 15, color: color),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: color),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Stat card ─────────────────────────────────────────────────────────────────
 
 class _StatCard extends StatelessWidget {
   final String label;
   final String value;
   final String emoji;
 
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.emoji,
-  });
+  _StatCard({required this.label, required this.value, required this.emoji});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppTheme.surface,
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.divider),
         ),
         child: Column(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: 4),
+            Text(emoji, style: TextStyle(fontSize: 22)),
+            SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: AppTheme.textPrimary,
@@ -318,7 +692,7 @@ class _StatCard extends StatelessWidget {
             ),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 color: AppTheme.textSecondary,
               ),
@@ -330,9 +704,11 @@ class _StatCard extends StatelessWidget {
   }
 }
 
+// ── Achievement card ──────────────────────────────────────────────────────────
+
 class _AchievementCard extends StatelessWidget {
   final dynamic achievement;
-  const _AchievementCard({required this.achievement});
+  _AchievementCard({required this.achievement});
 
   @override
   Widget build(BuildContext context) {
@@ -340,13 +716,13 @@ class _AchievementCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: unlocked
-            ? AppTheme.primary.withOpacity(0.1)
+            ? AppTheme.primary.withOpacity(0.10)
             : AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: unlocked
               ? AppTheme.primary.withOpacity(0.4)
-              : Colors.transparent,
+              : AppTheme.divider,
         ),
       ),
       child: Column(
@@ -356,20 +732,18 @@ class _AchievementCard extends StatelessWidget {
             achievement.icon as String,
             style: TextStyle(
               fontSize: 28,
-              color: unlocked ? null : const Color(0xFF555577),
+              color: unlocked ? null : AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               achievement.name as String,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: unlocked
-                    ? AppTheme.textPrimary
-                    : AppTheme.textSecondary,
+                color: unlocked ? AppTheme.textPrimary : AppTheme.textSecondary,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
@@ -377,7 +751,7 @@ class _AchievementCard extends StatelessWidget {
             ),
           ),
           if (unlocked)
-            const Text(
+            Text(
               '✓',
               style: TextStyle(
                 fontSize: 11,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/task_model.dart';
 import '../../providers/tasks_provider.dart';
@@ -54,7 +54,7 @@ class _TasksScreenState extends State<TasksScreen>
                 ),
                 child: Text(
                   '${tp.pendingTasks.length}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -154,7 +154,7 @@ class _MatrixView extends StatelessWidget {
                   tasks: tp.byQuadrant(3),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: _Quadrant(
                   q: 4,
@@ -167,7 +167,7 @@ class _MatrixView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 80),
+          SizedBox(height: 80),
         ],
       ),
     );
@@ -177,7 +177,7 @@ class _MatrixView extends StatelessWidget {
 class _AxisLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
         SizedBox(width: 4),
         Text(
@@ -195,7 +195,7 @@ class _Quadrant extends StatelessWidget {
   final Color color;
   final List<TaskModel> tasks;
 
-  const _Quadrant({
+  _Quadrant({
     required this.q,
     required this.title,
     required this.action,
@@ -207,8 +207,8 @@ class _Quadrant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 160),
-      padding: const EdgeInsets.all(10),
+      constraints: BoxConstraints(minHeight: 160),
+      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -227,8 +227,8 @@ class _Quadrant extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 14)),
-              const SizedBox(width: 4),
+              Text(emoji, style: TextStyle(fontSize: 14)),
+              SizedBox(width: 4),
               Expanded(
                 child: Text(
                   title,
@@ -250,8 +250,8 @@ class _Quadrant extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
-          const Divider(height: 1, color: AppTheme.divider),
+          SizedBox(height: 8),
+          Divider(height: 1, color: AppTheme.divider),
           const SizedBox(height: 8),
           if (tasks.isEmpty)
             Center(
@@ -275,7 +275,7 @@ class _Quadrant extends StatelessWidget {
 class _EisenhowerCard extends StatelessWidget {
   final TaskModel task;
   final Color accentColor;
-  const _EisenhowerCard({required this.task, required this.accentColor});
+  _EisenhowerCard({required this.task, required this.accentColor});
 
   @override
   Widget build(BuildContext context) {
@@ -288,8 +288,8 @@ class _EisenhowerCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showDetail(context),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.all(8),
+        margin: EdgeInsets.only(bottom: 6),
+        padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(10),
@@ -303,14 +303,14 @@ class _EisenhowerCard extends StatelessWidget {
             Row(
               children: [
                 if (task.isMIT)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(right: 4),
                     child: Text('⭐', style: TextStyle(fontSize: 10)),
                   ),
                 Expanded(
                   child: Text(
                     task.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
@@ -321,28 +321,28 @@ class _EisenhowerCard extends StatelessWidget {
                 ),
                 if (isInProgress)
                   Container(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                         horizontal: 4, vertical: 1),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF9F1C).withOpacity(0.15),
+                      color: Color(0xFFFF9F1C).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       '⚡',
                       style: TextStyle(fontSize: 9),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Row(
               children: [
-                Text(area.icon, style: const TextStyle(fontSize: 10)),
-                const SizedBox(width: 3),
+                Text(area.icon, style: TextStyle(fontSize: 10)),
+                SizedBox(width: 3),
                 Expanded(
                   child: Text(
                     area.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 9, color: AppTheme.textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -359,7 +359,7 @@ class _EisenhowerCard extends StatelessWidget {
               ],
             ),
             if (task.subtasks.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               ClipRRect(
                 borderRadius: BorderRadius.circular(2),
                 child: LinearProgressIndicator(
@@ -470,7 +470,7 @@ class _KanbanView extends StatelessWidget {
 
 class _KanbanReport extends StatelessWidget {
   final int planned, inProgress, completed;
-  const _KanbanReport({
+  _KanbanReport({
     required this.planned,
     required this.inProgress,
     required this.completed,
@@ -486,7 +486,7 @@ class _KanbanReport extends StatelessWidget {
     final doneRate = total > 0 ? completed / total : 0.0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -500,15 +500,15 @@ class _KanbanReport extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text('📊', style: TextStyle(fontSize: 16)),
+                child: Text('📊', style: TextStyle(fontSize: 16)),
               ),
-              const SizedBox(width: 10),
-              const Expanded(
+              SizedBox(width: 10),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -537,7 +537,7 @@ class _KanbanReport extends StatelessWidget {
                 ),
                 child: Text(
                   '$total total',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -556,14 +556,14 @@ class _KanbanReport extends StatelessWidget {
                 color: _colorPlanned,
                 icon: '📋',
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               _StatusChip(
                 label: 'Em Execução',
                 count: inProgress,
                 color: _colorInProgress,
                 icon: '⚡',
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               _StatusChip(
                 label: 'Concluídas',
                 count: completed,
@@ -572,19 +572,19 @@ class _KanbanReport extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           // Barra de progresso segmentada
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Progresso geral',
                 style:
                     TextStyle(fontSize: 11, color: AppTheme.textSecondary),
               ),
               Text(
                 '${(doneRate * 100).toInt()}% concluído',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: _colorDone,
@@ -592,27 +592,27 @@ class _KanbanReport extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _SegmentedBar(
             planned: planned,
             inProgress: inProgress,
             completed: completed,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           // Legenda
           Row(
             children: [
               _LegendDot(color: _colorDone, label: 'Concluídas'),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               _LegendDot(color: _colorInProgress, label: 'Em execução'),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               _LegendDot(color: _colorPlanned, label: 'Planejadas'),
             ],
           ),
           // Taxa de conclusão detalhada
           if (planned + inProgress + completed > 0) ...[
-            const SizedBox(height: 12),
-            const Divider(height: 1, color: AppTheme.divider),
+            SizedBox(height: 12),
+            Divider(height: 1, color: AppTheme.divider),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -648,7 +648,7 @@ class _KanbanReport extends StatelessWidget {
 
 class _SegmentedBar extends StatelessWidget {
   final int planned, inProgress, completed;
-  const _SegmentedBar({
+  _SegmentedBar({
     required this.planned,
     required this.inProgress,
     required this.completed,
@@ -715,7 +715,7 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 6),
         decoration: BoxDecoration(
           color: color.withOpacity(0.07),
           borderRadius: BorderRadius.circular(12),
@@ -723,8 +723,8 @@ class _StatusChip extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(icon, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 4),
+            Text(icon, style: TextStyle(fontSize: 16)),
+            SizedBox(height: 4),
             Text(
               '$count',
               style: TextStyle(
@@ -735,7 +735,7 @@ class _StatusChip extends StatelessWidget {
             ),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 9, color: AppTheme.textSecondary),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -751,7 +751,7 @@ class _StatusChip extends StatelessWidget {
 class _LegendDot extends StatelessWidget {
   final Color color;
   final String label;
-  const _LegendDot({required this.color, required this.label});
+  _LegendDot({required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -763,10 +763,10 @@ class _LegendDot extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 9, color: AppTheme.textSecondary),
+          style: TextStyle(fontSize: 9, color: AppTheme.textSecondary),
         ),
       ],
     );
@@ -776,7 +776,7 @@ class _LegendDot extends StatelessWidget {
 class _MiniStat extends StatelessWidget {
   final String label, value;
   final Color color;
-  const _MiniStat({
+  _MiniStat({
     required this.label,
     required this.value,
     required this.color,
@@ -798,7 +798,7 @@ class _MiniStat extends StatelessWidget {
           ),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 10, color: AppTheme.textSecondary),
           ),
         ],
@@ -814,7 +814,7 @@ class _KanbanColumn extends StatelessWidget {
   final Color color;
   final List<TaskModel> tasks;
 
-  const _KanbanColumn({
+  _KanbanColumn({
     required this.title,
     required this.icon,
     required this.color,
@@ -845,7 +845,7 @@ class _KanbanColumn extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Text(icon, style: const TextStyle(fontSize: 13)),
+                Text(icon, style: TextStyle(fontSize: 13)),
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
@@ -921,7 +921,7 @@ class _KanbanCard extends StatelessWidget {
   final Color accentColor;
   final String columnStatus;
 
-  const _KanbanCard({
+  _KanbanCard({
     required this.task,
     required this.accentColor,
     required this.columnStatus,
@@ -938,8 +938,8 @@ class _KanbanCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showDetail(context),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(10),
+        margin: EdgeInsets.only(bottom: 8),
+        padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.circular(12),
@@ -955,7 +955,7 @@ class _KanbanCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (task.isMIT)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(right: 3, top: 1),
                     child: Text('⭐', style: TextStyle(fontSize: 10)),
                   ),
@@ -977,22 +977,22 @@ class _KanbanCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             // Área + badge Eisenhower
             Row(
               children: [
-                Text(area.icon, style: const TextStyle(fontSize: 10)),
-                const SizedBox(width: 3),
+                Text(area.icon, style: TextStyle(fontSize: 10)),
+                SizedBox(width: 3),
                 Expanded(
                   child: Text(
                     area.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 9, color: AppTheme.textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                       horizontal: 4, vertical: 1),
                   decoration: BoxDecoration(
                     color: _qColor(task.eisenhowerQ).withOpacity(0.12),
@@ -1011,7 +1011,7 @@ class _KanbanCard extends StatelessWidget {
             ),
             // Barra de progresso das subtarefas
             if (task.subtasks.isNotEmpty) ...[
-              const SizedBox(height: 7),
+              SizedBox(height: 7),
               Row(
                 children: [
                   Expanded(
@@ -1026,7 +1026,7 @@ class _KanbanCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: 6),
                   Text(
                     '${task.completedSubtasks}/${task.subtasks.length}',
                     style: TextStyle(
@@ -1040,7 +1040,7 @@ class _KanbanCard extends StatelessWidget {
             ],
             // Prazo
             if (task.dueDate != null) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 '📅 ${_fmtDate(task.dueDate!)}',
                 style: TextStyle(
@@ -1065,7 +1065,7 @@ class _KanbanCard extends StatelessWidget {
       return _ActionButton(
         label: 'Iniciar',
         icon: '⚡',
-        color: const Color(0xFFFF9F1C),
+        color: Color(0xFFFF9F1C),
         onTap: () => context.read<TasksProvider>().moveToInProgress(task.id),
       );
     }
@@ -1076,15 +1076,15 @@ class _KanbanCard extends StatelessWidget {
           _ActionButton(
             label: 'Concluir',
             icon: '✓',
-            color: const Color(0xFF34D399),
+            color: Color(0xFF34D399),
             onTap: () =>
                 context.read<TasksProvider>().completeTask(task.id),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           GestureDetector(
             onTap: () =>
                 context.read<TasksProvider>().moveToPending(task.id),
-            child: const Center(
+            child: Center(
               child: Text(
                 '← Pausar',
                 style: TextStyle(
@@ -1101,12 +1101,12 @@ class _KanbanCard extends StatelessWidget {
       onTap: () => context.read<TasksProvider>().moveToPending(task.id),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppTheme.divider),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             '↩ Reabrir',
             style: TextStyle(
@@ -1127,7 +1127,7 @@ class _KanbanCard extends StatelessWidget {
       };
 
   bool _isOverdue(DateTime d) =>
-      d.isBefore(DateTime.now().subtract(const Duration(days: 1)));
+      d.isBefore(DateTime.now().subtract(Duration(days: 1)));
 
   String _fmtDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
@@ -1205,14 +1205,14 @@ class _ActionButton extends StatelessWidget {
 
 class _HistoryView extends StatelessWidget {
   final TasksProvider tp;
-  const _HistoryView({required this.tp});
+  _HistoryView({required this.tp});
 
   @override
   Widget build(BuildContext context) {
     final completed = tp.completedTasks;
 
     if (completed.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1234,7 +1234,7 @@ class _HistoryView extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 80),
       itemCount: completed.length,
       itemBuilder: (ctx, i) {
         final t = completed[i];
@@ -1247,13 +1247,13 @@ class _HistoryView extends StatelessWidget {
             areaIndex >= 0 ? areaIndex % AppTheme.areaColors.length : 0];
 
         return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
+          margin: EdgeInsets.only(bottom: 8),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppTheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: const Color(0xFF34D399).withOpacity(0.2)),
+                color: Color(0xFF34D399).withOpacity(0.2)),
           ),
           child: Row(
             children: [
@@ -1261,27 +1261,27 @@ class _HistoryView extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF34D399).withOpacity(0.12),
+                  color: Color(0xFF34D399).withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_circle,
+                child: Icon(Icons.check_circle,
                     color: Color(0xFF34D399), size: 18),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       t.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textSecondary,
                         decoration: TextDecoration.lineThrough,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: 3),
                     Row(
                       children: [
                         Container(
@@ -1290,14 +1290,14 @@ class _HistoryView extends StatelessWidget {
                           decoration: BoxDecoration(
                               color: color, shape: BoxShape.circle),
                         ),
-                        const SizedBox(width: 5),
+                        SizedBox(width: 5),
                         Text(
                           '${area.icon} ${area.name}',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 10,
                               color: AppTheme.textSecondary),
                         ),
-                        const Text(
+                        Text(
                           ' • ',
                           style: TextStyle(
                               fontSize: 10,
@@ -1305,18 +1305,18 @@ class _HistoryView extends StatelessWidget {
                         ),
                         Text(
                           '${t.eisenhowerEmoji} ${t.eisenhowerLabel}',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 10,
                               color: AppTheme.textSecondary),
                         ),
                       ],
                     ),
                     if (t.subtasks.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Text(
                         '${t.subtasks.length} subtarefa${t.subtasks.length > 1 ? 's' : ''}'
                         ' · ${t.totalEstimatedHours}h estimadas',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 10,
                             color: AppTheme.textSecondary),
                       ),
@@ -1327,7 +1327,7 @@ class _HistoryView extends StatelessWidget {
               if (t.completedAt != null)
                 Text(
                   _fmtDate(t.completedAt!),
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 10, color: AppTheme.textSecondary),
                 ),
             ],
@@ -1368,7 +1368,7 @@ class _TaskDetailSheet extends StatelessWidget {
       expand: false,
       builder: (_, ctrl) => SingleChildScrollView(
         controller: ctrl,
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1383,19 +1383,19 @@ class _TaskDetailSheet extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             // Título + MIT
             Row(
               children: [
                 if (current.isMIT)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(right: 6),
                     child: Text('⭐', style: TextStyle(fontSize: 18)),
                   ),
                 Expanded(
                   child: Text(
                     current.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: AppTheme.textPrimary,
@@ -1404,7 +1404,7 @@ class _TaskDetailSheet extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             // Badges: área + Eisenhower + Kanban status + horas
             Wrap(
               spacing: 8,
@@ -1430,25 +1430,25 @@ class _TaskDetailSheet extends StatelessWidget {
               ],
             ),
             if (current.description.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 current.description,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 13, color: AppTheme.textSecondary),
               ),
             ],
             if (current.dueDate != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 '📅 Prazo: ${current.dueDate!.day.toString().padLeft(2, '0')}/${current.dueDate!.month.toString().padLeft(2, '0')}/${current.dueDate!.year}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 12, color: AppTheme.textSecondary),
               ),
             ],
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             // Transições Kanban
             if (current.status != 'completed') ...[
-              const Text(
+              Text(
                 'Mover no Kanban',
                 style: TextStyle(
                   fontSize: 13,
@@ -1456,7 +1456,7 @@ class _TaskDetailSheet extends StatelessWidget {
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Row(
                 children: [
                   if (current.status == 'in_progress')
@@ -1468,12 +1468,12 @@ class _TaskDetailSheet extends StatelessWidget {
                               .moveToPending(current.id);
                           Navigator.pop(context);
                         },
-                        icon: const Icon(Icons.arrow_back, size: 14),
-                        label: const Text('Pausar'),
+                        icon: Icon(Icons.arrow_back, size: 14),
+                        label: Text('Pausar'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppTheme.textSecondary,
                           side:
-                              const BorderSide(color: AppTheme.divider),
+                              BorderSide(color: AppTheme.divider),
                         ),
                       ),
                     ),
@@ -1505,21 +1505,21 @@ class _TaskDetailSheet extends StatelessWidget {
                               .completeTask(current.id);
                           if (context.mounted) Navigator.pop(context);
                         },
-                        icon: const Icon(Icons.check,
+                        icon: Icon(Icons.check,
                             size: 16, color: Colors.white),
-                        label: const Text('Concluir',
+                        label: Text('Concluir',
                             style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF34D399)),
+                            backgroundColor: Color(0xFF34D399)),
                       ),
                     ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
             ],
             // Subtarefas
             if (current.subtasks.isNotEmpty) ...[
-              const Text(
+              Text(
                 'Subtarefas',
                 style: TextStyle(
                   fontSize: 14,
@@ -1527,14 +1527,14 @@ class _TaskDetailSheet extends StatelessWidget {
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               ...current.subtasks.map((s) => _SubtaskTile(
                     subtask: s,
                     onToggle: () => context
                         .read<TasksProvider>()
                         .toggleSubtask(current.id, s.id),
                   )),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
             ],
             // Editar / Excluir
             Row(
@@ -1551,15 +1551,15 @@ class _TaskDetailSheet extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: const Text('Editar'),
+                    icon: Icon(Icons.edit_outlined, size: 16),
+                    label: Text('Editar'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textPrimary,
-                      side: const BorderSide(color: AppTheme.divider),
+                      side: BorderSide(color: AppTheme.divider),
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () async {
@@ -1567,10 +1567,10 @@ class _TaskDetailSheet extends StatelessWidget {
                         context: context,
                         builder: (c) => AlertDialog(
                           backgroundColor: AppTheme.surface,
-                          title: const Text('Excluir tarefa?',
+                          title: Text('Excluir tarefa?',
                               style:
                                   TextStyle(color: AppTheme.textPrimary)),
-                          content: const Text(
+                          content: Text(
                             'Esta ação não pode ser desfeita.',
                             style:
                                 TextStyle(color: AppTheme.textSecondary),
@@ -1631,8 +1631,8 @@ class _TaskDetailSheet extends StatelessWidget {
 
   Color _statusColor(String s) => switch (s) {
         'pending' => AppTheme.primary,
-        'in_progress' => const Color(0xFFFF9F1C),
-        _ => const Color(0xFF34D399),
+        'in_progress' => Color(0xFFFF9F1C),
+        _ => Color(0xFF34D399),
       };
 }
 
@@ -1640,15 +1640,15 @@ class _SubtaskTile extends StatelessWidget {
   final SubtaskModel subtask;
   final VoidCallback onToggle;
 
-  const _SubtaskTile({required this.subtask, required this.onToggle});
+  _SubtaskTile({required this.subtask, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onToggle,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        margin: EdgeInsets.only(bottom: 6),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: subtask.isCompleted
               ? Colors.green.withOpacity(0.08)
@@ -1666,7 +1666,7 @@ class _SubtaskTile extends StatelessWidget {
                   : AppTheme.textSecondary,
               size: 20,
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: Text(
                 subtask.title,

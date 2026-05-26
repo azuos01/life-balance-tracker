@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/activities_provider.dart';
@@ -44,7 +44,7 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('🌙 Check-out noturno salvo! +10 XP'),
           backgroundColor: AppTheme.primary,
         ),
@@ -56,15 +56,15 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🌙 Check-out Noturno'),
-        leading: const CloseButton(),
+        title: Text('🌙 Check-out Noturno'),
+        leading: CloseButton(),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Como foi seu dia?',
               style: TextStyle(
                 fontSize: 22,
@@ -72,8 +72,8 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: 24),
+            Text(
               'Nota do dia',
               style: TextStyle(
                 fontSize: 15,
@@ -81,11 +81,11 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('1', style: TextStyle(color: AppTheme.textSecondary)),
+                Text('1', style: TextStyle(color: AppTheme.textSecondary)),
                 Expanded(
                   child: Slider(
                     value: _dayScore.toDouble(),
@@ -96,8 +96,8 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
                     onChanged: (v) => setState(() => _dayScore = v.round()),
                   ),
                 ),
-                const Text('10', style: TextStyle(color: AppTheme.textSecondary)),
-                const SizedBox(width: 8),
+                Text('10', style: TextStyle(color: AppTheme.textSecondary)),
+                SizedBox(width: 8),
                 Container(
                   width: 42,
                   height: 42,
@@ -108,7 +108,7 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
                   ),
                   child: Text(
                     '$_dayScore',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.primary,
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
@@ -117,8 +117,8 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: 24),
+            Text(
               'O que aprendi hoje?',
               style: TextStyle(
                 fontSize: 15,
@@ -126,17 +126,17 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _reflectionController,
               maxLines: 4,
-              style: const TextStyle(color: AppTheme.textPrimary),
-              decoration: const InputDecoration(
+              style: TextStyle(color: AppTheme.textPrimary),
+              decoration: InputDecoration(
                 hintText: 'Reflexão do dia...',
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'Plano para amanhã',
               style: TextStyle(
                 fontSize: 15,
@@ -144,11 +144,11 @@ class _EveningCheckoutScreenState extends State<EveningCheckoutScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _tomorrowController,
               maxLines: 3,
-              style: const TextStyle(color: AppTheme.textPrimary),
+              style: TextStyle(color: AppTheme.textPrimary),
               decoration: const InputDecoration(
                 hintText: 'Amanhã quero...',
               ),

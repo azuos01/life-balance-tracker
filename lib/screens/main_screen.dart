@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_l10n.dart';
 import 'dashboard_screen.dart';
 import 'tasks/tasks_screen.dart';
 import 'activities_screen.dart';
@@ -26,17 +27,18 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
-  static const _navItems = [
-    _NavItem(icon: Icons.home_outlined,          activeIcon: Icons.home,               label: 'Início'),
-    _NavItem(icon: Icons.grid_view_outlined,     activeIcon: Icons.grid_view,          label: 'Tarefas'),
-    _NavItem(icon: Icons.list_alt_outlined,      activeIcon: Icons.list_alt,           label: 'Atividades'),
-    _NavItem(icon: Icons.track_changes_outlined, activeIcon: Icons.track_changes,      label: 'Objetivos'),
-    _NavItem(icon: Icons.calendar_month_outlined,activeIcon: Icons.calendar_month,     label: 'Agenda'),
-    _NavItem(icon: Icons.person_outline,         activeIcon: Icons.person,             label: 'Perfil'),
+  List<_NavItem> _navItems(L10n l10n) => [
+    _NavItem(icon: Icons.home_outlined,          activeIcon: Icons.home,           label: l10n.navHome),
+    _NavItem(icon: Icons.grid_view_outlined,     activeIcon: Icons.grid_view,      label: l10n.navTasks),
+    _NavItem(icon: Icons.list_alt_outlined,      activeIcon: Icons.list_alt,       label: l10n.navActivities),
+    _NavItem(icon: Icons.track_changes_outlined, activeIcon: Icons.track_changes,  label: l10n.navGoals),
+    _NavItem(icon: Icons.calendar_month_outlined,activeIcon: Icons.calendar_month, label: l10n.navCalendar),
+    _NavItem(icon: Icons.person_outline,         activeIcon: Icons.person,         label: l10n.navProfile),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -45,7 +47,7 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: _BottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        items: _navItems,
+        items: _navItems(l10n),
       ),
     );
   }
@@ -55,7 +57,7 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  const _NavItem({required this.icon, required this.activeIcon, required this.label});
+  _NavItem({required this.icon, required this.activeIcon, required this.label});
 }
 
 class _BottomNav extends StatelessWidget {
@@ -63,7 +65,7 @@ class _BottomNav extends StatelessWidget {
   final ValueChanged<int> onTap;
   final List<_NavItem> items;
 
-  const _BottomNav({
+  _BottomNav({
     required this.currentIndex,
     required this.onTap,
     required this.items,
@@ -79,7 +81,7 @@ class _BottomNav extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.12),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -97,19 +99,19 @@ class _BottomNav extends StatelessWidget {
                   onTap: () => onTap(i),
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
+                    duration: Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: EdgeInsets.symmetric(vertical: 8),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Pill indicator
                         AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: Duration(milliseconds: 200),
                           curve: Curves.easeInOut,
                           width: selected ? 40 : 0,
                           height: selected ? 3 : 0,
-                          margin: const EdgeInsets.only(bottom: 4),
+                          margin: EdgeInsets.only(bottom: 4),
                           decoration: BoxDecoration(
                             gradient: selected
                                 ? AppTheme.primaryGradient
@@ -124,9 +126,9 @@ class _BottomNav extends StatelessWidget {
                               ? AppTheme.primary
                               : AppTheme.textSecondary,
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: 2),
                         AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 200),
+                          duration: Duration(milliseconds: 200),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: selected

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../providers/user_provider.dart';
@@ -77,12 +77,12 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('+ Nova Atividade'),
-        leading: const CloseButton(),
+        title: Text('+ Nova Atividade'),
+        leading: CloseButton(),
         actions: [
           TextButton(
             onPressed: _loading ? null : _save,
-            child: const Text(
+            child: Text(
               'Salvar',
               style: TextStyle(
                 color: AppTheme.primary,
@@ -93,11 +93,11 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Área',
               style: TextStyle(
                 fontSize: 15,
@@ -105,13 +105,13 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             _AreaSelector(
               selectedId: _selectedAreaId,
               onChanged: (id) => setState(() => _selectedAreaId = id),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'O que você fez?',
               style: TextStyle(
                 fontSize: 15,
@@ -119,24 +119,24 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextField(
               controller: _descriptionController,
               maxLines: 3,
               autofocus: true,
-              style: const TextStyle(color: AppTheme.textPrimary),
-              decoration: const InputDecoration(
+              style: TextStyle(color: AppTheme.textPrimary),
+              decoration: InputDecoration(
                 hintText: 'Descreva sua atividade...',
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Duração (min)',
                         style: TextStyle(
                           fontSize: 15,
@@ -144,7 +144,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                           color: AppTheme.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       _DurationPicker(
                         value: _duration,
                         onChanged: (v) => setState(() => _duration = v),
@@ -152,12 +152,12 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Dificuldade',
                         style: TextStyle(
                           fontSize: 15,
@@ -202,7 +202,7 @@ class _AreaSelector extends StatelessWidget {
   final String selectedId;
   final ValueChanged<String> onChanged;
 
-  const _AreaSelector({required this.selectedId, required this.onChanged});
+  _AreaSelector({required this.selectedId, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +211,7 @@ class _AreaSelector extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: kAreas.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => SizedBox(width: 8),
         itemBuilder: (context, i) {
           final area = kAreas[i];
           final selected = area.id == selectedId;
@@ -219,7 +219,7 @@ class _AreaSelector extends StatelessWidget {
           return GestureDetector(
             onTap: () => onChanged(area.id),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: Duration(milliseconds: 200),
               width: 72,
               decoration: BoxDecoration(
                 color: selected ? color.withOpacity(0.2) : AppTheme.surfaceLight,
@@ -232,8 +232,8 @@ class _AreaSelector extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(area.icon, style: const TextStyle(fontSize: 22)),
-                  const SizedBox(height: 4),
+                  Text(area.icon, style: TextStyle(fontSize: 22)),
+                  SizedBox(height: 4),
                   Text(
                     area.name.split(' ').first,
                     style: TextStyle(
@@ -259,11 +259,11 @@ class _DurationPicker extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
 
-  const _DurationPicker({required this.value, required this.onChanged});
+  _DurationPicker({required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    const options = [15, 30, 45, 60, 90, 120];
+    final options = [15, 30, 45, 60, 90, 120];
     return Wrap(
       spacing: 6,
       runSpacing: 6,
@@ -272,7 +272,7 @@ class _DurationPicker extends StatelessWidget {
         return GestureDetector(
           onTap: () => onChanged(min),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: selected
                   ? AppTheme.primary.withOpacity(0.2)
@@ -301,7 +301,7 @@ class _DifficultySelector extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
-  const _DifficultySelector({required this.value, required this.onChanged});
+  _DifficultySelector({required this.value, required this.onChanged});
 
   static const _items = [
     ('easy', '😌 Fácil', Color(0xFF2ED573)),
@@ -319,8 +319,8 @@ class _DifficultySelector extends StatelessWidget {
           onTap: () => onChanged(id),
           child: Container(
             width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 6),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            margin: EdgeInsets.only(bottom: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: selected ? color.withOpacity(0.15) : AppTheme.surfaceLight,
               borderRadius: BorderRadius.circular(8),
@@ -367,7 +367,7 @@ class _XpPreview extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             'Você vai ganhar +$xp XP',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.primary,
               fontWeight: FontWeight.w700,
               fontSize: 14,
