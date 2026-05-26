@@ -12,6 +12,10 @@ permissions:
   pages: write
   id-token: write
 
+# Opt-in para Node.js 24 (obrigatório a partir de junho/2026)
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 # ── Jobs ──────────────────────────────────────────────────────────────────────
 
 jobs:
