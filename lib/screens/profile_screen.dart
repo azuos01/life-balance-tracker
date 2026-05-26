@@ -525,40 +525,96 @@ class _SettingsSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppTheme.divider),
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              gradient: AppTheme.primaryGradient,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Center(
-                              child: Text('⚖️',
-                                  style: TextStyle(fontSize: 22)),
-                            ),
-                          ),
-                          SizedBox(width: 14),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          // Linha principal: ícone + nome + versão
+                          Row(
                             children: [
-                              Text(
-                                kAppName,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.textPrimary,
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.primaryGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Center(
+                                  child: Text('⚖️',
+                                      style: TextStyle(fontSize: 22)),
                                 ),
                               ),
+                              SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      kAppName,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                    ),
+                                    Text(
+                                      'v$kAppVersion',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // Divisor
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Divider(
+                                color: AppTheme.divider, height: 1),
+                          ),
+
+                          // Cabeçalho da última alteração
+                          Row(
+                            children: [
+                              Icon(Icons.update_outlined,
+                                  size: 13, color: AppTheme.textSecondary),
+                              SizedBox(width: 5),
                               Text(
-                                'v$kAppVersion',
+                                'Última alteração',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textSecondary,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                              Spacer(),
+                              // Badge do tipo de mudança
+                              _ChangeTypeBadge(type: kLastChangeType),
+                              SizedBox(width: 8),
+                              // Versão + data
+                              Text(
+                                '$kLastChangeVersion · $kLastChangeDate',
+                                style: TextStyle(
+                                  fontSize: 11,
                                   color: AppTheme.textSecondary,
                                 ),
                               ),
                             ],
+                          ),
+                          SizedBox(height: 8),
+
+                          // Resumo do changelog
+                          Text(
+                            kLastChangeSummary,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
+                              height: 1.5,
+                            ),
                           ),
                         ],
                       ),
@@ -814,6 +870,40 @@ class _StatCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Change-type badge ─────────────────────────────────────────────────────────
+
+class _ChangeTypeBadge extends StatelessWidget {
+  final String type; // 'MAJOR' | 'MINOR' | 'PATCH'
+  const _ChangeTypeBadge({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = switch (type) {
+      'MAJOR' => const Color(0xFF6366F1), // indigo
+      'MINOR' => const Color(0xFF10B981), // emerald
+      'PATCH' => const Color(0xFFF59E0B), // amber
+      _       => AppTheme.primary,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.40)),
+      ),
+      child: Text(
+        type,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.5,
         ),
       ),
     );

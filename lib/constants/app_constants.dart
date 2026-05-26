@@ -80,6 +80,17 @@ const String kAppName = 'Life Balance Tracker';
 const String kAppVersion = '2.0.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
+// ── Changelog da última versão ────────────────────────────────────────────────
+// Atualize estes campos a cada release para refletir o resumo na aba Configurações.
+const String kLastChangeVersion = 'v2.0.0';
+const String kLastChangeDate    = 'Mai 2026';
+const String kLastChangeType    = 'MAJOR';   // MAJOR | MINOR | PATCH
+const String kLastChangeSummary =
+    'Sincronização automática Google Agenda → Tarefas Planejadas '
+    '(janela configurável de 7 a 360 dias). '
+    '134 testes unitários, CI/CD com gate de qualidade '
+    'e versionamento semântico (MAJOR · MINOR · PATCH).';
+
 // XP rewards
 const int kXpEasy = 10;
 const int kXpMedium = 25;
