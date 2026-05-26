@@ -11,6 +11,7 @@ class AreasProvider extends ChangeNotifier {
 
   String? _uid;
   bool _isCloud = false;
+  String? _lastLoadedUid;
 
   List<AreaModel> get areas => _areas;
 
@@ -41,11 +42,20 @@ class AreasProvider extends ChangeNotifier {
   }
 
   /// Chamado pelo ProxyProvider quando o usuário autenticado muda.
+  ///
+  /// Mesma lógica de _lastLoadedUid que TasksProvider: reseta em logout e
+  /// força recarga em todo novo login, garantindo dados frescos do Firestore.
   void syncUser(String? uid, bool isCloud) {
-    if (_uid == uid && _isCloud == isCloud) return;
-    _uid = uid;
+    _uid     = uid;
     _isCloud = isCloud;
-    if (uid != null && isCloud) {
+
+    if (uid == null || !isCloud) {
+      _lastLoadedUid = null;
+      return;
+    }
+
+    if (uid != _lastLoadedUid) {
+      _lastLoadedUid = uid;
       _loadFromCloud(uid);
     }
   }
@@ -56,8 +66,8 @@ class AreasProvider extends ChangeNotifier {
     final cloudAreas = await FirestoreService.instance.getAreas(uid);
 
     if (cloudAreas.isNotEmpty) {
+      // Dados encontrados — substitui local e garante todas as áreas do sistema
       _areas = cloudAreas;
-      // Garante que todas as áreas do sistema existam (novos releases)
       for (final config in kAreas) {
         if (!_areas.any((a) => a.id == config.id)) {
           final newArea =
@@ -66,9 +76,18 @@ class AreasProvider extends ChangeNotifier {
           await FirestoreService.instance.saveArea(uid, newArea);
         }
       }
-    } else {
-      // Primeira vez no Firestore: migra dados locais
+      await _saveAreasLocal();
+    } else if (_areas.isNotEmpty) {
+      // Firestore vazio mas há dados locais (migração de UID antigo para Firebase UID).
+      // Sobe as áreas existentes para o path correto no Firestore.
       await FirestoreService.instance.saveAllAreas(uid, _areas);
+    } else {
+      // Usuário novo: inicializa com áreas padrão e salva no Firestore
+      _areas = kAreas
+          .map((c) => AreaModel(id: c.id, name: c.name, icon: c.icon))
+          .toList();
+      await FirestoreService.instance.saveAllAreas(uid, _areas);
+      await _saveAreasLocal();
     }
 
     notifyListeners();

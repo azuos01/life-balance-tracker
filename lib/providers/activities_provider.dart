@@ -12,8 +12,9 @@ class ActivitiesProvider extends ChangeNotifier {
   List<ActivityModel> _activities = [];
   List<CheckInModel> _checkIns = [];
 
-  String? _uid;     // null = modo Demo
+  String? _uid;
   bool _isCloud = false;
+  String? _lastLoadedUid;
 
   List<ActivityModel> get activities => _activities;
   List<CheckInModel> get checkIns => _checkIns;
@@ -57,12 +58,17 @@ class ActivitiesProvider extends ChangeNotifier {
   }
 
   /// Chamado pelo ProxyProvider quando o usuário autenticado muda.
-  /// [uid] null = demo mode; [isCloud] true = usa Firestore
   void syncUser(String? uid, bool isCloud) {
-    if (_uid == uid && _isCloud == isCloud) return;
-    _uid = uid;
+    _uid     = uid;
     _isCloud = isCloud;
-    if (uid != null && isCloud) {
+
+    if (uid == null || !isCloud) {
+      _lastLoadedUid = null;
+      return;
+    }
+
+    if (uid != _lastLoadedUid) {
+      _lastLoadedUid = uid;
       _loadFromCloud(uid);
     }
   }
@@ -70,14 +76,29 @@ class ActivitiesProvider extends ChangeNotifier {
   // ── Sincronização com Firestore ───────────────────────────────────────────
 
   Future<void> _loadFromCloud(String uid) async {
+    // ── Atividades ──────────────────────────────────────────────────────────
     final acts = await FirestoreService.instance.getActivities(uid);
     if (acts.isNotEmpty) {
       _activities = acts;
+      await _saveActivitiesLocal();
+    } else if (_activities.isNotEmpty) {
+      // Migração: atividades locais existem mas não estão neste UID no Firestore
+      for (final act in _activities) {
+        await FirestoreService.instance.saveActivity(uid, act);
+      }
     }
+
+    // ── Check-ins ───────────────────────────────────────────────────────────
     final checks = await FirestoreService.instance.getCheckIns(uid);
     if (checks.isNotEmpty) {
       _checkIns = checks;
+      await _saveCheckInsLocal();
+    } else if (_checkIns.isNotEmpty) {
+      for (final checkIn in _checkIns) {
+        await FirestoreService.instance.saveCheckIn(uid, checkIn);
+      }
     }
+
     notifyListeners();
   }
 

@@ -9,6 +9,8 @@ class TasksProvider extends ChangeNotifier {
   List<TaskModel> _tasks = [];
   String? _uid;
   bool _isCloud = false;
+  // Último UID carregado do Firestore. Quando null, força recarga no próximo login.
+  String? _lastLoadedUid;
 
   List<TaskModel> get tasks => List.unmodifiable(_tasks);
 
@@ -79,20 +81,50 @@ class TasksProvider extends ChangeNotifier {
     initLocal();
   }
 
+  /// Chamado pelo ProxyProvider toda vez que UserProvider notifica.
+  ///
+  /// Estratégia de recarga:
+  /// • Ao fazer logout (isCloud=false): reseta _lastLoadedUid → garante que o
+  ///   próximo login sempre busque dados frescos do Firestore.
+  /// • Ao fazer login (isCloud=true, uid≠_lastLoadedUid): dispara _loadFromCloud.
+  /// • Rebuilds intermediários com mesmo uid+isCloud: ignorados.
   void syncUser(String? uid, bool isCloud) {
-    if (_uid == uid && _isCloud == isCloud) return;
-    _uid = uid;
-    _isCloud = isCloud;
-    if (uid != null && isCloud) _loadFromCloud(uid);
+    _uid      = uid;
+    _isCloud  = isCloud;
+
+    if (uid == null || !isCloud) {
+      // Deslogou ou modo demo — reseta o marcador de última carga
+      _lastLoadedUid = null;
+      return;
+    }
+
+    // Login ou troca de conta: carrega dados do Firestore
+    if (uid != _lastLoadedUid) {
+      _lastLoadedUid = uid;
+      _loadFromCloud(uid);
+    }
   }
 
   // ── Sincronização com Firestore ───────────────────────────────────────────
 
   Future<void> _loadFromCloud(String uid) async {
     final cloudTasks = await FirestoreService.instance.getTasks(uid);
+
     if (cloudTasks.isNotEmpty) {
+      // Dados encontrados no Firestore → substitui tudo (local + memória)
       _tasks = cloudTasks;
+      await _saveLocal();
+    } else if (_tasks.isNotEmpty) {
+      // Firestore vazio mas há dados locais em memória.
+      // Cenário típico: usuário antigo cujos dados foram salvos com UUID em vez
+      // do Firebase UID. Migra para o path correto no Firestore agora.
+      for (final task in _tasks) {
+        await FirestoreService.instance.saveTask(uid, task);
+      }
+      // Mantém _tasks como está (já são os dados corretos)
     }
+    // Se ambos estiverem vazios: usuário novo sem tarefas → lista vazia ✓
+
     notifyListeners();
   }
 
