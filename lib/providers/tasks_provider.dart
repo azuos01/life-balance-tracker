@@ -85,6 +85,77 @@ class TasksProvider extends ChangeNotifier {
   int get totalTasks => _allTasks.length;
   int get completedCount => completedTasks.length;
 
+  // ── Métricas de relatório ─────────────────────────────────────────────────
+
+  /// Taxa de conclusão global (0.0 a 1.0).
+  double get completionRate =>
+      totalTasks == 0 ? 0.0 : completedCount / totalTasks;
+
+  /// Total de tarefas no status "pending" ("A Fazer").
+  int get pendingCount => plannedTasks.length;
+
+  /// Total de tarefas no status "in_progress".
+  int get inProgressCount => inProgressTasks.length;
+
+  /// Tarefas manuais criadas pelo usuário (excluindo calendário).
+  int get userTasksCount => _tasks.length;
+
+  /// Tarefas importadas automaticamente do Google Calendar.
+  int get calendarTasksCount => _calendarTasks.length;
+
+  /// Contagem de tarefas por [areaId].
+  /// Se [statusFilter] for fornecido, conta apenas tarefas desse status.
+  Map<String, int> taskCountByArea({String? statusFilter}) {
+    final source = statusFilter == null
+        ? _allTasks
+        : _allTasks.where((t) => t.status == statusFilter).toList();
+    final result = <String, int>{};
+    for (final t in source) {
+      result[t.areaId] = (result[t.areaId] ?? 0) + 1;
+    }
+    return result;
+  }
+
+  /// Contagem de tarefas ATIVAS (não concluídas) por quadrante Eisenhower.
+  /// As quatro chaves (1–4) estão sempre presentes (valor 0 se vazia).
+  Map<int, int> get activeTasksByQuadrant {
+    final result = <int, int>{1: 0, 2: 0, 3: 0, 4: 0};
+    for (final t in _allTasks.where((t) => t.status != 'completed')) {
+      result[t.eisenhowerQ] = (result[t.eisenhowerQ] ?? 0) + 1;
+    }
+    return result;
+  }
+
+  /// Número de tarefas concluídas nos últimos 7 dias.
+  int get completedThisWeek {
+    final cutoff = DateTime.now().subtract(const Duration(days: 7));
+    return completedTasks
+        .where((t) => (t.completedAt ?? t.createdAt).isAfter(cutoff))
+        .length;
+  }
+
+  /// Número de tarefas criadas nos últimos 7 dias.
+  int get createdThisWeek {
+    final cutoff = DateTime.now().subtract(const Duration(days: 7));
+    return _allTasks.where((t) => t.createdAt.isAfter(cutoff)).length;
+  }
+
+  /// Tempo médio de conclusão das tarefas do usuário (excluindo calendário).
+  /// Considera apenas tarefas com [completedAt] definido.
+  /// Retorna `null` se não houver nenhuma tarefa concluída com data registrada.
+  Duration? get avgCompletionTime {
+    final done = _tasks
+        .where((t) => t.status == 'completed' && t.completedAt != null)
+        .toList();
+    if (done.isEmpty) return null;
+    final totalMinutes = done.fold<int>(
+      0,
+      (sum, t) =>
+          sum + t.completedAt!.difference(t.createdAt).inMinutes.abs(),
+    );
+    return Duration(minutes: totalMinutes ~/ done.length);
+  }
+
   // ── Inicialização ─────────────────────────────────────────────────────────
 
   void initLocal() {

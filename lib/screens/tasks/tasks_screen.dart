@@ -7,6 +7,7 @@ import '../../constants/app_constants.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_background.dart';
 import 'task_create_screen.dart';
+import '../reports/reports_screen.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -22,7 +23,7 @@ class _TasksScreenState extends State<TasksScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -65,10 +66,13 @@ class _TasksScreenState extends State<TasksScreen>
           ),
           bottom: TabBar(
             controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: const [
               Tab(text: 'Eisenhower'),
               Tab(text: 'Kanban'),
               Tab(text: 'Histórico'),
+              Tab(icon: Icon(Icons.bar_chart_outlined, size: 15), text: 'Relatórios'),
             ],
           ),
         ),
@@ -78,6 +82,7 @@ class _TasksScreenState extends State<TasksScreen>
             _MatrixView(tp: tp),
             _KanbanView(tp: tp),
             _HistoryView(tp: tp),
+            const ReportsScreen(),
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(

@@ -97,6 +97,23 @@ class L10n {
   String get kanban       => _en ? 'Kanban'    : 'Kanban';
   String get history      => _en ? 'History'   : 'Histórico';
 
+  // ── Relatórios ─────────────────────────────────────────────────────────────
+  String get reports          => _en ? 'Reports'           : 'Relatórios';
+  String get reportsTitle     => _en ? 'Task Report'       : 'Relatório de Tarefas';
+  String get allTasks         => _en ? 'All'               : 'Todas';
+  String get toDo             => _en ? 'To Do'             : 'A Fazer';
+  String get inProgressLabel  => _en ? 'In Progress'       : 'Em Andamento';
+  String get completedLabel   => _en ? 'Completed'         : 'Concluídas';
+  String get completionRateLbl=> _en ? 'Completion Rate'   : 'Taxa de Conclusão';
+  String get byArea           => _en ? 'By Area'           : 'Por Área';
+  String get byQuadrant       => _en ? 'By Quadrant'       : 'Por Quadrante';
+  String get thisWeek         => _en ? 'This Week'         : 'Esta Semana';
+  String get avgTimeLbl       => _en ? 'Avg. completion'   : 'Tempo médio';
+  String get noTasksFound     => _en ? 'No tasks found for this filter.' : 'Nenhuma tarefa encontrada para este filtro.';
+  String get originLabel      => _en ? 'Origin'            : 'Origem';
+  String get userTasksLabel   => _en ? 'Manual'            : 'Manual';
+  String get calendarTasksLbl => _en ? 'Calendar'          : 'Agenda';
+
   // ── Onboarding ─────────────────────────────────────────────────────────────
   String get welcomeTo     => _en ? 'Welcome to'                  : 'Bem-vindo ao';
   String get nameQuestion  => _en ? 'What should we call you?'   : 'Como você quer ser chamado?';
