@@ -68,17 +68,6 @@ void main() {
   });
 
   group('TaskModel — serialização', () {
-    late TaskModel task;
-    setUp(() {
-      task = TaskModel(
-        id: 'task1',
-        userId: 'user1',
-        title: 'Tarefa',
-        areaId: 'career',
-        createdAt: DateTime(2024, 1, 1),
-      );
-    });
-
     test('toJson / fromJson round-trip preserva todos os campos', () {
       final full = TaskModel(
         id: 't1',

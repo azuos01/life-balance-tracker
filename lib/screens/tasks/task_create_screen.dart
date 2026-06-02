@@ -182,10 +182,6 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final areaConfig = kAreas.firstWhere(
-      (a) => a.id == _areaId,
-      orElse: () => kAreas.first,
-    );
     final canMIT = context.watch<TasksProvider>().canAddMIT ||
         (widget.existingTask?.isMIT ?? false);
 
