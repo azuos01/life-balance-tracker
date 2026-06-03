@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../constants/app_constants.dart';
 import '../../models/task_model.dart';
 import '../../providers/tasks_provider.dart';
@@ -120,6 +121,8 @@ class TaskDetailSheet extends StatelessWidget {
                     text: '⏱ ${current.totalEstimatedHours}h',
                     color: Colors.blueGrey,
                   ),
+                if (current.hasLocation)
+                  _LocationBadge(task: current),
               ],
             ),
 
@@ -455,6 +458,62 @@ class TaskSubtaskTile extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Widget: Badge de localização ──────────────────────────────────────────────
+
+/// Badge clicável que exibe o endereço da tarefa e abre o Google Maps ao tocar.
+class _LocationBadge extends StatelessWidget {
+  final TaskModel task;
+  const _LocationBadge({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final url = task.googleMapsUrl;
+        if (url != null) {
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFF10B981).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFF10B981).withOpacity(0.35),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.location_on,
+                size: 13, color: Color(0xFF10B981)),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                task.locationAddress!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF10B981),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.open_in_new,
+                size: 11, color: Color(0xFF10B981)),
           ],
         ),
       ),

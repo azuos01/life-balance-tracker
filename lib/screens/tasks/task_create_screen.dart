@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/task_model.dart';
 import '../../providers/tasks_provider.dart';
@@ -18,13 +19,14 @@ class TaskCreateScreen extends StatefulWidget {
 }
 
 class _TaskCreateScreenState extends State<TaskCreateScreen> {
-  final _titleCtrl = TextEditingController();
-  final _descCtrl = TextEditingController();
+  final _titleCtrl    = TextEditingController();
+  final _descCtrl     = TextEditingController();
+  final _locationCtrl = TextEditingController();
 
-  bool _isUrgent = false;
+  bool _isUrgent    = false;
   bool _isImportant = true;
-  bool _isMIT = false;
-  String _areaId = 'career';
+  bool _isMIT       = false;
+  String _areaId     = 'career';
   String _autoAreaId = 'career'; // sugerido pelo classificador
   DateTime? _dueDate;
 
@@ -36,14 +38,15 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     super.initState();
     final t = widget.existingTask;
     if (t != null) {
-      _titleCtrl.text = t.title;
-      _descCtrl.text = t.description;
-      _isUrgent = t.eisenhowerQ == 1 || t.eisenhowerQ == 3;
+      _titleCtrl.text    = t.title;
+      _descCtrl.text     = t.description;
+      _locationCtrl.text = t.locationAddress ?? '';
+      _isUrgent    = t.eisenhowerQ == 1 || t.eisenhowerQ == 3;
       _isImportant = t.eisenhowerQ == 1 || t.eisenhowerQ == 2;
-      _isMIT = t.isMIT;
-      _areaId = t.areaId;
+      _isMIT    = t.isMIT;
+      _areaId   = t.areaId;
       _autoAreaId = t.areaId;
-      _dueDate = t.dueDate;
+      _dueDate  = t.dueDate;
       for (final s in t.subtasks) {
         _subtasks.add(_SubtaskEntry(
           id: s.id,
@@ -58,10 +61,23 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
   void dispose() {
     _titleCtrl.dispose();
     _descCtrl.dispose();
+    _locationCtrl.dispose();
     for (final s in _subtasks) {
       s.titleCtrl.dispose();
     }
     super.dispose();
+  }
+
+  /// Abre o Google Maps para o usuário pesquisar e copiar o endereço.
+  Future<void> _openGoogleMaps() async {
+    final addr = _locationCtrl.text.trim();
+    final url = addr.isNotEmpty
+        ? Uri.parse(
+            'https://www.google.com/maps/search/${Uri.encodeComponent(addr)}')
+        : Uri.parse('https://www.google.com/maps');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
   }
 
   int get _eisenhowerQ {
@@ -155,6 +171,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
         .toList();
 
     final existing = widget.existingTask;
+    final locationText = _locationCtrl.text.trim();
     final task = TaskModel(
       id: existing?.id ?? const Uuid().v4(),
       userId: userId,
@@ -169,6 +186,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
       subtasks: subtasks,
       createdAt: existing?.createdAt ?? DateTime.now(),
       completedAt: existing?.completedAt,
+      locationAddress: locationText.isEmpty ? null : locationText,
     );
 
     if (existing != null) {
@@ -453,6 +471,84 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
               ),
             ),
             SizedBox(height: 24),
+
+            // ── Localização ────────────────────────────────────────────────
+            _SectionLabel(
+              icon: '📍',
+              title: 'Localização',
+              subtitle: 'Endereço ou nome do lugar (Google Maps)',
+            ),
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _locationCtrl,
+                    style: TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: 'Ex: Av. Paulista, 1578 — São Paulo',
+                      prefixIcon: Icon(
+                        Icons.location_on_outlined,
+                        color: AppTheme.primary,
+                        size: 20,
+                      ),
+                      suffixIcon: _locationCtrl.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear,
+                                  size: 16,
+                                  color: AppTheme.textSecondary),
+                              onPressed: () =>
+                                  setState(() => _locationCtrl.clear()),
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Botão: abre Google Maps para pesquisar/confirmar o endereço
+                Tooltip(
+                  message: 'Abrir Google Maps',
+                  child: Material(
+                    color: AppTheme.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: _openGoogleMaps,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Icon(
+                          Icons.map_outlined,
+                          color: AppTheme.primary,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (_locationCtrl.text.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(Icons.check_circle, size: 13,
+                      color: const Color(0xFF10B981)),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      'Clique em 🗺️ para verificar no mapa',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 24),
 
             // ── Subtarefas ──────────────────────────────────────────────────
             Row(

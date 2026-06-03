@@ -251,4 +251,91 @@ void main() {
       expect(copy.eisenhowerQ, task.eisenhowerQ);
     });
   });
+
+  // ── LocationAddress ───────────────────────────────────────────────────────
+
+  group('TaskModel — locationAddress', () {
+    TaskModel _taskWithLocation(String address) => TaskModel(
+          id: 't1',
+          userId: 'u1',
+          title: 'Reunião',
+          areaId: 'career',
+          createdAt: DateTime(2024, 1, 1),
+          locationAddress: address,
+        );
+
+    test('hasLocation é false quando locationAddress é null', () {
+      final t = TaskModel(
+        id: 't1', userId: 'u1', title: 'T',
+        areaId: 'career', createdAt: DateTime(2024, 1, 1),
+      );
+      expect(t.hasLocation, false);
+    });
+
+    test('hasLocation é false quando locationAddress é string vazia', () {
+      final t = _taskWithLocation('');
+      expect(t.hasLocation, false);
+    });
+
+    test('hasLocation é false quando locationAddress é só espaços', () {
+      final t = _taskWithLocation('   ');
+      expect(t.hasLocation, false);
+    });
+
+    test('hasLocation é true quando locationAddress tem conteúdo', () {
+      final t = _taskWithLocation('Av. Paulista, 1578 — São Paulo');
+      expect(t.hasLocation, true);
+    });
+
+    test('googleMapsUrl retorna null quando não há localização', () {
+      final t = TaskModel(
+        id: 't1', userId: 'u1', title: 'T',
+        areaId: 'career', createdAt: DateTime(2024, 1, 1),
+      );
+      expect(t.googleMapsUrl, null);
+    });
+
+    test('googleMapsUrl contém o endereço codificado', () {
+      final t = _taskWithLocation('Av. Paulista, São Paulo');
+      expect(t.googleMapsUrl, isNotNull);
+      expect(t.googleMapsUrl!.contains('maps.google.com') ||
+             t.googleMapsUrl!.contains('google.com/maps'), true);
+    });
+
+    test('toJson / fromJson preserva locationAddress', () {
+      final t = _taskWithLocation('Rua das Flores, 42, Rio de Janeiro');
+      final restored = TaskModel.fromJson(t.toJson());
+      expect(restored.locationAddress, t.locationAddress);
+    });
+
+    test('fromJson com locationAddress ausente retorna null', () {
+      final json = {
+        'id': 't1', 'userId': 'u1', 'title': 'T',
+        'areaId': 'career',
+        'createdAt': DateTime(2024, 1, 1).toIso8601String(),
+      };
+      final t = TaskModel.fromJson(json);
+      expect(t.locationAddress, null);
+      expect(t.hasLocation, false);
+    });
+
+    test('copyWith com novo locationAddress atualiza o campo', () {
+      final t = _taskWithLocation('Endereço A');
+      final copy = t.copyWith(locationAddress: 'Endereço B');
+      expect(copy.locationAddress, 'Endereço B');
+    });
+
+    test('copyWith clearLocation: true remove o endereço', () {
+      final t = _taskWithLocation('Endereço A');
+      final copy = t.copyWith(clearLocation: true);
+      expect(copy.locationAddress, null);
+      expect(copy.hasLocation, false);
+    });
+
+    test('copyWith sem locationAddress preserva o endereço existente', () {
+      final t = _taskWithLocation('Av. Brasil, 100');
+      final copy = t.copyWith(title: 'Novo título');
+      expect(copy.locationAddress, 'Av. Brasil, 100');
+    });
+  });
 }

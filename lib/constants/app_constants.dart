@@ -77,19 +77,19 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '2.1.1';
+const String kAppVersion = '2.2.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // ── Changelog da última versão ────────────────────────────────────────────────
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
-const String kLastChangeVersion = 'v2.1.1';
+const String kLastChangeVersion = 'v2.2.0';
 const String kLastChangeDate    = 'Jun 2026';
-const String kLastChangeType    = 'PATCH';   // MAJOR | MINOR | PATCH
+const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
-    'Correção do bug de toque nos botões de filtro da aba Relatórios '
-    '(conflito de gestos entre ListView e GestureDetector resolvido com Wrap+InkWell). '
-    'Estado do filtro preservado ao trocar de aba.';
+    'Campo Localização (Google Maps) adicionado a todas as tarefas: '
+    'endereço com ícone 📍 nos cards Eisenhower, Kanban, Histórico e Relatórios, '
+    'badge clicável no detalhe abre o Google Maps. 244 testes, CI/CD verde.';
 
 // XP rewards
 const int kXpEasy = 10;

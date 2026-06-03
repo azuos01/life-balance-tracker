@@ -317,6 +317,12 @@ class _EisenhowerCard extends StatelessWidget {
                     padding: EdgeInsets.only(right: 4),
                     child: Text('🗓️', style: TextStyle(fontSize: 10)),
                   ),
+                if (task.hasLocation)
+                  Padding(
+                    padding: EdgeInsets.only(right: 4),
+                    child: Icon(Icons.location_on,
+                        size: 11, color: const Color(0xFF10B981)),
+                  ),
                 Expanded(
                   child: Text(
                     task.title,
@@ -959,6 +965,12 @@ class _KanbanCard extends StatelessWidget {
                     padding: EdgeInsets.only(right: 3, top: 1),
                     child: Text('🗓️', style: TextStyle(fontSize: 10)),
                   ),
+                if (task.hasLocation)
+                  Padding(
+                    padding: EdgeInsets.only(right: 3, top: 1),
+                    child: Icon(Icons.location_on,
+                        size: 11, color: const Color(0xFF10B981)),
+                  ),
                 Expanded(
                   child: Text(
                     task.title,
@@ -1258,14 +1270,26 @@ class _HistoryView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      t.title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textSecondary,
-                        decoration: TextDecoration.lineThrough,
-                      ),
+                    Row(
+                      children: [
+                        if (t.hasLocation)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Icon(Icons.location_on,
+                                size: 12, color: const Color(0xFF10B981)),
+                          ),
+                        Expanded(
+                          child: Text(
+                            t.title,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSecondary,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 3),
                     Row(

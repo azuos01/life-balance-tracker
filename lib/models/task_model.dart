@@ -63,6 +63,10 @@ class TaskModel {
   /// Usado como chave para persistir overrides locais.
   final String? calendarEventId;
 
+  /// Endereço ou nome de lugar obtido via Google Maps.
+  /// Ex: "Av. Paulista, 1578, São Paulo — SP"
+  final String? locationAddress;
+
   TaskModel({
     required this.id,
     required this.userId,
@@ -79,7 +83,19 @@ class TaskModel {
     this.completedAt,
     this.isFromCalendar = false,
     this.calendarEventId,
+    this.locationAddress,
   }) : subtasks = subtasks ?? [];
+
+  /// Retorna true quando há um endereço preenchido.
+  bool get hasLocation =>
+      locationAddress != null && locationAddress!.trim().isNotEmpty;
+
+  /// URL do Google Maps para o endereço salvo.
+  String? get googleMapsUrl {
+    if (!hasLocation) return null;
+    final encoded = Uri.encodeComponent(locationAddress!.trim());
+    return 'https://www.google.com/maps/search/$encoded';
+  }
 
   /// Horas estimadas totais = soma das subtarefas (ou 0 se não houver)
   int get totalEstimatedHours =>
@@ -119,6 +135,7 @@ class TaskModel {
         'completedAt': completedAt?.toIso8601String(),
         'isFromCalendar': isFromCalendar,
         'calendarEventId': calendarEventId,
+        'locationAddress': locationAddress,
       };
 
   factory TaskModel.fromJson(Map<String, dynamic> j) => TaskModel(
@@ -143,6 +160,7 @@ class TaskModel {
             : null,
         isFromCalendar: j['isFromCalendar'] as bool? ?? false,
         calendarEventId: j['calendarEventId'] as String?,
+        locationAddress: j['locationAddress'] as String?,
       );
 
   TaskModel copyWith({
@@ -158,6 +176,8 @@ class TaskModel {
     DateTime? completedAt,
     bool? isFromCalendar,
     String? calendarEventId,
+    String? locationAddress,
+    bool clearLocation = false,
   }) =>
       TaskModel(
         id: id,
@@ -175,5 +195,7 @@ class TaskModel {
         completedAt: completedAt ?? this.completedAt,
         isFromCalendar: isFromCalendar ?? this.isFromCalendar,
         calendarEventId: calendarEventId ?? this.calendarEventId,
+        locationAddress:
+            clearLocation ? null : (locationAddress ?? this.locationAddress),
       );
 }

@@ -666,6 +666,7 @@ class _TaskCard extends StatelessWidget {
               ),
               if (task.isMIT) ...[const SizedBox(width: 4), const Text('⭐', style: TextStyle(fontSize: 12))],
               if (task.isFromCalendar) ...[const SizedBox(width: 4), const Text('🗓️', style: TextStyle(fontSize: 12))],
+              if (task.hasLocation) ...[const SizedBox(width: 4), const Icon(Icons.location_on, size: 13, color: Color(0xFF10B981))],
               const SizedBox(width: 6),
               const Icon(Icons.chevron_right, size: 16),
             ]),
