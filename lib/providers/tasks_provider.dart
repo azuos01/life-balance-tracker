@@ -156,6 +156,36 @@ class TasksProvider extends ChangeNotifier {
     return Duration(minutes: totalMinutes ~/ done.length);
   }
 
+  /// Tasks concluídas dentro da janela [from..to] (inclusivo em ambos os lados).
+  /// [to] padrão: `DateTime.now()` + 1 segundo (para incluir conclusões do instante atual).
+  int completedInPeriod(DateTime from, {DateTime? to}) {
+    final end = (to ?? DateTime.now()).add(const Duration(seconds: 1));
+    return completedTasks.where((t) {
+      final d = t.completedAt ?? t.createdAt;
+      return !d.isBefore(from) && !d.isAfter(end);
+    }).length;
+  }
+
+  /// Tasks criadas dentro da janela [from..to] (inclusivo em ambos os lados).
+  /// [to] padrão: `DateTime.now()` + 1 segundo.
+  int createdInPeriod(DateTime from, {DateTime? to}) {
+    final end = (to ?? DateTime.now()).add(const Duration(seconds: 1));
+    return _allTasks
+        .where((t) => !t.createdAt.isBefore(from) && !t.createdAt.isAfter(end))
+        .length;
+  }
+
+  /// Lista de anos (desc) em que existem tasks criadas ou concluídas.
+  /// Sempre inclui o ano corrente.
+  List<int> get taskYears {
+    final years = <int>{DateTime.now().year};
+    for (final t in _allTasks) {
+      years.add(t.createdAt.year);
+      if (t.completedAt != null) years.add(t.completedAt!.year);
+    }
+    return years.toList()..sort((a, b) => b.compareTo(a));
+  }
+
   // ── Inicialização ─────────────────────────────────────────────────────────
 
   void initLocal() {

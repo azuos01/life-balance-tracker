@@ -415,4 +415,151 @@ void main() {
       expect(p.avgCompletionTime, isNull);
     });
   });
+
+  // ── completedInPeriod / createdInPeriod ───────────────────────────────────
+
+  group('completedInPeriod e createdInPeriod', () {
+    test('completedInPeriod = 0 sem tarefas', () async {
+      final p = await _makeProvider();
+      final from = DateTime.now().subtract(const Duration(days: 7));
+      expect(p.completedInPeriod(from), 0);
+    });
+
+    test('completedInPeriod conta task concluída dentro da janela', () async {
+      final p = await _makeProvider();
+      await p.addTask(TaskModel(
+        id: 't1', userId: 'u1', title: 'T', areaId: 'career',
+        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+      ));
+      await p.completeTask('t1');
+      final from = DateTime.now().subtract(const Duration(days: 7));
+      expect(p.completedInPeriod(from), 1);
+    });
+
+    test('completedInPeriod exclui task concluída antes da janela', () async {
+      final p = await _makeProvider();
+      // Task criada 30 dias atrás — completedAt também é ~agora após completeTask
+      // Para simular conclusão ANTES da janela, usamos uma janela futura
+      await p.addTask(TaskModel(
+        id: 't1', userId: 'u1', title: 'T', areaId: 'career',
+        createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      ));
+      await p.completeTask('t1');
+      // Janela que começa DEPOIS da conclusão → não deve contar
+      final from = DateTime.now().add(const Duration(days: 1));
+      expect(p.completedInPeriod(from), 0);
+    });
+
+    test('completedInPeriod com janela year [from..to]', () async {
+      final p = await _makeProvider();
+      await p.addTask(TaskModel(
+        id: 't1', userId: 'u1', title: 'T', areaId: 'career',
+        createdAt: DateTime.now(),
+      ));
+      await p.completeTask('t1');
+      final year = DateTime.now().year;
+      final from = DateTime(year);
+      final to   = DateTime(year + 1);
+      expect(p.completedInPeriod(from, to: to), 1);
+    });
+
+    test('createdInPeriod = 0 sem tarefas recentes', () async {
+      final p = await _makeProvider();
+      await p.addTask(_task(
+        id: 't1',
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      ));
+      // Janela dos últimos 7 dias não inclui tarefa de 30 dias atrás
+      final from = DateTime.now().subtract(const Duration(days: 7));
+      expect(p.createdInPeriod(from), 0);
+    });
+
+    test('createdInPeriod conta task criada hoje', () async {
+      final p = await _makeProvider();
+      await p.addTask(TaskModel(
+        id: 't1', userId: 'u1', title: 'T', areaId: 'career',
+        createdAt: DateTime.now(),
+      ));
+      final from = DateTime.now().subtract(const Duration(days: 1));
+      expect(p.createdInPeriod(from), 1);
+    });
+
+    test('createdInPeriod com janela [from..to] exclui fora do intervalo', () async {
+      final p = await _makeProvider();
+      await p.addTask(TaskModel(
+        id: 't1', userId: 'u1', title: 'T', areaId: 'career',
+        createdAt: DateTime.now(),
+      ));
+      // Janela de 2 dias no futuro → não deve contar
+      final from = DateTime.now().add(const Duration(days: 1));
+      final to   = DateTime.now().add(const Duration(days: 3));
+      expect(p.createdInPeriod(from, to: to), 0);
+    });
+
+    test('completedInPeriod inclui tasks de calendário concluídas', () async {
+      final p = await _makeProvider();
+      p.syncCalendarTasks([_event(id: 'e1')], 'u1');
+      await p.completeTask('cal_e1');
+      final from = DateTime.now().subtract(const Duration(days: 7));
+      expect(p.completedInPeriod(from), 1);
+    });
+
+    test('múltiplas tasks — completedInPeriod conta corretamente', () async {
+      final p = await _makeProvider();
+      for (var i = 1; i <= 5; i++) {
+        await p.addTask(TaskModel(
+          id: 't$i', userId: 'u1', title: 'T$i', areaId: 'career',
+          createdAt: DateTime.now(),
+        ));
+      }
+      // Conclui apenas 3
+      await p.completeTask('t1');
+      await p.completeTask('t2');
+      await p.completeTask('t3');
+      final from = DateTime.now().subtract(const Duration(days: 1));
+      expect(p.completedInPeriod(from), 3);
+    });
+  });
+
+  // ── taskYears ─────────────────────────────────────────────────────────────
+
+  group('taskYears', () {
+    test('sempre inclui o ano corrente mesmo sem tasks', () async {
+      final p = await _makeProvider();
+      expect(p.taskYears, contains(DateTime.now().year));
+    });
+
+    test('inclui ano de tasks criadas', () async {
+      final p = await _makeProvider();
+      await p.addTask(TaskModel(
+        id: 't1', userId: 'u1', title: 'T', areaId: 'career',
+        createdAt: DateTime(2023, 6, 1),
+      ));
+      expect(p.taskYears, contains(2023));
+    });
+
+    test('retornado em ordem decrescente', () async {
+      final p = await _makeProvider();
+      await p.addTask(TaskModel(
+        id: 't1', userId: 'u1', title: 'T', areaId: 'career',
+        createdAt: DateTime(2022, 1, 1),
+      ));
+      final years = p.taskYears;
+      for (var i = 0; i < years.length - 1; i++) {
+        expect(years[i], greaterThan(years[i + 1]));
+      }
+    });
+
+    test('sem duplicatas mesmo com várias tasks no mesmo ano', () async {
+      final p = await _makeProvider();
+      for (var i = 1; i <= 5; i++) {
+        await p.addTask(TaskModel(
+          id: 't$i', userId: 'u1', title: 'T$i', areaId: 'career',
+          createdAt: DateTime(2024, i, 1),
+        ));
+      }
+      final years = p.taskYears;
+      expect(years.toSet().length, years.length); // sem duplicatas
+    });
+  });
 }
