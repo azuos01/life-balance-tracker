@@ -1,0 +1,174 @@
+# Life Balance Tracker — Instruções para o Claude Code
+
+Este arquivo é lido automaticamente pelo Claude Code no início de cada sessão.
+As regras aqui definidas têm prioridade sobre qualquer instrução genérica.
+
+---
+
+## Visão Geral do Projeto
+
+| Item | Detalhe |
+|---|---|
+| **Framework** | Flutter 3.x / Dart 3.x (web) |
+| **Deploy** | GitHub Pages → https://azuos01.github.io/life-balance-tracker/ |
+| **CI/CD** | `.github/workflows/deploy.yml` — test gate → build → deploy |
+| **State** | Provider (`ChangeNotifier`, `ProxyProvider2`) |
+| **Auth** | Firebase Auth (Google + LinkedIn OAuth2 PKCE) |
+| **DB Cloud** | Cloud Firestore (`users/{uid}/...`) |
+| **Testes** | `flutter_test` — 231 testes unitários/integração/stress |
+
+---
+
+## ⚠️ Protocolo de Versionamento — OBRIGATÓRIO
+
+**Toda vez que Claude alterar código funcional (feature, fix ou refatoração),
+ele DEVE atualizar os arquivos de versão ANTES de fazer o commit.**
+
+### Critérios de bump
+
+| Dígito | Condição | Exemplos |
+|---|---|---|
+| **MAJOR** (X.0.0) | Arquitetura: troca de provider, nova camada, breaking change | Migrar Provider→Riverpod, refatorar todo o sistema de auth |
+| **MINOR** (x.Y.0) | Nova funcionalidade, nova tela, nova integração, melhoria visível | Nova aba, novo filtro, sincronização com API externa |
+| **PATCH** (x.y.Z) | Correção de bug, fix de CI, correção visual | Filtro quebrado, crash fix, import circular |
+| **+BUILD** (+N) | Todo commit publicado em `main` | Incrementar sempre, sem exceção |
+
+**Regra de prioridade:** se o commit misturar tipos, usar o dígito mais alto.
+Exemplo: fix + nova feature → bump MINOR (não PATCH).
+
+### Arquivos que DEVEM ser atualizados a cada release
+
+#### 1. `pubspec.yaml` — versão do pacote Flutter
+
+```yaml
+version: X.Y.Z+N   # ex: 2.1.0+3
+```
+
+#### 2. `lib/constants/app_constants.dart` — 5 constantes obrigatórias
+
+```dart
+const String kAppVersion        = 'X.Y.Z';       // ex: '2.1.0'
+const String kLastChangeVersion = 'vX.Y.Z';      // ex: 'v2.1.0'
+const String kLastChangeDate    = 'Mmm YYYY';    // ex: 'Jun 2026'  (mês abreviado PT)
+const String kLastChangeType    = 'TIPO';        // 'MAJOR' | 'MINOR' | 'PATCH'
+const String kLastChangeSummary = '...';         // Máx. 3 frases descrevendo o que mudou
+```
+
+#### Exemplo completo de atualização
+
+Antes de commitar uma sessão que adicionou uma nova tela e corrigiu um bug:
+
+```dart
+// pubspec.yaml
+version: 2.2.0+4          // era 2.1.0+3 → MINOR (nova tela) + incremento BUILD
+
+// app_constants.dart
+const String kAppVersion        = '2.2.0';
+const String kLastChangeVersion = 'v2.2.0';
+const String kLastChangeDate    = 'Jul 2026';
+const String kLastChangeType    = 'MINOR';
+const String kLastChangeSummary =
+    'Nova tela de Configurações com exportação de dados em CSV. '
+    'Correção do crash ao abrir tarefa sem área associada.';
+```
+
+### Resumo do `kLastChangeSummary`
+
+- Máximo de **3 frases curtas**
+- Listar as funcionalidades/fixes mais importantes
+- Usar linguagem objetiva em português
+- Não mencionar detalhes técnicos internos (nomes de classe, arquivos)
+
+---
+
+## Histórico de Versões
+
+| Versão | Tipo | Data | Resumo |
+|---|---|---|---|
+| `v2.1.0+3` | MINOR | Jun 2026 | Relatórios com filtros corrigidos, edição universal de tarefas e taxa de conclusão por período |
+| `v2.0.0+2` | MAJOR | Mai 2026 | Sincronização Google Agenda→Tarefas, 134 testes unitários, CI/CD com gate de qualidade |
+| `v1.x` | — | — | Versão inicial (local-only, sem Firebase) |
+
+---
+
+## Arquitetura — Referência Rápida
+
+### Providers (ordem em `main.dart`)
+
+```
+SettingsProvider          → tema + idioma
+UserProvider              → XP, nível, streak, auth
+AreasProvider             → 10 áreas + scores + objetivos
+ActivitiesProvider        → atividades + check-ins
+CalendarProvider          → Google Calendar (deve vir ANTES de TasksProvider)
+TasksProvider             → Eisenhower + Kanban + MIT + sync calendário
+```
+
+> ⚠️ `CalendarProvider` **precisa** ser declarado antes de `TasksProvider` no
+> `MultiProvider` (dependência do `ChangeNotifierProxyProvider2`).
+
+### Convenções de ID
+
+| Prefixo | Significado |
+|---|---|
+| `cal_` | Tarefa originada do Google Calendar (`isFromCalendar: true`) |
+| Sem prefixo | Tarefa manual do usuário |
+
+### Tarefas de Calendário
+
+- **Não persistidas** no Firestore — reconstruídas a cada `syncCalendarTasks()`
+- **Estado mutável** salvo em `_calendarOverrides` (SharedPreferences)
+- **Campos sobreponíveis**: `eisenhowerQ`, `isMIT`, `mitOrder`, `status`, `completedAt`
+- **`deleteTask('cal_...')`** é no-op — a tarefa não pode ser excluída
+
+---
+
+## Política de Testes — OBRIGATÓRIA
+
+Toda nova feature ou método público deve ter testes **antes do commit**.
+
+| Tipo | Localização | Quando criar |
+|---|---|---|
+| **Unitário** | `test/models/` e `test/providers/` | Todo método público novo |
+| **Integração** | `test/reports/` ou subpasta relevante | Fluxos multi-step (add→complete→check stats) |
+| **Stress** | `test/reports/tasks_report_stress_test.dart` | Operações com datasets grandes (≥100 itens) |
+
+```bash
+# Rodar todos os testes antes de commitar
+flutter test --reporter=expanded
+
+# Checar se o analyze está limpo (exit 0 obrigatório para CI passar)
+flutter analyze --no-fatal-infos
+```
+
+---
+
+## CI/CD — Regras
+
+O pipeline (`.github/workflows/deploy.yml`) **falha** se:
+- `flutter analyze --no-fatal-infos` retornar `exit code 1` (warning ou error)
+- Qualquer teste falhar
+
+**Warnings que bloqueiam CI:** `unused_local_variable`, `unused_import`.
+Infos (`prefer_const`, `withOpacity deprecated`) são toleradas.
+
+---
+
+## Segurança
+
+> ⚠️ O **Client Secret do LinkedIn** vai APENAS no Firebase Console.
+> Nunca em código, nunca em repositório.
+> A Firebase API Key é pública (restrita por domínio).
+
+---
+
+## Checklist de Release
+
+Antes de cada `git push origin main`, verificar:
+
+- [ ] `pubspec.yaml` — `version:` atualizada
+- [ ] `app_constants.dart` — `kAppVersion`, `kLastChange*` atualizados
+- [ ] Testes passando: `flutter test`
+- [ ] Analyze limpo: `flutter analyze --no-fatal-infos` → exit 0
+- [ ] Sem `unused_local_variable` ou `unused_import`
+- [ ] Commit message segue convenção: `tipo(escopo): descrição`
