@@ -105196,7 +105196,7 @@ return s},
 $S:0}
 A.a66.prototype={
 C(a){var s,r,q,p,o,n,m,l=null,k=A.ar(l,B.IA,B.m,l,l,new A.ah(l,l,l,l,A.b([new A.bC(0,B.a_,A.K(89,B.h.l()>>>16&255,B.h.l()>>>8&255,B.h.l()&255),B.hB,24)],t.V),B.d3,B.bS),l,88,l,l,l,l,88),j=A.aXH(B.G3,B.a6J,new A.aLH()),i=A.Q(l,10,l),h=A.K(31,B.h.l()>>>16&255,B.h.l()>>>8&255,B.h.l()&255),g=A.am(20),f=A.bQ(A.K(B.d.af(76.5),B.h.l()>>>16&255,B.h.l()>>>8&255,B.h.l()&255),1)
-g=A.ar(l,A.v("v2.0.0",l,l,l,l,A.A(l,l,B.h,l,l,l,l,l,l,l,l,11,l,l,B.G,l,l,!0,l,0.5,l,l,l,l,l,l),l,l,l),B.m,l,l,new A.ah(h,l,f,g,l,l,B.u),l,l,l,new A.S(12,4,12,4),l,l,l)
+g=A.ar(l,A.v("v2.1.0",l,l,l,l,A.A(l,l,B.h,l,l,l,l,l,l,l,l,11,l,l,B.G,l,l,!0,l,0.5,l,l,l,l,l,l),l,l,l),B.m,l,l,new A.ah(h,l,f,g,l,l,B.u),l,l,l,new A.S(12,4,12,4),l,l,l)
 f=A.Q(l,20,l)
 h=A.v("Monitore e melhore as 10 \xe1reas\nfundamentais da sua vida.",l,l,l,l,A.A(l,l,$.H?B.q:B.r,l,l,l,l,l,l,l,l,14,l,l,l,l,1.55,!0,l,l,l,l,l,l,l,l),B.ba,l,l)
 s=A.Q(l,28,l)
@@ -105415,16 +105415,16 @@ m=A.am(12)
 m=A.ar(a,A.cP(A.v("\u2696\ufe0f",a,a,a,a,A.A(a,a,a,a,a,a,a,a,a,a,a,22,a,a,a,a,a,!0,a,a,a,a,a,a,a,a),a,a,a),a,a),B.m,a,a,new A.ah(a,a,a,m,a,B.d3,B.u),a,44,a,a,a,a,44)
 l=A.Q(a,a,14)
 a4=A.v("Life Balance Tracker",a,a,a,a,A.A(a,a,$.H?B.v:B.x,a,a,a,a,a,a,a,a,14,a,a,B.G,a,a,!0,a,a,a,a,a,a,a,a),a,a,a)
-a4=A.at(A.b([m,l,A.aU(A.au(A.b([a4,A.v("v2.0.0",a,a,a,a,A.A(a,a,$.H?B.q:B.r,a,a,a,a,a,a,a,a,12,a,a,a,a,a,!0,a,a,a,a,a,a,a,a),a,a,a)],n),B.E,B.i,B.k,0,B.p),1)],n),B.l,B.i,B.k,0,a)
+a4=A.at(A.b([m,l,A.aU(A.au(A.b([a4,A.v("v2.1.0",a,a,a,a,A.A(a,a,$.H?B.q:B.r,a,a,a,a,a,a,a,a,12,a,a,a,a,a,!0,a,a,a,a,a,a,a,a),a,a,a)],n),B.E,B.i,B.k,0,B.p),1)],n),B.l,B.i,B.k,0,a)
 m=$.H
 l=A.ll(m?B.V:B.Y,1,a)
 k=A.c4(B.NF,m?B.q:B.r,a,13)
 j=A.Q(a,a,5)
 h=A.v("\xdaltima altera\xe7\xe3o",a,a,a,a,A.A(a,a,m?B.q:B.r,a,a,a,a,a,a,a,a,11,a,a,B.Q,a,a,!0,a,0.3,a,a,a,a,a,a),a,a,a)
 g=A.Q(a,a,8)
-m=A.at(A.b([k,j,h,new A.ut(a),new A.YF("MAJOR",a),g,A.v("v2.0.0 \xb7 Mai 2026",a,a,a,a,A.A(a,a,$.H?B.q:B.r,a,a,a,a,a,a,a,a,11,a,a,a,a,a,!0,a,a,a,a,a,a,a,a),a,a,a)],n),B.l,B.i,B.k,0,a)
+m=A.at(A.b([k,j,h,new A.ut(a),new A.YF("MINOR",a),g,A.v("v2.1.0 \xb7 Jun 2026",a,a,a,a,A.A(a,a,$.H?B.q:B.r,a,a,a,a,a,a,a,a,11,a,a,a,a,a,!0,a,a,a,a,a,a,a,a),a,a,a)],n),B.l,B.i,B.k,0,a)
 k=A.Q(a,8,a)
-i.push(A.ar(a,A.au(A.b([a4,new A.aC(new A.S(0,12,0,12),l,a),m,k,A.v("Sincroniza\xe7\xe3o autom\xe1tica Google Agenda \u2192 Tarefas Planejadas (janela configur\xe1vel de 7 a 360 dias). 134 testes unit\xe1rios, CI/CD com gate de qualidade e versionamento sem\xe2ntico (MAJOR \xb7 MINOR \xb7 PATCH).",a,a,a,a,A.A(a,a,$.H?B.q:B.r,a,a,a,a,a,a,a,a,12,a,a,a,a,1.5,!0,a,a,a,a,a,a,a,a),a,a,a)],n),B.E,B.i,B.k,0,B.p),B.m,a,a,new A.ah(r,a,p,q,a,a,B.u),a,a,a,new A.S(14,14,14,14),a,a,a))
+i.push(A.ar(a,A.au(A.b([a4,new A.aC(new A.S(0,12,0,12),l,a),m,k,A.v("Aba Relat\xf3rios: filtros por status corrigidos, todas as tarefas edit\xe1veis em todas as abas (Eisenhower, Kanban, Hist\xf3rico, Relat\xf3rios) e taxa de conclus\xe3o por per\xedodo (Semana/M\xeas/Trimestre/Semestre/Ano/Total). 231 testes unit\xe1rios com CI/CD verde.",a,a,a,a,A.A(a,a,$.H?B.q:B.r,a,a,a,a,a,a,a,a,12,a,a,a,a,1.5,!0,a,a,a,a,a,a,a,a),a,a,a)],n),B.E,B.i,B.k,0,B.p),B.m,a,a,new A.ah(r,a,p,q,a,a,B.u),a,a,a,new A.S(14,14,14,14),a,a,a))
 i.push(A.Q(a,32,a))
 return A.ar(a,A.au(A.b([new A.aC(new A.S(0,10,0,4),a5,a),new A.aC(new A.S(20,8,20,4),o,a),s,A.aU(A.aQn(i,a7,new A.S(20,0,20,0),a,B.a5,!1),1)],n),B.l,B.i,B.k,0,B.p),B.m,a,a,new A.ah(a1,a,a,a2,a3,a,B.u),a,a,a,a,a,a,a)},
 $S:696}
