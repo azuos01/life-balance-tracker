@@ -27,7 +27,12 @@ class ReportsScreen extends StatefulWidget {
   State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> {
+class _ReportsScreenState extends State<ReportsScreen>
+    with AutomaticKeepAliveClientMixin {
+  // Preserva o estado (filtro + período) ao trocar de aba no TabBarView
+  @override
+  bool get wantKeepAlive => true;
+
   String _statusFilter = _kAll;
   _Period _period      = _Period.total;
   int     _year        = DateTime.now().year;
@@ -64,6 +69,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // obrigatório para AutomaticKeepAliveClientMixin
     final tp    = context.watch<TasksProvider>();
     final l10n  = context.l10n;
     final tasks = _filtered(tp);
@@ -334,44 +340,45 @@ class _PeriodChips extends StatelessWidget {
     final minYear = years.isEmpty ? DateTime.now().year : years.last;
     final maxYear = DateTime.now().year;
 
+    // ⚠️ Wrap + InkWell em vez de ListView + GestureDetector
+    //    (evita conflito de gestos com o SingleChildScrollView externo)
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      // Chips
-      SizedBox(
-        height: 32,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: _Period.values.map((p) {
-            final active = selected == p;
-            return Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: GestureDetector(
-                onTap: () => onPeriodChanged(p),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: active
-                        ? AppTheme.primary.withOpacity(0.15)
-                        : AppTheme.surfaceHigh,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: active ? AppTheme.primary : AppTheme.divider,
-                      width: active ? 1.5 : 1,
-                    ),
+      Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: _Period.values.map((p) {
+          final active = selected == p;
+          return Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => onPeriodChanged(p),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: active
+                      ? AppTheme.primary.withOpacity(0.15)
+                      : AppTheme.surfaceHigh,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: active ? AppTheme.primary : AppTheme.divider,
+                    width: active ? 2 : 1,
                   ),
-                  child: Text(
-                    _labels[p]!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                      color: active ? AppTheme.primary : AppTheme.textSecondary,
-                    ),
+                ),
+                child: Text(
+                  _labels[p]!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+                    color: active ? AppTheme.primary : AppTheme.textSecondary,
                   ),
                 ),
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        }).toList(),
       ),
 
       // Seletor de ano (visível apenas quando _Period.year)
@@ -489,56 +496,105 @@ class _OriginChip extends StatelessWidget {
 }
 
 // ── Filtro de status com contadores ──────────────────────────────────────────
+//
+// ⚠️ NÃO usar ListView + GestureDetector aqui.
+// O scroll horizontal do ListView absorve os taps antes do GestureDetector.
+// Solução correta: Wrap + InkWell (sem scroll aninhado, sem conflito de gestos).
 
 class _StatusFilterRow extends StatelessWidget {
   final String selected;
   final TasksProvider tp;
   final ValueChanged<String> onChanged;
   final L10n l10n;
-  const _StatusFilterRow({required this.selected, required this.tp, required this.onChanged, required this.l10n});
+  const _StatusFilterRow({
+    required this.selected,
+    required this.tp,
+    required this.onChanged,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final filters = [
-      (_kAll,        '${l10n.allTasks} (${tp.totalTasks})',              const Color(0xFF8E8EBB)),
-      (_kPending,    '${l10n.toDo} (${tp.pendingCount})',                const Color(0xFF3B82F6)),
-      (_kInProgress, '${l10n.inProgressLabel} (${tp.inProgressCount})',  AppTheme.accentGold),
-      (_kCompleted,  '${l10n.completedLabel} (${tp.completedCount})',    const Color(0xFF10B981)),
+    final filters = <(String, String, int, Color)>[
+      (_kAll,        l10n.allTasks,        tp.totalTasks,      const Color(0xFF8E8EBB)),
+      (_kPending,    l10n.toDo,            tp.pendingCount,    const Color(0xFF3B82F6)),
+      (_kInProgress, l10n.inProgressLabel, tp.inProgressCount, AppTheme.accentGold),
+      (_kCompleted,  l10n.completedLabel,  tp.completedCount,  const Color(0xFF10B981)),
     ];
 
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) {
-          final (value, label, color) = filters[i];
-          final active = selected == value;
-          return GestureDetector(
-            onTap: () => onChanged(value),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: active ? color.withOpacity(0.15) : AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: active ? color : AppTheme.divider,
-                  width: active ? 1.5 : 1,
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: filters.map((f) {
+        final (value, label, count, color) = f;
+        final active = selected == value;
+        return _StatusChipButton(
+          label: label,
+          count: count,
+          color: color,
+          active: active,
+          onTap: () => onChanged(value),
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// Chip de filtro de status — usa InkWell para garantir que o toque
+/// seja registrado sem conflito com ScrollViews ao redor.
+class _StatusChipButton extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+  final bool active;
+  final VoidCallback onTap;
+
+  const _StatusChipButton({
+    required this.label,
+    required this.count,
+    required this.color,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: active ? color.withOpacity(0.15) : AppTheme.surfaceLight,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: active ? color : AppTheme.divider,
+              width: active ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (active)
+                Padding(
+                  padding: const EdgeInsets.only(right: 5),
+                  child: Icon(Icons.check_circle, size: 13, color: color),
                 ),
-              ),
-              child: Text(
-                label,
+              Text(
+                '$label  $count',
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 13,
+                  fontWeight: active ? FontWeight.w800 : FontWeight.w500,
                   color: active ? color : AppTheme.textSecondary,
                 ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }

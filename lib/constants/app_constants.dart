@@ -77,20 +77,19 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '2.1.0';
+const String kAppVersion = '2.1.1';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // ── Changelog da última versão ────────────────────────────────────────────────
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
-const String kLastChangeVersion = 'v2.1.0';
+const String kLastChangeVersion = 'v2.1.1';
 const String kLastChangeDate    = 'Jun 2026';
-const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
+const String kLastChangeType    = 'PATCH';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
-    'Aba Relatórios: filtros por status corrigidos, todas as tarefas editáveis '
-    'em todas as abas (Eisenhower, Kanban, Histórico, Relatórios) '
-    'e taxa de conclusão por período (Semana/Mês/Trimestre/Semestre/Ano/Total). '
-    '231 testes unitários com CI/CD verde.';
+    'Correção do bug de toque nos botões de filtro da aba Relatórios '
+    '(conflito de gestos entre ListView e GestureDetector resolvido com Wrap+InkWell). '
+    'Estado do filtro preservado ao trocar de aba.';
 
 // XP rewards
 const int kXpEasy = 10;
