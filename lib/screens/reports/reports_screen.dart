@@ -29,15 +29,13 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen>
     with AutomaticKeepAliveClientMixin {
-  // Preserva o estado (filtro + período) ao trocar de aba no TabBarView
   @override
   bool get wantKeepAlive => true;
 
-  String _statusFilter = _kAll;
-  _Period _period      = _Period.total;
-  int     _year        = DateTime.now().year;
+  // Apenas estado do período — o estado do filtro vive em _ReportsFilterSection
+  _Period _period = _Period.total;
+  int     _year   = DateTime.now().year;
 
-  // ── Janela de datas do período selecionado ────────────────────────────────
   ({DateTime? from, DateTime? to}) get _window {
     final now = DateTime.now();
     return switch (_period) {
@@ -45,35 +43,17 @@ class _ReportsScreenState extends State<ReportsScreen>
       _Period.month    => (from: now.subtract(const Duration(days: 30)), to: null),
       _Period.quarter  => (from: now.subtract(const Duration(days: 90)), to: null),
       _Period.semester => (from: now.subtract(const Duration(days: 180)), to: null),
-      _Period.year     => (
-          from: DateTime(_year),
-          to: DateTime(_year + 1),
-        ),
+      _Period.year     => (from: DateTime(_year), to: DateTime(_year + 1)),
       _Period.total    => (from: null, to: null),
     };
   }
 
-  // ── Lista filtrada por status ──────────────────────────────────────────────
-  List<TaskModel> _filtered(TasksProvider tp) {
-    var list = tp.tasks.toList();
-    if (_statusFilter != _kAll) {
-      list = list.where((t) => t.status == _statusFilter).toList();
-    }
-    list.sort((a, b) {
-      const ord = {_kPending: 0, _kInProgress: 1, _kCompleted: 2};
-      final cmp = (ord[a.status] ?? 0).compareTo(ord[b.status] ?? 0);
-      return cmp != 0 ? cmp : b.createdAt.compareTo(a.createdAt);
-    });
-    return list;
-  }
-
   @override
   Widget build(BuildContext context) {
-    super.build(context); // obrigatório para AutomaticKeepAliveClientMixin
-    final tp    = context.watch<TasksProvider>();
-    final l10n  = context.l10n;
-    final tasks = _filtered(tp);
-    final win   = _window;
+    super.build(context);
+    final tp   = context.watch<TasksProvider>();
+    final l10n = context.l10n;
+    final win  = _window;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -81,12 +61,8 @@ class _ReportsScreenState extends State<ReportsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // ── 1. KPIs ───────────────────────────────────────────────────────
           _KpiRow(tp: tp, l10n: l10n),
           const SizedBox(height: 16),
-
-          // ── 2. Anel de conclusão + seletor de período ─────────────────────
           _ProgressSection(
             tp: tp,
             l10n: l10n,
@@ -97,36 +73,166 @@ class _ReportsScreenState extends State<ReportsScreen>
             onYearChanged:   (y) => setState(() => _year   = y),
           ),
           const SizedBox(height: 16),
-
-          // ── 3. Origem (Manual vs Agenda) ──────────────────────────────────
           _OriginRow(tp: tp, l10n: l10n),
           const SizedBox(height: 24),
 
-          // ── 4. Filtro por status ──────────────────────────────────────────
-          _StatusFilterRow(
-            selected: _statusFilter,
-            tp: tp,
-            onChanged: (v) => setState(() => _statusFilter = v),
-            l10n: l10n,
-          ),
-          const SizedBox(height: 10),
-
-          // ── 5. Lista de tarefas (filtrada) ────────────────────────────────
-          if (tasks.isEmpty)
-            _EmptyState(l10n: l10n)
-          else
-            ...tasks.map((t) => _TaskCard(task: t)),
+          // ── Filtro + lista: widget isolado com estado próprio ─────────────
+          _ReportsFilterSection(tp: tp, l10n: l10n),
 
           const SizedBox(height: 28),
-
-          // ── 6. Distribuição por área ──────────────────────────────────────
           _AreaChart(tp: tp, l10n: l10n),
           const SizedBox(height: 28),
-
-          // ── 7. Distribuição por quadrante Eisenhower ──────────────────────
           _QuadrantGrid(tp: tp, l10n: l10n),
         ],
       ),
+    );
+  }
+}
+
+// ── Seção isolada: filtros de status + lista de tarefas ───────────────────────
+//
+// Arquitetura deliberada:
+//   • StatefulWidget próprio → setState() do chip afeta APENAS esta seção
+//   • addListener(tp) → garante rebuild quando o provider adiciona/remove tasks
+//   • Filtro e lista ficam no MESMO build() → sem ambiguidade na leitura do estado
+//
+// Isso elimina qualquer risco de otimização de widget tree ignorar o setState()
+// que vinha de um estado ancestral distante.
+
+class _ReportsFilterSection extends StatefulWidget {
+  final TasksProvider tp;
+  final L10n l10n;
+  const _ReportsFilterSection({required this.tp, required this.l10n});
+
+  @override
+  State<_ReportsFilterSection> createState() => _ReportsFilterSectionState();
+}
+
+class _ReportsFilterSectionState extends State<_ReportsFilterSection> {
+  String _filter = _kAll;
+
+  // ── Subscrição direta ao provider ─────────────────────────────────────────
+
+  @override
+  void initState() {
+    super.initState();
+    widget.tp.addListener(_onProviderChanged);
+  }
+
+  @override
+  void didUpdateWidget(_ReportsFilterSection old) {
+    super.didUpdateWidget(old);
+    if (old.tp != widget.tp) {
+      old.tp.removeListener(_onProviderChanged);
+      widget.tp.addListener(_onProviderChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.tp.removeListener(_onProviderChanged);
+    super.dispose();
+  }
+
+  void _onProviderChanged() {
+    if (mounted) setState(() {});
+  }
+
+  // ── Filtragem ─────────────────────────────────────────────────────────────
+
+  List<TaskModel> _filteredTasks() {
+    var list = widget.tp.tasks.toList();
+    if (_filter != _kAll) {
+      list = list.where((t) => t.status == _filter).toList();
+    }
+    list.sort((a, b) {
+      const ord = {_kPending: 0, _kInProgress: 1, _kCompleted: 2};
+      final cmp = (ord[a.status] ?? 0).compareTo(ord[b.status] ?? 0);
+      return cmp != 0 ? cmp : b.createdAt.compareTo(a.createdAt);
+    });
+    return list;
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    final tp    = widget.tp;
+    final l10n  = widget.l10n;
+    final tasks = _filteredTasks();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Chips de filtro ─────────────────────────────────────────────────
+        _buildFilterChips(tp, l10n),
+        const SizedBox(height: 12),
+
+        // ── Lista de tarefas com key forçando rebuild ao trocar filtro ───────
+        KeyedSubtree(
+          key: ValueKey(_filter),
+          child: tasks.isEmpty
+              ? _EmptyState(l10n: l10n)
+              : Column(
+                  children: tasks
+                      .map((t) => _TaskCard(key: ValueKey(t.id), task: t))
+                      .toList(),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterChips(TasksProvider tp, L10n l10n) {
+    final filters = <(String, String, int, Color)>[
+      (_kAll,        l10n.allTasks,        tp.totalTasks,      const Color(0xFF8E8EBB)),
+      (_kPending,    l10n.toDo,            tp.pendingCount,    const Color(0xFF3B82F6)),
+      (_kInProgress, l10n.inProgressLabel, tp.inProgressCount, AppTheme.accentGold),
+      (_kCompleted,  l10n.completedLabel,  tp.completedCount,  const Color(0xFF10B981)),
+    ];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: filters.map((f) {
+        final (value, label, count, color) = f;
+        final active = _filter == value;
+        return Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            // setState aqui pertence a _ReportsFilterSectionState — rebuild garantido
+            onTap: () => setState(() => _filter = value),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+              decoration: BoxDecoration(
+                color: active ? color.withOpacity(0.15) : AppTheme.surfaceLight,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: active ? color : AppTheme.divider,
+                  width: active ? 2 : 1,
+                ),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                if (active) ...[
+                  Icon(Icons.check_circle, size: 13, color: color),
+                  const SizedBox(width: 5),
+                ],
+                Text(
+                  '$label  $count',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+                    color: active ? color : AppTheme.textSecondary,
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -495,116 +601,13 @@ class _OriginChip extends StatelessWidget {
   }
 }
 
-// ── Filtro de status com contadores ──────────────────────────────────────────
-//
-// ⚠️ NÃO usar ListView + GestureDetector aqui.
-// O scroll horizontal do ListView absorve os taps antes do GestureDetector.
-// Solução correta: Wrap + InkWell (sem scroll aninhado, sem conflito de gestos).
-
-class _StatusFilterRow extends StatelessWidget {
-  final String selected;
-  final TasksProvider tp;
-  final ValueChanged<String> onChanged;
-  final L10n l10n;
-  const _StatusFilterRow({
-    required this.selected,
-    required this.tp,
-    required this.onChanged,
-    required this.l10n,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final filters = <(String, String, int, Color)>[
-      (_kAll,        l10n.allTasks,        tp.totalTasks,      const Color(0xFF8E8EBB)),
-      (_kPending,    l10n.toDo,            tp.pendingCount,    const Color(0xFF3B82F6)),
-      (_kInProgress, l10n.inProgressLabel, tp.inProgressCount, AppTheme.accentGold),
-      (_kCompleted,  l10n.completedLabel,  tp.completedCount,  const Color(0xFF10B981)),
-    ];
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: filters.map((f) {
-        final (value, label, count, color) = f;
-        final active = selected == value;
-        return _StatusChipButton(
-          label: label,
-          count: count,
-          color: color,
-          active: active,
-          onTap: () => onChanged(value),
-        );
-      }).toList(),
-    );
-  }
-}
-
-/// Chip de filtro de status — usa InkWell para garantir que o toque
-/// seja registrado sem conflito com ScrollViews ao redor.
-class _StatusChipButton extends StatelessWidget {
-  final String label;
-  final int count;
-  final Color color;
-  final bool active;
-  final VoidCallback onTap;
-
-  const _StatusChipButton({
-    required this.label,
-    required this.count,
-    required this.color,
-    required this.active,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: active ? color.withOpacity(0.15) : AppTheme.surfaceLight,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: active ? color : AppTheme.divider,
-              width: active ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (active)
-                Padding(
-                  padding: const EdgeInsets.only(right: 5),
-                  child: Icon(Icons.check_circle, size: 13, color: color),
-                ),
-              Text(
-                '$label  $count',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: active ? FontWeight.w800 : FontWeight.w500,
-                  color: active ? color : AppTheme.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+// (Os chips de filtro vivem dentro de _ReportsFilterSection._buildFilterChips)
 
 // ── Card de tarefa (clicável → abre TaskDetailSheet) ─────────────────────────
 
 class _TaskCard extends StatelessWidget {
   final TaskModel task;
-  const _TaskCard({required this.task});
+  const _TaskCard({super.key, required this.task});
 
   Color get _statusColor => switch (task.status) {
         _kPending    => const Color(0xFF3B82F6),

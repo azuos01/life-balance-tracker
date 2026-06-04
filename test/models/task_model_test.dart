@@ -255,7 +255,7 @@ void main() {
   // ── LocationAddress ───────────────────────────────────────────────────────
 
   group('TaskModel — locationAddress', () {
-    TaskModel _taskWithLocation(String address) => TaskModel(
+    TaskModel taskWithLocation(String address) => TaskModel(
           id: 't1',
           userId: 'u1',
           title: 'Reunião',
@@ -273,17 +273,17 @@ void main() {
     });
 
     test('hasLocation é false quando locationAddress é string vazia', () {
-      final t = _taskWithLocation('');
+      final t = taskWithLocation('');
       expect(t.hasLocation, false);
     });
 
     test('hasLocation é false quando locationAddress é só espaços', () {
-      final t = _taskWithLocation('   ');
+      final t = taskWithLocation('   ');
       expect(t.hasLocation, false);
     });
 
     test('hasLocation é true quando locationAddress tem conteúdo', () {
-      final t = _taskWithLocation('Av. Paulista, 1578 — São Paulo');
+      final t = taskWithLocation('Av. Paulista, 1578 — São Paulo');
       expect(t.hasLocation, true);
     });
 
@@ -296,14 +296,14 @@ void main() {
     });
 
     test('googleMapsUrl contém o endereço codificado', () {
-      final t = _taskWithLocation('Av. Paulista, São Paulo');
+      final t = taskWithLocation('Av. Paulista, São Paulo');
       expect(t.googleMapsUrl, isNotNull);
       expect(t.googleMapsUrl!.contains('maps.google.com') ||
              t.googleMapsUrl!.contains('google.com/maps'), true);
     });
 
     test('toJson / fromJson preserva locationAddress', () {
-      final t = _taskWithLocation('Rua das Flores, 42, Rio de Janeiro');
+      final t = taskWithLocation('Rua das Flores, 42, Rio de Janeiro');
       final restored = TaskModel.fromJson(t.toJson());
       expect(restored.locationAddress, t.locationAddress);
     });
@@ -320,20 +320,20 @@ void main() {
     });
 
     test('copyWith com novo locationAddress atualiza o campo', () {
-      final t = _taskWithLocation('Endereço A');
+      final t = taskWithLocation('Endereço A');
       final copy = t.copyWith(locationAddress: 'Endereço B');
       expect(copy.locationAddress, 'Endereço B');
     });
 
     test('copyWith clearLocation: true remove o endereço', () {
-      final t = _taskWithLocation('Endereço A');
+      final t = taskWithLocation('Endereço A');
       final copy = t.copyWith(clearLocation: true);
       expect(copy.locationAddress, null);
       expect(copy.hasLocation, false);
     });
 
     test('copyWith sem locationAddress preserva o endereço existente', () {
-      final t = _taskWithLocation('Av. Brasil, 100');
+      final t = taskWithLocation('Av. Brasil, 100');
       final copy = t.copyWith(title: 'Novo título');
       expect(copy.locationAddress, 'Av. Brasil, 100');
     });
