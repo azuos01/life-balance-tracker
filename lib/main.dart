@@ -10,6 +10,7 @@ import 'providers/activities_provider.dart';
 import 'providers/tasks_provider.dart';
 import 'providers/calendar_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/ai_agent_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -76,6 +77,9 @@ void main() async {
             return cp;
           },
         ),
+
+        // AiAgentProvider: sugestões de tarefas via OpenAI
+        ChangeNotifierProvider(create: (_) => AiAgentProvider()),
 
         // TasksProvider: tarefas MIT + Matriz de Eisenhower + eventos de calendário
         ChangeNotifierProxyProvider2<UserProvider, CalendarProvider,

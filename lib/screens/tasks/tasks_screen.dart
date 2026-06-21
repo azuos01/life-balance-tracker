@@ -8,6 +8,7 @@ import '../../widgets/app_background.dart';
 import 'task_create_screen.dart';
 import 'task_detail_sheet.dart';
 import '../reports/reports_screen.dart';
+import '../ai_agent/ai_agent_screen.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -23,7 +24,7 @@ class _TasksScreenState extends State<TasksScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -73,6 +74,7 @@ class _TasksScreenState extends State<TasksScreen>
               Tab(text: 'Kanban'),
               Tab(text: 'Histórico'),
               Tab(icon: Icon(Icons.bar_chart_outlined, size: 15), text: 'Relatórios'),
+              Tab(icon: Icon(Icons.psychology_outlined, size: 15), text: 'IA'),
             ],
           ),
         ),
@@ -83,6 +85,7 @@ class _TasksScreenState extends State<TasksScreen>
             _KanbanView(tp: tp),
             _HistoryView(tp: tp),
             const ReportsScreen(),
+            const AiAgentScreen(),
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(

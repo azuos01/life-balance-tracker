@@ -340,6 +340,14 @@ class _SettingsSheet extends StatelessWidget {
                     ),
                     SizedBox(height: 24),
 
+                    // ── Inteligência Artificial ────────────────────────────
+                    _SectionHeader(
+                        icon: Icons.psychology_outlined,
+                        title: 'Inteligência Artificial'),
+                    const SizedBox(height: 10),
+                    const _ApiKeySection(),
+                    const SizedBox(height: 24),
+
                     // ── Google Agenda ──────────────────────────────────────
                     if (calendar.isGoogleUser) ...[
                       _SectionHeader(
@@ -873,6 +881,188 @@ class _StatCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ── API Key Section ───────────────────────────────────────────────────────────
+
+class _ApiKeySection extends StatefulWidget {
+  const _ApiKeySection();
+
+  @override
+  State<_ApiKeySection> createState() => _ApiKeySectionState();
+}
+
+class _ApiKeySectionState extends State<_ApiKeySection> {
+  late TextEditingController _ctrl;
+  bool _obscure = true;
+  bool _dirty = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final key = context.read<SettingsProvider>().openAIKey ?? '';
+    _ctrl = TextEditingController(text: key);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final hasKey = settings.hasOpenAIKey;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                hasKey
+                    ? Icons.check_circle_outline
+                    : Icons.key_outlined,
+                size: 15,
+                color: hasKey
+                    ? const Color(0xFF34D399)
+                    : AppTheme.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                hasKey ? 'Chave OpenAI configurada' : 'Chave OpenAI não configurada',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: hasKey
+                      ? const Color(0xFF34D399)
+                      : AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _ctrl,
+            obscureText: _obscure,
+            onChanged: (_) => setState(() => _dirty = true),
+            style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+            decoration: InputDecoration(
+              hintText: 'sk-...',
+              hintStyle: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              filled: true,
+              fillColor: AppTheme.surface,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: AppTheme.divider),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: AppTheme.divider),
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  size: 18,
+                  color: AppTheme.textSecondary,
+                ),
+                onPressed: () => setState(() => _obscure = !_obscure),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: _dirty ? () => _save(context) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    decoration: BoxDecoration(
+                      color: _dirty
+                          ? AppTheme.primary
+                          : AppTheme.primary.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Salvar',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white.withOpacity(_dirty ? 1 : 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (hasKey) ...[
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () => _remove(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      'Remover',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.shade600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Obtenha sua chave em platform.openai.com/api-keys',
+            style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _save(BuildContext context) async {
+    await context.read<SettingsProvider>().setOpenAIKey(_ctrl.text);
+    setState(() => _dirty = false);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Chave OpenAI salva!'),
+          backgroundColor: AppTheme.primary,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  Future<void> _remove(BuildContext context) async {
+    await context.read<SettingsProvider>().setOpenAIKey(null);
+    _ctrl.clear();
+    setState(() => _dirty = false);
   }
 }
 

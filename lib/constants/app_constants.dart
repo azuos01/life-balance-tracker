@@ -77,19 +77,19 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '2.2.0';
+const String kAppVersion = '2.3.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // ── Changelog da última versão ────────────────────────────────────────────────
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
-const String kLastChangeVersion = 'v2.2.0';
+const String kLastChangeVersion = 'v2.3.0';
 const String kLastChangeDate    = 'Jun 2026';
 const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
-    'Campo Localização (Google Maps) adicionado a todas as tarefas: '
-    'endereço com ícone 📍 nos cards Eisenhower, Kanban, Histórico e Relatórios, '
-    'badge clicável no detalhe abre o Google Maps. 244 testes, CI/CD verde.';
+    'Assistente IA integrado à aba Tarefas: sugere tarefas priorizadas por '
+    'Eisenhower com base no perfil de vida do usuário via OpenAI GPT-4o-mini. '
+    'Chave API configurável nas Configurações. 256 testes, CI/CD verde.';
 
 // XP rewards
 const int kXpEasy = 10;

@@ -15,7 +15,7 @@ As regras aqui definidas têm prioridade sobre qualquer instrução genérica.
 | **State** | Provider (`ChangeNotifier`, `ProxyProvider2`) |
 | **Auth** | Firebase Auth (Google + LinkedIn OAuth2 PKCE) |
 | **DB Cloud** | Cloud Firestore (`users/{uid}/...`) |
-| **Testes** | `flutter_test` — 231 testes unitários/integração/stress |
+| **Testes** | `flutter_test` — 256 testes unitários/integração/stress |
 
 ---
 
@@ -85,6 +85,8 @@ const String kLastChangeSummary =
 
 | Versão | Tipo | Data | Resumo |
 |---|---|---|---|
+| `v2.3.0+6` | MINOR | Jun 2026 | Assistente IA com OpenAI GPT-4o-mini na aba Tarefas: sugere tarefas priorizadas por Eisenhower/MIT com base no perfil de vida; 256 testes, CI/CD verde |
+| `v2.2.0+5` | MINOR | Jun 2026 | Campo Localização (Google Maps) em todas as tarefas; filtros de status na aba Relatórios garantidamente funcionais; 244 testes, CI/CD verde |
 | `v2.1.0+3` | MINOR | Jun 2026 | Relatórios com filtros corrigidos, edição universal de tarefas e taxa de conclusão por período |
 | `v2.0.0+2` | MAJOR | Mai 2026 | Sincronização Google Agenda→Tarefas, 134 testes unitários, CI/CD com gate de qualidade |
 | `v1.x` | — | — | Versão inicial (local-only, sem Firebase) |
