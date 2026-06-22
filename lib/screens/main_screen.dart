@@ -7,6 +7,7 @@ import 'activities_screen.dart';
 import 'goals_screen.dart';
 import 'profile_screen.dart';
 import 'calendar/calendar_screen.dart';
+import 'learning/learning_tracker_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -24,6 +25,7 @@ class _MainScreenState extends State<MainScreen> {
     ActivitiesScreen(),
     GoalsScreen(),
     CalendarScreen(),
+    LearningTrackerScreen(),
     ProfileScreen(),
   ];
 
@@ -33,6 +35,7 @@ class _MainScreenState extends State<MainScreen> {
     _NavItem(icon: Icons.list_alt_outlined,      activeIcon: Icons.list_alt,       label: l10n.navActivities),
     _NavItem(icon: Icons.track_changes_outlined, activeIcon: Icons.track_changes,  label: l10n.navGoals),
     _NavItem(icon: Icons.calendar_month_outlined,activeIcon: Icons.calendar_month, label: l10n.navCalendar),
+    _NavItem(icon: Icons.school_outlined,        activeIcon: Icons.school,         label: l10n.navLearning),
     _NavItem(icon: Icons.person_outline,         activeIcon: Icons.person,         label: l10n.navProfile),
   ];
 

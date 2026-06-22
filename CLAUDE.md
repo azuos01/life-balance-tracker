@@ -15,7 +15,7 @@ As regras aqui definidas têm prioridade sobre qualquer instrução genérica.
 | **State** | Provider (`ChangeNotifier`, `ProxyProvider2`) |
 | **Auth** | Firebase Auth (Google + LinkedIn OAuth2 PKCE) |
 | **DB Cloud** | Cloud Firestore (`users/{uid}/...`) |
-| **Testes** | `flutter_test` — 256 testes unitários/integração/stress |
+| **Testes** | `flutter_test` — 273 testes unitários/integração/stress |
 
 ---
 
@@ -85,6 +85,7 @@ const String kLastChangeSummary =
 
 | Versão | Tipo | Data | Resumo |
 |---|---|---|---|
+| `v2.4.0+7` | MINOR | Jun 2026 | Nova aba Aprender: tracking de DataCamp (cursos/capítulos), Duolingo (streak/XP) e Chess.com (ratings via API); 273 testes, CI/CD verde |
 | `v2.3.0+6` | MINOR | Jun 2026 | Assistente IA com OpenAI GPT-4o-mini na aba Tarefas: sugere tarefas priorizadas por Eisenhower/MIT com base no perfil de vida; 256 testes, CI/CD verde |
 | `v2.2.0+5` | MINOR | Jun 2026 | Campo Localização (Google Maps) em todas as tarefas; filtros de status na aba Relatórios garantidamente funcionais; 244 testes, CI/CD verde |
 | `v2.1.0+3` | MINOR | Jun 2026 | Relatórios com filtros corrigidos, edição universal de tarefas e taxa de conclusão por período |
@@ -164,12 +165,40 @@ Infos (`prefer_const`, `withOpacity deprecated`) são toleradas.
 
 ---
 
+## Documentação — README.md
+
+O `README.md` deve ser atualizado **sempre que houver mudança significativa** na estrutura do software ou no design do aplicativo.
+
+### Quando atualizar o README
+
+| Situação | Exemplos |
+|---|---|
+| **Nova tela ou aba** | Adicionar aba IA, nova tela de Relatórios |
+| **Nova integração externa** | OpenAI, Google Maps, LinkedIn OAuth |
+| **Mudança de arquitetura** | Novo provider, nova camada de serviço |
+| **Mudança na navegação principal** | Item adicionado/removido do bottom nav |
+| **Novo modelo de dados** | Campo importante adicionado a `TaskModel` |
+| **Requisito de configuração do usuário** | Chave de API que o usuário precisa obter |
+
+### O que manter atualizado
+
+- **Funcionalidades implementadas (MVP)** — lista das features ativas
+- **Estrutura de pastas** — quando arquivos/diretórios são adicionados
+- **Pré-requisitos e configuração** — ex: chave OpenAI, Firebase
+- **Histórico de versões** — espelhar a tabela do CLAUDE.md
+- **Roadmap** — remover itens concluídos, adicionar novos
+
+> Mudanças apenas internas (refatoração, fix de bug, ajuste visual) **não exigem** atualização do README.
+
+---
+
 ## Checklist de Release
 
 Antes de cada `git push origin main`, verificar:
 
 - [ ] `pubspec.yaml` — `version:` atualizada
 - [ ] `app_constants.dart` — `kAppVersion`, `kLastChange*` atualizados
+- [ ] `README.md` — atualizado se houve mudança estrutural ou de design
 - [ ] Testes passando: `flutter test`
 - [ ] Analyze limpo: `flutter analyze --no-fatal-infos` → exit 0
 - [ ] Sem `unused_local_variable` ou `unused_import`

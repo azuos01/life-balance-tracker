@@ -19,6 +19,7 @@ class L10n {
   String get navActivities => _en ? 'Activities' : 'Atividades';
   String get navGoals      => _en ? 'Goals'      : 'Objetivos';
   String get navCalendar   => _en ? 'Calendar'   : 'Agenda';
+  String get navLearning   => _en ? 'Learning'   : 'Aprender';
   String get navProfile    => _en ? 'Profile'    : 'Perfil';
 
   // ── Botões comuns ──────────────────────────────────────────────────────────
