@@ -37,7 +37,6 @@ build/
 **/ios/Runner/GeneratedPluginRegistrant.*
 
 # Web
-lib/generated_plugin_registrant.dart
 
 # Exceptions for CI
 !**/ios/Runner/GeneratedPluginRegistrant.swift

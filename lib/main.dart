@@ -12,6 +12,7 @@ import 'providers/calendar_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/ai_agent_provider.dart';
 import 'providers/learning_provider.dart';
+import 'providers/weather_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -82,9 +83,14 @@ void main() async {
         // AiAgentProvider: sugestões de tarefas via OpenAI
         ChangeNotifierProvider(create: (_) => AiAgentProvider()),
 
-        // LearningProvider: DataCamp, Duolingo, Chess.com
+        // LearningProvider: DataCamp, Duolingo, Chess.com + 4 novas plataformas
         ChangeNotifierProvider(
           create: (_) => LearningProvider()..init(),
+        ),
+
+        // WeatherProvider: previsão do tempo via Open-Meteo (sem API key)
+        ChangeNotifierProvider(
+          create: (_) => WeatherProvider()..init(),
         ),
 
         // TasksProvider: tarefas MIT + Matriz de Eisenhower + eventos de calendário

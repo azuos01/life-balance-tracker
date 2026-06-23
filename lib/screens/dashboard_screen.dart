@@ -4,7 +4,9 @@ import '../providers/user_provider.dart';
 import '../providers/areas_provider.dart';
 import '../providers/activities_provider.dart';
 import '../providers/tasks_provider.dart';
+import '../providers/weather_provider.dart';
 import '../models/task_model.dart';
+import '../models/weather_model.dart';
 import '../constants/app_constants.dart';
 import '../theme/app_theme.dart';
 import '../services/quotes_service.dart';
@@ -68,6 +70,10 @@ class DashboardScreen extends StatelessWidget {
 
                   // ── Frase filosófica do dia ─────────────────────────────
                   _DailyQuoteCard(),
+                  SizedBox(height: 12),
+
+                  // ── Clima + alertas de tarefas ──────────────────────────
+                  _WeatherCard(tasks: tasks),
                   SizedBox(height: 16),
 
                   // ── Check-in cards ──────────────────────────────────────
@@ -122,6 +128,341 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
     ),
+    );
+  }
+}
+
+// ── Weather Card ──────────────────────────────────────────────────────────────
+
+class _WeatherCard extends StatelessWidget {
+  final TasksProvider tasks;
+  const _WeatherCard({required this.tasks});
+
+  @override
+  Widget build(BuildContext context) {
+    final wp = context.watch<WeatherProvider>();
+
+    if (!wp.hasData && !wp.loading && wp.city.isEmpty) {
+      return _WeatherSetupPrompt(onSetup: () => _showCityDialog(context, wp));
+    }
+
+    if (wp.loading && !wp.hasData) {
+      return Container(
+        height: 80,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    if (wp.error != null && !wp.hasData) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.red.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            const Text('⚠️', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                wp.error!,
+                style: const TextStyle(fontSize: 12, color: Colors.red),
+              ),
+            ),
+            TextButton(
+              onPressed: () => _showCityDialog(context, wp),
+              child: const Text('Trocar', style: TextStyle(fontSize: 12)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!wp.hasData) return const SizedBox();
+
+    final weather = wp.data!;
+    final sensitiveTasks = weather.isBadWeather
+        ? tasks.tasks
+            .where((t) =>
+                t.status != 'completed' &&
+                isWeatherSensitiveTask(t.title, t.description))
+            .toList()
+        : <TaskModel>[];
+
+    return Column(
+      children: [
+        // Card principal do clima
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: weather.isBadWeather
+                  ? [const Color(0xFF2C3E50), const Color(0xFF3D5166)]
+                  : [const Color(0xFF1A6B3C), const Color(0xFF2196F3)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Linha principal
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                child: Row(
+                  children: [
+                    Text(
+                      WeatherData.emoji(weather.current.code),
+                      style: const TextStyle(fontSize: 36),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${weather.current.temperature.toStringAsFixed(0)}°C',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            WeatherData.description(weather.current.code),
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showCityDialog(context, wp),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.location_on,
+                                  color: Colors.white70, size: 12),
+                              const SizedBox(width: 2),
+                              Text(
+                                weather.city,
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 11),
+                              ),
+                              const Icon(Icons.edit,
+                                  color: Colors.white38, size: 11),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () => wp.fetch(weather.city),
+                          child: const Icon(Icons.refresh,
+                              color: Colors.white54, size: 16),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Mini-previsão 3 dias
+              if (weather.forecast.isNotEmpty)
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(18)),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: weather.forecast
+                        .map((d) => _ForecastDay(day: d))
+                        .toList(),
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        // Alerta de tarefas sensíveis
+        if (sensitiveTasks.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange.withOpacity(0.4)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text('⚠️', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Condições desfavoráveis para ${sensitiveTasks.length} tarefa(s) ao ar livre:',
+                        style: const TextStyle(
+                          color: Colors.orange,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ...sensitiveTasks.take(3).map((t) => Padding(
+                      padding: const EdgeInsets.only(left: 24, top: 2),
+                      child: Text(
+                        '• ${t.title}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )),
+                if (sensitiveTasks.length > 3)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 24, top: 2),
+                    child: Text(
+                      '+ ${sensitiveTasks.length - 3} mais...',
+                      style: TextStyle(
+                          fontSize: 11, color: AppTheme.textSecondary),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showCityDialog(BuildContext context, WeatherProvider wp) {
+    final ctrl = TextEditingController(text: wp.city);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        title: Text('Cidade',
+            style: TextStyle(color: AppTheme.textPrimary, fontSize: 16)),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          style: TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+          decoration: InputDecoration(
+            hintText: 'Ex: São Paulo, Brasília...',
+            hintStyle:
+                TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppTheme.divider)),
+            focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppTheme.primary)),
+          ),
+          onSubmitted: (v) {
+            Navigator.pop(context);
+            if (v.trim().isNotEmpty) wp.fetch(v.trim());
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar',
+                style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (ctrl.text.trim().isNotEmpty) wp.fetch(ctrl.text.trim());
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white),
+            child: const Text('Buscar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeatherSetupPrompt extends StatelessWidget {
+  final VoidCallback onSetup;
+  const _WeatherSetupPrompt({required this.onSetup});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onSetup,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.divider),
+        ),
+        child: Row(
+          children: [
+            const Text('🌤️', style: TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Previsão do Tempo',
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary)),
+                  Text('Toque para configurar sua cidade',
+                      style: TextStyle(
+                          fontSize: 12, color: AppTheme.textSecondary)),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios,
+                size: 14, color: AppTheme.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ForecastDay extends StatelessWidget {
+  final WeatherDay day;
+  const _ForecastDay({required this.day});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          WeatherData.shortDay(day.date),
+          style: const TextStyle(color: Colors.white70, fontSize: 11),
+        ),
+        const SizedBox(height: 2),
+        Text(WeatherData.emoji(day.code),
+            style: const TextStyle(fontSize: 16)),
+        const SizedBox(height: 2),
+        Text(
+          '${day.tempMax.toStringAsFixed(0)}° / ${day.tempMin.toStringAsFixed(0)}°',
+          style:
+              const TextStyle(color: Colors.white, fontSize: 10),
+        ),
+      ],
     );
   }
 }

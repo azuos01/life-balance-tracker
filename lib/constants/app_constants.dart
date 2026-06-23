@@ -77,19 +77,19 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '2.4.0';
+const String kAppVersion = '2.5.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // ── Changelog da última versão ────────────────────────────────────────────────
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
-const String kLastChangeVersion = 'v2.4.0';
+const String kLastChangeVersion = 'v2.5.0';
 const String kLastChangeDate    = 'Jun 2026';
 const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
-    'Nova aba Aprender na navegação: acompanhamento de progresso em DataCamp '
-    '(tracking manual de cursos/capítulos), Duolingo (streak e XP) e Chess.com '
-    '(ratings via API pública). 273 testes, CI/CD verde.';
+    'Previsão do tempo no Dashboard via Open-Meteo (sem API key) com alerta '
+    'automático de tarefas sensíveis ao clima. Aba Aprender expandida com '
+    'Goodreads, NotebookLM, MEC Livros e MEC Idiomas.';
 
 // XP rewards
 const int kXpEasy = 10;

@@ -7,6 +7,10 @@ const _kChessUsername = 'learning_chess_username';
 const _kChessStats = 'learning_chess_stats';
 const _kDuolingoData = 'learning_duolingo_data';
 const _kDatacampCourses = 'learning_datacamp_courses';
+const _kGoodreadsData = 'learning_goodreads_data';
+const _kNotebookLMData = 'learning_notebooklm_data';
+const _kMecLivrosData = 'learning_meclivros_data';
+const _kMecIdiomasData = 'learning_mecidiomas_data';
 
 class LearningProvider extends ChangeNotifier {
   final _service = LearningService();
@@ -24,25 +28,37 @@ class LearningProvider extends ChangeNotifier {
 
   // ── Duolingo ───────────────────────────────────────────────────────────────
   DuolingoProgress _duolingo = const DuolingoProgress(username: '');
-
   DuolingoProgress get duolingo => _duolingo;
 
   // ── DataCamp ───────────────────────────────────────────────────────────────
   List<DataCampCourse> _courses = [];
-
   List<DataCampCourse> get courses => List.unmodifiable(_courses);
-
   int get completedCourses => _courses.where((c) => c.isCompleted).length;
 
   double get overallProgress {
     if (_courses.isEmpty) return 0.0;
-    final totalChapters =
-        _courses.fold(0, (s, c) => s + c.totalChapters);
+    final totalChapters = _courses.fold(0, (s, c) => s + c.totalChapters);
     if (totalChapters == 0) return 0.0;
     final completedChapters =
         _courses.fold(0, (s, c) => s + c.completedChapters);
     return completedChapters / totalChapters;
   }
+
+  // ── Goodreads ──────────────────────────────────────────────────────────────
+  GoodreadsProgress _goodreads = const GoodreadsProgress();
+  GoodreadsProgress get goodreads => _goodreads;
+
+  // ── NotebookLM ─────────────────────────────────────────────────────────────
+  NotebookLMProgress _notebookLM = const NotebookLMProgress();
+  NotebookLMProgress get notebookLM => _notebookLM;
+
+  // ── MEC Livros ─────────────────────────────────────────────────────────────
+  MecLivrosProgress _mecLivros = const MecLivrosProgress();
+  MecLivrosProgress get mecLivros => _mecLivros;
+
+  // ── MEC Idiomas ────────────────────────────────────────────────────────────
+  MecIdiomasProgress _mecIdiomas = const MecIdiomasProgress();
+  MecIdiomasProgress get mecIdiomas => _mecIdiomas;
 
   // ── Init ───────────────────────────────────────────────────────────────────
 
@@ -65,6 +81,34 @@ class LearningProvider extends ChangeNotifier {
 
     final rawCourses = StorageService.instance.getJsonList(_kDatacampCourses);
     _courses = rawCourses.map(DataCampCourse.fromJson).toList();
+
+    final grJson = StorageService.instance.getJson(_kGoodreadsData);
+    if (grJson != null) {
+      try {
+        _goodreads = GoodreadsProgress.fromJson(grJson);
+      } catch (_) {}
+    }
+
+    final nlmJson = StorageService.instance.getJson(_kNotebookLMData);
+    if (nlmJson != null) {
+      try {
+        _notebookLM = NotebookLMProgress.fromJson(nlmJson);
+      } catch (_) {}
+    }
+
+    final mlJson = StorageService.instance.getJson(_kMecLivrosData);
+    if (mlJson != null) {
+      try {
+        _mecLivros = MecLivrosProgress.fromJson(mlJson);
+      } catch (_) {}
+    }
+
+    final miJson = StorageService.instance.getJson(_kMecIdiomasData);
+    if (miJson != null) {
+      try {
+        _mecIdiomas = MecIdiomasProgress.fromJson(miJson);
+      } catch (_) {}
+    }
   }
 
   // ── Chess.com ──────────────────────────────────────────────────────────────
@@ -132,5 +176,41 @@ class LearningProvider extends ChangeNotifier {
       _kDatacampCourses,
       _courses.map((c) => c.toJson()).toList(),
     );
+  }
+
+  // ── Goodreads ──────────────────────────────────────────────────────────────
+
+  Future<void> saveGoodreads(GoodreadsProgress progress) async {
+    _goodreads = progress;
+    await StorageService.instance
+        .setJson(_kGoodreadsData, progress.toJson());
+    notifyListeners();
+  }
+
+  // ── NotebookLM ─────────────────────────────────────────────────────────────
+
+  Future<void> saveNotebookLM(NotebookLMProgress progress) async {
+    _notebookLM = progress;
+    await StorageService.instance
+        .setJson(_kNotebookLMData, progress.toJson());
+    notifyListeners();
+  }
+
+  // ── MEC Livros ─────────────────────────────────────────────────────────────
+
+  Future<void> saveMecLivros(MecLivrosProgress progress) async {
+    _mecLivros = progress;
+    await StorageService.instance
+        .setJson(_kMecLivrosData, progress.toJson());
+    notifyListeners();
+  }
+
+  // ── MEC Idiomas ────────────────────────────────────────────────────────────
+
+  Future<void> saveMecIdiomas(MecIdiomasProgress progress) async {
+    _mecIdiomas = progress;
+    await StorageService.instance
+        .setJson(_kMecIdiomasData, progress.toJson());
+    notifyListeners();
   }
 }

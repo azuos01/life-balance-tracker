@@ -187,3 +187,200 @@ class DataCampCourse {
         completedChapters: json['completedChapters'] as int? ?? 0,
       );
 }
+
+// ── Goodreads (manual) ────────────────────────────────────────────────────────
+
+class GoodreadsProgress {
+  final String username;
+  final int booksReadYear;
+  final int booksReading;
+  final int booksWantToRead;
+  final int pagesYear;
+  final String currentBook;
+
+  const GoodreadsProgress({
+    this.username = '',
+    this.booksReadYear = 0,
+    this.booksReading = 0,
+    this.booksWantToRead = 0,
+    this.pagesYear = 0,
+    this.currentBook = '',
+  });
+
+  GoodreadsProgress copyWith({
+    String? username,
+    int? booksReadYear,
+    int? booksReading,
+    int? booksWantToRead,
+    int? pagesYear,
+    String? currentBook,
+  }) =>
+      GoodreadsProgress(
+        username: username ?? this.username,
+        booksReadYear: booksReadYear ?? this.booksReadYear,
+        booksReading: booksReading ?? this.booksReading,
+        booksWantToRead: booksWantToRead ?? this.booksWantToRead,
+        pagesYear: pagesYear ?? this.pagesYear,
+        currentBook: currentBook ?? this.currentBook,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'username': username,
+        'booksReadYear': booksReadYear,
+        'booksReading': booksReading,
+        'booksWantToRead': booksWantToRead,
+        'pagesYear': pagesYear,
+        'currentBook': currentBook,
+      };
+
+  factory GoodreadsProgress.fromJson(Map<String, dynamic> json) =>
+      GoodreadsProgress(
+        username: json['username'] as String? ?? '',
+        booksReadYear: json['booksReadYear'] as int? ?? 0,
+        booksReading: json['booksReading'] as int? ?? 0,
+        booksWantToRead: json['booksWantToRead'] as int? ?? 0,
+        pagesYear: json['pagesYear'] as int? ?? 0,
+        currentBook: json['currentBook'] as String? ?? '',
+      );
+}
+
+// ── NotebookLM (manual) ───────────────────────────────────────────────────────
+
+class NotebookLMProgress {
+  final int notebooksCount;
+  final int sourcesCount;
+  final int notesCount;
+  final String latestTopic;
+
+  const NotebookLMProgress({
+    this.notebooksCount = 0,
+    this.sourcesCount = 0,
+    this.notesCount = 0,
+    this.latestTopic = '',
+  });
+
+  NotebookLMProgress copyWith({
+    int? notebooksCount,
+    int? sourcesCount,
+    int? notesCount,
+    String? latestTopic,
+  }) =>
+      NotebookLMProgress(
+        notebooksCount: notebooksCount ?? this.notebooksCount,
+        sourcesCount: sourcesCount ?? this.sourcesCount,
+        notesCount: notesCount ?? this.notesCount,
+        latestTopic: latestTopic ?? this.latestTopic,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'notebooksCount': notebooksCount,
+        'sourcesCount': sourcesCount,
+        'notesCount': notesCount,
+        'latestTopic': latestTopic,
+      };
+
+  factory NotebookLMProgress.fromJson(Map<String, dynamic> json) =>
+      NotebookLMProgress(
+        notebooksCount: json['notebooksCount'] as int? ?? 0,
+        sourcesCount: json['sourcesCount'] as int? ?? 0,
+        notesCount: json['notesCount'] as int? ?? 0,
+        latestTopic: json['latestTopic'] as String? ?? '',
+      );
+}
+
+// ── MEC Livros (manual) ───────────────────────────────────────────────────────
+
+class MecLivrosProgress {
+  final int booksRead;
+  final int booksReading;
+  final String currentBook;
+  final String favoriteGenre;
+
+  const MecLivrosProgress({
+    this.booksRead = 0,
+    this.booksReading = 0,
+    this.currentBook = '',
+    this.favoriteGenre = '',
+  });
+
+  MecLivrosProgress copyWith({
+    int? booksRead,
+    int? booksReading,
+    String? currentBook,
+    String? favoriteGenre,
+  }) =>
+      MecLivrosProgress(
+        booksRead: booksRead ?? this.booksRead,
+        booksReading: booksReading ?? this.booksReading,
+        currentBook: currentBook ?? this.currentBook,
+        favoriteGenre: favoriteGenre ?? this.favoriteGenre,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'booksRead': booksRead,
+        'booksReading': booksReading,
+        'currentBook': currentBook,
+        'favoriteGenre': favoriteGenre,
+      };
+
+  factory MecLivrosProgress.fromJson(Map<String, dynamic> json) =>
+      MecLivrosProgress(
+        booksRead: json['booksRead'] as int? ?? 0,
+        booksReading: json['booksReading'] as int? ?? 0,
+        currentBook: json['currentBook'] as String? ?? '',
+        favoriteGenre: json['favoriteGenre'] as String? ?? '',
+      );
+}
+
+// ── MEC Idiomas (manual) ──────────────────────────────────────────────────────
+
+class MecIdiomasProgress {
+  final String activeCourse;
+  final String activeLanguage;
+  final int lessonsCompleted;
+  final int totalLessons;
+  final int streak;
+
+  const MecIdiomasProgress({
+    this.activeCourse = '',
+    this.activeLanguage = '',
+    this.lessonsCompleted = 0,
+    this.totalLessons = 0,
+    this.streak = 0,
+  });
+
+  double get progress =>
+      totalLessons == 0 ? 0.0 : lessonsCompleted / totalLessons;
+
+  MecIdiomasProgress copyWith({
+    String? activeCourse,
+    String? activeLanguage,
+    int? lessonsCompleted,
+    int? totalLessons,
+    int? streak,
+  }) =>
+      MecIdiomasProgress(
+        activeCourse: activeCourse ?? this.activeCourse,
+        activeLanguage: activeLanguage ?? this.activeLanguage,
+        lessonsCompleted: lessonsCompleted ?? this.lessonsCompleted,
+        totalLessons: totalLessons ?? this.totalLessons,
+        streak: streak ?? this.streak,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'activeCourse': activeCourse,
+        'activeLanguage': activeLanguage,
+        'lessonsCompleted': lessonsCompleted,
+        'totalLessons': totalLessons,
+        'streak': streak,
+      };
+
+  factory MecIdiomasProgress.fromJson(Map<String, dynamic> json) =>
+      MecIdiomasProgress(
+        activeCourse: json['activeCourse'] as String? ?? '',
+        activeLanguage: json['activeLanguage'] as String? ?? '',
+        lessonsCompleted: json['lessonsCompleted'] as int? ?? 0,
+        totalLessons: json['totalLessons'] as int? ?? 0,
+        streak: json['streak'] as int? ?? 0,
+      );
+}

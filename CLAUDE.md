@@ -85,6 +85,7 @@ const String kLastChangeSummary =
 
 | Versão | Tipo | Data | Resumo |
 |---|---|---|---|
+| `v2.5.0+8` | MINOR | Jun 2026 | Previsão do tempo no Dashboard (Open-Meteo, sem API key) + alertas de tarefas sensíveis ao clima; aba Aprender expandida com Goodreads, NotebookLM, MEC Livros e MEC Idiomas; 313 testes, CI/CD verde |
 | `v2.4.0+7` | MINOR | Jun 2026 | Nova aba Aprender: tracking de DataCamp (cursos/capítulos), Duolingo (streak/XP) e Chess.com (ratings via API); 273 testes, CI/CD verde |
 | `v2.3.0+6` | MINOR | Jun 2026 | Assistente IA com OpenAI GPT-4o-mini na aba Tarefas: sugere tarefas priorizadas por Eisenhower/MIT com base no perfil de vida; 256 testes, CI/CD verde |
 | `v2.2.0+5` | MINOR | Jun 2026 | Campo Localização (Google Maps) em todas as tarefas; filtros de status na aba Relatórios garantidamente funcionais; 244 testes, CI/CD verde |
