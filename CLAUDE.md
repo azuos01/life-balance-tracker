@@ -47,11 +47,11 @@ version: X.Y.Z+N   # ex: 2.1.0+3
 #### 2. `lib/constants/app_constants.dart` — 5 constantes obrigatórias
 
 ```dart
-const String kAppVersion        = 'X.Y.Z';       // ex: '2.1.0'
-const String kLastChangeVersion = 'vX.Y.Z';      // ex: 'v2.1.0'
-const String kLastChangeDate    = 'Mmm YYYY';    // ex: 'Jun 2026'  (mês abreviado PT)
-const String kLastChangeType    = 'TIPO';        // 'MAJOR' | 'MINOR' | 'PATCH'
-const String kLastChangeSummary = '...';         // Máx. 3 frases descrevendo o que mudou
+const String kAppVersion        = 'X.Y.Z';            // ex: '2.1.0'
+const String kLastChangeVersion = 'vX.Y.Z';           // ex: 'v2.1.0'
+const String kLastChangeDate    = 'DD/MM/YYYY HH:mm'; // ex: '23/06/2026 14:30'  (timestamp completo)
+const String kLastChangeType    = 'TIPO';             // 'MAJOR' | 'MINOR' | 'PATCH'
+const String kLastChangeSummary = '...';              // Máx. 3 frases descrevendo o que mudou
 ```
 
 #### Exemplo completo de atualização
@@ -65,7 +65,7 @@ version: 2.2.0+4          // era 2.1.0+3 → MINOR (nova tela) + incremento BUIL
 // app_constants.dart
 const String kAppVersion        = '2.2.0';
 const String kLastChangeVersion = 'v2.2.0';
-const String kLastChangeDate    = 'Jul 2026';
+const String kLastChangeDate    = '15/07/2026 10:30';
 const String kLastChangeType    = 'MINOR';
 const String kLastChangeSummary =
     'Nova tela de Configurações com exportação de dados em CSV. '
@@ -83,15 +83,15 @@ const String kLastChangeSummary =
 
 ## Histórico de Versões
 
-| Versão | Tipo | Data | Resumo |
+| Versão | Tipo | Timestamp | Resumo |
 |---|---|---|---|
-| `v2.6.0+9` | MINOR | Jun 2026 | Nova aba E-mail em Tarefas: integração Gmail (OAuth2 gmail.readonly) + OpenAI GPT-4o-mini para gerar tarefas priorizadas por Eisenhower; configuração de remetentes e janela de 1 dia a 1 ano; 327 testes, CI/CD verde |
-| `v2.5.0+8` | MINOR | Jun 2026 | Previsão do tempo no Dashboard (Open-Meteo, sem API key) + alertas de tarefas sensíveis ao clima; aba Aprender expandida com Goodreads, NotebookLM, MEC Livros e MEC Idiomas; 313 testes, CI/CD verde |
-| `v2.4.0+7` | MINOR | Jun 2026 | Nova aba Aprender: tracking de DataCamp (cursos/capítulos), Duolingo (streak/XP) e Chess.com (ratings via API); 273 testes, CI/CD verde |
-| `v2.3.0+6` | MINOR | Jun 2026 | Assistente IA com OpenAI GPT-4o-mini na aba Tarefas: sugere tarefas priorizadas por Eisenhower/MIT com base no perfil de vida; 256 testes, CI/CD verde |
-| `v2.2.0+5` | MINOR | Jun 2026 | Campo Localização (Google Maps) em todas as tarefas; filtros de status na aba Relatórios garantidamente funcionais; 244 testes, CI/CD verde |
-| `v2.1.0+3` | MINOR | Jun 2026 | Relatórios com filtros corrigidos, edição universal de tarefas e taxa de conclusão por período |
-| `v2.0.0+2` | MAJOR | Mai 2026 | Sincronização Google Agenda→Tarefas, 134 testes unitários, CI/CD com gate de qualidade |
+| `v2.6.0+9` | MINOR | 23/06/2026 11:58 | Nova aba E-mail em Tarefas: integração Gmail (OAuth2 gmail.readonly) + OpenAI GPT-4o-mini para gerar tarefas priorizadas por Eisenhower; configuração de remetentes e janela de 1 dia a 1 ano; 327 testes, CI/CD verde |
+| `v2.5.0+8` | MINOR | 22/06/2026 22:18 | Previsão do tempo no Dashboard (Open-Meteo, sem API key) + alertas de tarefas sensíveis ao clima; aba Aprender expandida com Goodreads, NotebookLM, MEC Livros e MEC Idiomas; 313 testes, CI/CD verde |
+| `v2.4.0+7` | MINOR | 22/06/2026 03:21 | Nova aba Aprender: tracking de DataCamp (cursos/capítulos), Duolingo (streak/XP) e Chess.com (ratings via API); 273 testes, CI/CD verde |
+| `v2.3.0+6` | MINOR | 21/06/2026 01:12 | Assistente IA com OpenAI GPT-4o-mini na aba Tarefas: sugere tarefas priorizadas por Eisenhower/MIT com base no perfil de vida; 256 testes, CI/CD verde |
+| `v2.2.0+5` | MINOR | 03/06/2026 20:13 | Campo Localização (Google Maps) em todas as tarefas; filtros de status na aba Relatórios garantidamente funcionais; 244 testes, CI/CD verde |
+| `v2.1.0+3` | MINOR | 03/06/2026 00:33 | Relatórios com filtros corrigidos, edição universal de tarefas e taxa de conclusão por período |
+| `v2.0.0+2` | MAJOR | 26/05/2026 20:05 | Sincronização Google Agenda→Tarefas, 134 testes unitários, CI/CD com gate de qualidade |
 | `v1.x` | — | — | Versão inicial (local-only, sem Firebase) |
 
 ---

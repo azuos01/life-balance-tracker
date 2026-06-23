@@ -84,7 +84,7 @@ const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
 const String kLastChangeVersion = 'v2.6.0';
-const String kLastChangeDate    = 'Jun 2026';
+const String kLastChangeDate    = '23/06/2026 11:58';
 const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
     'Nova aba E-mail em Tarefas: integração Gmail (OAuth2 gmail.readonly) com '

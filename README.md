@@ -6,7 +6,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?logo=firebase)](https://firebase.google.com)
-[![Versão](https://img.shields.io/badge/versão-2.0.0-blueviolet)](pubspec.yaml)
+[![Versão](https://img.shields.io/badge/versão-2.6.0-blueviolet)](pubspec.yaml)
 
 **🌐 Live:** https://azuos01.github.io/life-balance-tracker/
 
@@ -14,26 +14,31 @@
 
 ## Visão Geral
 
-O Life Balance Tracker é um aplicativo Flutter Web que combina **gamificação** com **gestão intencional de vida**. O usuário acompanha e evolui as 10 áreas da Roda da Vida, registra atividades, planeja tarefas com a Matriz de Eisenhower/Kanban, realiza check-ins diários e sincroniza compromissos diretamente do Google Agenda — tudo persistido localmente ou na nuvem via Cloud Firestore.
+O Life Balance Tracker é um aplicativo Flutter Web que combina **gamificação** com **gestão intencional de vida**. O usuário acompanha e evolui as 10 áreas da Roda da Vida, registra atividades, planeja tarefas com a Matriz de Eisenhower/Kanban, realiza check-ins diários, sincroniza compromissos do Google Agenda, analisa e-mails para gerar tarefas automaticamente via IA, e acompanha a previsão do tempo integrada ao seu plano do dia — tudo persistido localmente ou na nuvem via Cloud Firestore.
 
 ---
 
-## Funcionalidades Implementadas (v2.0.0)
+## Funcionalidades Implementadas (v2.6.0)
 
 ### 🔐 Autenticação
-- [x] Login com **Google** (Firebase Auth + OAuth2)
+
+- [x] Login com **Google** (Firebase Auth + OAuth2 — escopos: Calendar + Gmail)
 - [x] Login com **LinkedIn** (OAuth2 PKCE — sem backend)
 - [x] Modo **offline/local** (sem conta) com SharedPreferences
 - [x] Migração automática de dados locais → cloud ao fazer login
 
 ### 🏠 Dashboard
+
 - [x] **Roda da Vida** — gráfico radar interativo com as 10 áreas (CustomPainter)
 - [x] Score de equilíbrio geral (0–100%)
 - [x] Cards de visão rápida por área (score + importância)
 - [x] **Frase filosófica diária** (150 citações, seleção determinística por dia)
 - [x] Resumo de atividades da semana e check-ins
+- [x] **Previsão do tempo** via Open-Meteo (sem API key) com temperatura atual e forecast de 3 dias
+- [x] **Alertas de tarefas sensíveis ao clima** — avisa quando há tarefas como limpeza, instalação solar ou jardinagem e a previsão é de chuva ou tempestade
 
 ### 🎯 Sistema de XP e Gamificação
+
 - [x] XP por dificuldade: fácil **10** / médio **25** / difícil **50** XP
 - [x] XP adicional: hábito **15** / streak **100** / objetivo **500** / check-in **20**
 - [x] **5 tiers**: Iniciante → Praticante → Guerreiro → Mestre → Lenda
@@ -41,15 +46,39 @@ O Life Balance Tracker é um aplicativo Flutter Web que combina **gamificação*
 - [x] Streak de dias consecutivos com bônus
 - [x] **8 conquistas** com sistema de desbloqueio automático
 
-### 📋 Planejamento de Tarefas
+### 📋 Planejamento de Tarefas (6 abas)
+
 - [x] **Matriz de Eisenhower** (4 quadrantes: Urgente/Importante)
 - [x] **Kanban** (Planejado → Em Progresso → Concluído)
 - [x] **MITs — Most Important Tasks** (máx. 3 por dia)
+- [x] **Histórico** de tarefas concluídas
+- [x] **Relatórios** com filtros de status, taxa de conclusão e métricas por área
+- [x] **IA (Agente OpenAI)** — sugere tarefas priorizadas por Eisenhower/MIT com base no perfil de vida (GPT-4o-mini)
+- [x] **E-mail** — analisa e-mails do Gmail e gera tarefas automaticamente via IA
+- [x] Campo **Localização** vinculado ao Google Maps em cada tarefa
 - [x] Classificação automática de área por palavras-chave (`AreaClassifier`)
 - [x] Sincronização bidirecional com Cloud Firestore
 - [x] Tarefas de calendário protegidas (não editáveis/deletáveis pelo usuário)
 
+### 📧 Análise de E-mails (aba E-mail em Tarefas)
+
+- [x] Integração com **Gmail REST API v1** (escopo `gmail.readonly`)
+- [x] Configuração de **remetentes-alvo** (filtra apenas e-mails de endereços específicos)
+- [x] **Janela de análise** configurável: 1 dia / 1 semana / 1 mês / 1 trimestre / 1 semestre / 1 ano
+- [x] Análise por **OpenAI GPT-4o-mini** — identifica ações concretas e gera até 8 tarefas priorizadas
+- [x] Cada sugestão exibe: quadrante Eisenhower, área de vida, raciocínio da IA e origem no e-mail
+- [x] Aceitar sugestão cria a tarefa diretamente; ignorar a descarta sem efeitos
+
+### 🌤️ Previsão do Tempo
+
+- [x] **Open-Meteo API** — totalmente gratuita, sem API key, CORS-friendly
+- [x] Busca por nome de cidade (geocodificação automática)
+- [x] Exibe temperatura atual, condição (emoji + texto) e forecast dos próximos 3 dias
+- [x] **Detecção de tarefas sensíveis ao clima** — palavras-chave: limpeza, solar, pintura, jardinagem, obra, lavagem, telhado, etc.
+- [x] Cache local de 30 minutos (evita chamadas repetidas)
+
 ### 📅 Google Agenda
+
 - [x] Integração com **Google Calendar REST API v3**
 - [x] Visualização de eventos por mês (calendário interativo)
 - [x] Criação e edição de eventos com data, hora e recorrência
@@ -59,12 +88,14 @@ O Life Balance Tracker é um aplicativo Flutter Web que combina **gamificação*
 - [x] Estado das tarefas de calendário persistido localmente (overrides)
 
 ### 📓 Diário (Check-ins)
+
 - [x] **Check-in matinal**: humor (1-5), energia (1-5), intenções do dia, gratidão
 - [x] **Check-out noturno**: nota do dia (1-10), reflexão, plano para amanhã
 - [x] Histórico de check-ins com contadores
 - [x] Apenas um check-in por dia (atualização em vez de duplicação)
 
 ### 📊 Atividades
+
 - [x] Registro de atividades com área, duração e dificuldade
 - [x] Heatmap de atividades estilo GitHub (por dia)
 - [x] Agrupamento de XP por área (`xpByArea`)
@@ -72,22 +103,56 @@ O Life Balance Tracker é um aplicativo Flutter Web que combina **gamificação*
 - [x] Áreas ativas na última semana (`areasActiveThisWeek`)
 
 ### 🎯 Objetivos
+
 - [x] Criação de objetivos por área com título, prazo e progresso (%)
 - [x] Status: `pendente` / `em andamento` / `concluído`
 - [x] Edição e exclusão de objetivos
 - [x] Listagem de objetivos ativos (exclui concluídos)
 
+### 📚 Aprender (7 plataformas)
+
+- [x] **DataCamp** — cursos concluídos, capítulos, XP e curso atual
+- [x] **Duolingo** — streak, XP diário/total, nível e idioma ativo
+- [x] **Chess.com** — ratings Bullet / Blitz / Rapid via API pública
+- [x] **Goodreads** — livros lidos no ano, em leitura, páginas e livro atual
+- [x] **NotebookLM** — notebooks, fontes, notas e tópico mais recente
+- [x] **MEC Livros** — livros lidos, em leitura e gênero favorito
+- [x] **MEC Idiomas** — curso ativo, lições concluídas, total e progresso (%)
+- [x] Grid 2-colunas com indicador visual de plataforma ativa
+- [x] Modal por plataforma com formulário de atualização manual
+
 ### ⚙️ Configurações
+
 - [x] Alternância **Dark / Light theme** (persistida)
 - [x] Alternância de idioma **Português / English** (i18n com `AppLocalizations`)
 - [x] Configuração da janela de sincronização do Google Agenda
+- [x] Configuração da **chave OpenAI** (armazenada apenas localmente via SharedPreferences)
 - [x] Reset completo de dados do usuário
-- [x] **Seção de informações do app** com versão, tipo de release e changelog
+- [x] **Seção de informações do app** com versão, tipo de release, timestamp e changelog
 
 ### ☁️ Cloud (Firebase)
+
 - [x] Cloud Firestore com estrutura `users/{uid}/{profile|activities|areas|checkIns|achievements|tasks}`
 - [x] Dados completamente isolados por `uid`
 - [x] Modo local → cloud transparente (sem mudança de UX)
+
+---
+
+## Pré-requisitos de Configuração
+
+### Chave OpenAI (para IA e análise de e-mails)
+
+A chave OpenAI é necessária para duas features:
+- **Aba IA** em Tarefas — sugestões de tarefas por GPT-4o-mini
+- **Aba E-mail** em Tarefas — análise de e-mails e geração de tarefas
+
+Configure em: **Perfil → Inteligência Artificial → Chave OpenAI**
+
+> A chave é armazenada apenas localmente no dispositivo (SharedPreferences). Nunca é enviada ao repositório.
+
+### Acesso Gmail (para análise de e-mails)
+
+O acesso ao Gmail é solicitado automaticamente no login com Google. O aplicativo usa apenas o escopo `gmail.readonly` — nenhum e-mail é armazenado, apenas o snippet (prévia curta) é enviado ao OpenAI para análise.
 
 ---
 
@@ -98,85 +163,109 @@ life_balance_tracker/
 │
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml              # CI/CD: testes → build → GitHub Pages
+│       └── deploy.yml                   # CI/CD: testes → build → GitHub Pages
 │
 ├── test/
 │   ├── models/
 │   │   ├── activity_model_test.dart
 │   │   ├── area_model_test.dart
+│   │   ├── email_model_test.dart        # EmailMessage, EmailAnalysisConfig
+│   │   ├── learning_progress_test.dart  # 7 plataformas de aprendizado
 │   │   ├── task_model_test.dart
-│   │   └── user_model_test.dart
-│   └── providers/
-│       ├── activities_provider_test.dart
-│       ├── areas_provider_test.dart
-│       └── tasks_provider_test.dart
+│   │   ├── user_model_test.dart
+│   │   └── weather_model_test.dart      # WeatherData, isWeatherSensitiveTask
+│   ├── providers/
+│   │   ├── activities_provider_test.dart
+│   │   ├── areas_provider_test.dart
+│   │   └── tasks_provider_test.dart
+│   └── reports/
+│       ├── tasks_report_filter_test.dart
+│       ├── tasks_report_integration_test.dart
+│       └── tasks_report_stress_test.dart  # Stress com 500–1000 tarefas
 │
 └── lib/
-    ├── main.dart                    # Entry point + MultiProvider
-    ├── app.dart                     # MaterialApp + roteamento + temas
+    ├── main.dart                          # Entry point + MultiProvider (10 providers)
+    ├── app.dart                           # MaterialApp + roteamento + temas
     │
     ├── constants/
-    │   └── app_constants.dart       # 10 áreas, XP, níveis, tiers, changelog
+    │   └── app_constants.dart             # 10 áreas, XP, níveis, tiers, changelog
     │
     ├── theme/
-    │   └── app_theme.dart           # Dark/light theme + cores das 10 áreas
+    │   └── app_theme.dart                 # Dark/light theme + cores das 10 áreas
     │
     ├── l10n/
-    │   └── app_l10n.dart            # Internacionalização PT/EN (inline)
+    │   └── app_l10n.dart                  # Internacionalização PT/EN (inline)
     │
     ├── models/
-    │   ├── user_model.dart          # Perfil, XP, tier, nível, streak
-    │   ├── area_model.dart          # Área da roda da vida + GoalModel
-    │   ├── activity_model.dart      # Log de atividade
-    │   ├── checkin_model.dart       # Check-in matinal + noturno
-    │   ├── achievement_model.dart   # Conquistas
-    │   ├── task_model.dart          # Tarefas Eisenhower/Kanban + MIT
-    │   └── calendar_event_model.dart # Evento do Google Calendar
+    │   ├── user_model.dart                # Perfil, XP, tier, nível, streak
+    │   ├── area_model.dart                # Área da roda da vida + GoalModel
+    │   ├── activity_model.dart            # Log de atividade
+    │   ├── checkin_model.dart             # Check-in matinal + noturno
+    │   ├── achievement_model.dart         # Conquistas
+    │   ├── task_model.dart                # Tarefas Eisenhower/Kanban + MIT + localização
+    │   ├── task_suggestion.dart           # Sugestão de tarefa gerada por IA
+    │   ├── calendar_event_model.dart      # Evento do Google Calendar
+    │   ├── learning_progress.dart         # 7 plataformas (DataCamp, Duolingo, etc.)
+    │   ├── weather_model.dart             # WeatherData, WeatherCurrent, WeatherDay
+    │   └── email_model.dart               # EmailMessage, EmailAnalysisConfig
     │
     ├── services/
-    │   ├── storage_service.dart     # SharedPreferences wrapper (singleton)
-    │   ├── firestore_service.dart   # Cloud Firestore CRUD por coleção
-    │   ├── auth_service.dart        # Google + LinkedIn OAuth2 PKCE
-    │   ├── calendar_service.dart    # Google Calendar REST API v3
-    │   ├── area_classifier.dart     # Classificação de tarefas por palavras-chave
-    │   └── quotes_service.dart      # 150 frases filosóficas (por dia do ano)
+    │   ├── storage_service.dart           # SharedPreferences wrapper (singleton)
+    │   ├── firestore_service.dart         # Cloud Firestore CRUD por coleção
+    │   ├── auth_service.dart              # Google + LinkedIn OAuth2 PKCE
+    │   ├── calendar_service.dart          # Google Calendar REST API v3
+    │   ├── weather_service.dart           # Open-Meteo geocoding + forecast
+    │   ├── gmail_service.dart             # Gmail REST API v1 (batch fetch)
+    │   ├── area_classifier.dart           # Classificação de tarefas por palavras-chave
+    │   └── quotes_service.dart            # 150 frases filosóficas (por dia do ano)
     │
     ├── providers/
-    │   ├── user_provider.dart       # XP, nível, streak, conquistas, auth
-    │   ├── areas_provider.dart      # 10 áreas, scores, objetivos
-    │   ├── activities_provider.dart # Atividades, check-ins, heatmap
-    │   ├── tasks_provider.dart      # Tarefas, Kanban, Eisenhower, MITs, sync calendário
-    │   ├── calendar_provider.dart   # Google Calendar, janela de sync, eventos
-    │   └── settings_provider.dart  # Tema, idioma
+    │   ├── settings_provider.dart         # Tema, idioma, chave OpenAI
+    │   ├── user_provider.dart             # XP, nível, streak, conquistas, auth
+    │   ├── areas_provider.dart            # 10 áreas, scores, objetivos
+    │   ├── activities_provider.dart       # Atividades, check-ins, heatmap
+    │   ├── calendar_provider.dart         # Google Calendar, janela de sync, eventos
+    │   ├── ai_agent_provider.dart         # Sugestões de tarefas via OpenAI
+    │   ├── learning_provider.dart         # 7 plataformas de aprendizado
+    │   ├── weather_provider.dart          # Clima via Open-Meteo (cache 30 min)
+    │   ├── gmail_tasks_provider.dart      # Análise Gmail + geração de tarefas IA
+    │   └── tasks_provider.dart            # Tarefas, Kanban, Eisenhower, MITs, sync calendário
     │
     ├── screens/
     │   ├── splash_screen.dart
-    │   ├── onboarding_screen.dart   # Wizard 3 passos (nome + scores + objetivos)
-    │   ├── main_screen.dart         # Bottom nav (5 abas)
-    │   ├── dashboard_screen.dart    # Roda da Vida + overview + frase do dia
-    │   ├── activities_screen.dart   # Histórico + heatmap
-    │   ├── goals_screen.dart        # Objetivos por área
-    │   ├── profile_screen.dart      # XP, conquistas, stats, configurações
+    │   ├── onboarding_screen.dart         # Wizard 3 passos (nome + scores + objetivos)
+    │   ├── main_screen.dart               # Bottom nav (5 abas)
+    │   ├── dashboard_screen.dart          # Roda da Vida + clima + frase do dia
+    │   ├── activities_screen.dart         # Histórico + heatmap
+    │   ├── goals_screen.dart              # Objetivos por área
+    │   ├── profile_screen.dart            # XP, conquistas, stats, configurações
     │   ├── auth/
-    │   │   └── login_screen.dart    # Google + LinkedIn sign-in
+    │   │   └── login_screen.dart          # Google + LinkedIn sign-in
     │   ├── logging/
     │   │   ├── add_activity_screen.dart
     │   │   ├── morning_checkin_screen.dart
     │   │   └── evening_checkout_screen.dart
     │   ├── tasks/
-    │   │   ├── tasks_screen.dart    # Kanban + Eisenhower + MITs (TabBar 3 abas)
-    │   │   └── task_create_screen.dart
+    │   │   ├── tasks_screen.dart          # 6 abas: Eisenhower, Kanban, Histórico, Relatórios, IA, E-mail
+    │   │   ├── task_create_screen.dart
+    │   │   ├── task_detail_sheet.dart
+    │   │   ├── ai_agent_screen.dart       # Aba IA: sugestões OpenAI
+    │   │   └── email_tasks_tab.dart       # Aba E-mail: análise Gmail + tarefas IA
+    │   ├── reports/
+    │   │   └── reports_screen.dart        # Relatórios com filtros e métricas
+    │   ├── learning/
+    │   │   └── learning_tracker_screen.dart  # Grid 7 plataformas + modais
     │   └── calendar/
-    │       ├── calendar_screen.dart # Calendário mensal interativo
+    │       ├── calendar_screen.dart       # Calendário mensal interativo
     │       └── event_form_screen.dart
     │
     ├── widgets/
-    │   ├── life_wheel_chart.dart    # Gráfico radar (CustomPainter)
-    │   ├── xp_progress_bar.dart     # Barra de XP animada
-    │   ├── area_card.dart           # Card de área da Roda da Vida
-    │   └── app_background.dart      # Background gradiente adaptativo dark/light
+    │   ├── life_wheel_chart.dart          # Gráfico radar (CustomPainter)
+    │   ├── xp_progress_bar.dart           # Barra de XP animada
+    │   ├── area_card.dart                 # Card de área da Roda da Vida
+    │   └── app_background.dart            # Background gradiente adaptativo dark/light
     │
-    └── firebase_options.dart        # Configuração Firebase (gerada pelo FlutterFire CLI)
+    └── firebase_options.dart              # Configuração Firebase (gerada pelo FlutterFire CLI)
 ```
 
 ---
@@ -191,9 +280,12 @@ life_balance_tracker/
 | Banco de dados cloud | Cloud Firestore |
 | Persistência local | SharedPreferences |
 | Integração de agenda | Google Calendar REST API v3 |
+| Análise de e-mails | Gmail REST API v1 (escopo `gmail.readonly`) |
+| Inteligência Artificial | OpenAI GPT-4o-mini (sugestões + análise de e-mails) |
+| Previsão do tempo | Open-Meteo API (gratuita, sem API key) |
 | Deploy | GitHub Pages via `peaceiris/actions-gh-pages` |
 | CI/CD | GitHub Actions (test gate + build + deploy) |
-| Testes | `flutter_test` (134 testes unitários) |
+| Testes | `flutter_test` (327 testes unitários/integração/stress) |
 | Fontes | Google Fonts |
 | Geração de IDs | uuid |
 
@@ -252,17 +344,23 @@ flutter test --reporter=expanded
 flutter test --coverage --reporter=expanded
 ```
 
-**134 testes unitários** cobrindo:
+**327 testes** cobrindo modelos, providers, filtros de relatórios e cenários stress:
 
-| Arquivo | Testes |
+| Arquivo | Escopo |
 |---|---|
-| `test/models/task_model_test.dart` | 35 |
-| `test/models/user_model_test.dart` | 17 |
-| `test/models/area_model_test.dart` | 12 |
-| `test/models/activity_model_test.dart` | 7 |
-| `test/providers/tasks_provider_test.dart` | 41 |
-| `test/providers/areas_provider_test.dart` | 20 |
-| `test/providers/activities_provider_test.dart` | 20 |
+| `test/models/task_model_test.dart` | TaskModel, SubtaskModel |
+| `test/models/user_model_test.dart` | UserModel, XP, tiers |
+| `test/models/area_model_test.dart` | AreaModel, GoalModel |
+| `test/models/activity_model_test.dart` | ActivityModel |
+| `test/models/weather_model_test.dart` | WeatherData, isWeatherSensitiveTask |
+| `test/models/learning_progress_test.dart` | 7 plataformas de aprendizado |
+| `test/models/email_model_test.dart` | EmailMessage, EmailAnalysisConfig |
+| `test/providers/tasks_provider_test.dart` | TasksProvider, Eisenhower, MIT, calendar |
+| `test/providers/areas_provider_test.dart` | AreasProvider, scores, objetivos |
+| `test/providers/activities_provider_test.dart` | ActivitiesProvider, check-ins |
+| `test/reports/tasks_report_filter_test.dart` | Filtros de status em Relatórios |
+| `test/reports/tasks_report_integration_test.dart` | Fluxos multi-step |
+| `test/reports/tasks_report_stress_test.dart` | Stress 500–1000 tarefas |
 
 ---
 
@@ -272,7 +370,7 @@ O pipeline `.github/workflows/deploy.yml` executa em todo push/PR para `main`:
 
 ```
 push → main
-  ├── [1] 🧪 Testes Unitários
+  ├── [1] 🧪 Testes + Análise
   │       flutter analyze --no-fatal-infos
   │       flutter test --reporter=expanded
   │       flutter test --coverage  (artefato: coverage/lcov.info)
@@ -292,10 +390,23 @@ Formato: **`MAJOR.MINOR.PATCH+BUILD`**
 
 | Dígito | Quando incrementar |
 |---|---|
-| `MAJOR` | Alterações complexas de arquitetura (ex: mudança de providers, refatoração de camadas) |
-| `MINOR` | Novas funcionalidades e melhorias (ex: nova tela, nova feature) |
-| `PATCH` | Correções de bugs (ex: fix de lógica, crash fix, correção visual) |
-| `+BUILD` | Incrementado a cada publicação/release |
+| `MAJOR` | Alterações de arquitetura (ex: troca de provider, breaking change) |
+| `MINOR` | Novas funcionalidades (ex: nova aba, nova integração) |
+| `PATCH` | Correções de bugs (ex: crash fix, correção visual) |
+| `+BUILD` | Incrementado a cada publicação em `main` |
+
+### Histórico de Versões
+
+| Versão | Tipo | Timestamp | Resumo |
+|---|---|---|---|
+| `v2.6.0+9` | MINOR | 23/06/2026 11:58 | Nova aba E-mail: integração Gmail + OpenAI para gerar tarefas; 327 testes |
+| `v2.5.0+8` | MINOR | 22/06/2026 22:18 | Previsão do tempo no Dashboard + alertas de tarefas sensíveis ao clima; 7 plataformas de aprendizado; 313 testes |
+| `v2.4.0+7` | MINOR | 22/06/2026 03:21 | Aba Aprender com DataCamp, Duolingo e Chess.com; 273 testes |
+| `v2.3.0+6` | MINOR | 21/06/2026 01:12 | Assistente IA com OpenAI GPT-4o-mini na aba Tarefas; 256 testes |
+| `v2.2.0+5` | MINOR | 03/06/2026 20:13 | Campo Localização via Google Maps; relatórios com filtros funcionais; 244 testes |
+| `v2.1.0+3` | MINOR | 03/06/2026 00:33 | Relatórios, edição universal de tarefas e taxa de conclusão por período |
+| `v2.0.0+2` | MAJOR | 26/05/2026 20:05 | Sincronização Google Agenda→Tarefas, 134 testes unitários, CI/CD |
+| `v1.x` | — | — | Versão inicial (local-only, sem Firebase) |
 
 ---
 
@@ -316,14 +427,16 @@ Formato: **`MAJOR.MINOR.PATCH+BUILD`**
 
 ---
 
-## Roadmap — Sugestões de Novos Desenvolvimentos
+## Roadmap — Próximos Desenvolvimentos
 
 ### 🔔 Notificações e Engajamento
+
 - [ ] Notificações push para check-in matinal e check-out noturno (horários configuráveis)
 - [ ] Lembretes de tarefas MITs com X minutos de antecedência
 - [ ] Notificação de streak em risco ("Você não fez check-in hoje ainda!")
 
 ### 📊 Analytics e Insights
+
 - [ ] Gráfico de evolução de scores das 10 áreas ao longo do tempo (linha temporal)
 - [ ] Painel de insights automáticos ("Você não registra atividade em Saúde Mental há 7 dias")
 - [ ] Correlação entre score de área e XP ganho
@@ -331,12 +444,14 @@ Formato: **`MAJOR.MINOR.PATCH+BUILD`**
 - [ ] Exportação de dados em CSV
 
 ### 🤖 Inteligência Artificial
-- [ ] Sugestão de atividades baseada em áreas com score mais baixo
+
 - [ ] Análise de sentimento do check-in noturno (reflexão textual)
 - [ ] Geração automática de objetivos SMART com base no perfil
 - [ ] Resumo semanal gerado por IA com pontos de atenção
+- [ ] Análise de e-mails de calendário (Outlook) além do Gmail
 
 ### 🔗 Integrações Externas
+
 - [ ] Sincronização com **Google Fit / Apple Health** (passos, sono, frequência cardíaca)
 - [ ] Integração com **Notion** para importar tarefas como blocos
 - [ ] Integração com **Todoist / TickTick** via API REST
@@ -344,18 +459,21 @@ Formato: **`MAJOR.MINOR.PATCH+BUILD`**
 - [ ] Importação de tarefas do **Microsoft Outlook Calendar**
 
 ### 👥 Social e Colaboração
+
 - [ ] Perfil público compartilhável (Roda da Vida pública com link)
 - [ ] Grupos e desafios coletivos ("Grupo de corrida — meta semanal")
 - [ ] Ranking de XP entre amigos (leaderboard opt-in)
 - [ ] Mentor/mentee: compartilhar progresso com coach ou mentor
 
 ### 🎮 Gamificação Avançada
+
 - [ ] Missões semanais com recompensas extras de XP
 - [ ] Conquistas sazonais (ex: "30 dias de streak em dezembro")
 - [ ] Sistema de loja de avatares/skins desbloqueáveis com XP
 - [ ] Modo desafio: completar todas as 10 áreas em 1 semana
 
 ### 📱 Plataforma e UX
+
 - [ ] App nativo Android / iOS (build mobile com suporte a push nativo)
 - [ ] Widget de tela inicial (Android) com score diário e MIT do dia
 - [ ] Modo offline completo com sincronização delta ao reconectar
@@ -363,6 +481,7 @@ Formato: **`MAJOR.MINOR.PATCH+BUILD`**
 - [ ] Suporte a ES/FR/DE (extensão do sistema i18n existente)
 
 ### 🔐 Segurança e Privacidade
+
 - [ ] Autenticação por biometria (Face ID / impressão digital) no mobile
 - [ ] Criptografia local dos dados em SharedPreferences
 - [ ] Exportação e exclusão completa de dados (LGPD/GDPR compliance)
@@ -374,6 +493,7 @@ Formato: **`MAJOR.MINOR.PATCH+BUILD`**
 
 > ⚠️ **O Client Secret do LinkedIn vai APENAS no Firebase Console, nunca no código ou repositório.**
 > A Firebase API Key é segura em repositório público (restrita por domínio).
+> A chave OpenAI é armazenada apenas localmente no dispositivo do usuário (SharedPreferences).
 
 ---
 
