@@ -1,7 +1,7 @@
 class SubtaskModel {
   final String id;
   String title;
-  int estimatedHours; // 2–8 horas por subtarefa
+  int estimatedHours;
   bool isCompleted;
   DateTime? completedAt;
 
@@ -32,39 +32,41 @@ class SubtaskModel {
       );
 }
 
-/// Representa uma tarefa gerenciável com classificação Eisenhower e MIT.
+/// Quadrantes Eisenhower (definição vigente):
+///   Q1 = +Urgente +Importante  → Faça Agora  🔴
+///   Q2 = +Urgente −Importante  → Delegue     🟡
+///   Q3 = −Urgente +Importante  → Agende      🟢
+///   Q4 = −Urgente −Importante  → Elimine     ⚫
 ///
-/// Quadrantes Eisenhower:
-///   1 = Urgente  + Importante  → Faça Agora
-///   2 = Não Urgente + Importante → Agende
-///   3 = Urgente  + Não Importante → Delegue
-///   4 = Não Urgente + Não Importante → Elimine
+/// Ambientes:
+///   'indoor'       → não afetado por clima
+///   'outdoor'      → afetado por condições climáticas
+///   'unspecified'  → detecção automática por palavras-chave
+///
+/// Status Kanban:
+///   'pending'     → Planejado
+///   'in_progress' → Em Andamento
+///   'completed'   → Feito
+///   'blocked'     → Bloqueado
 class TaskModel {
-  final String id;
+  final String id;         // Formato: YYYYMMDDHHMMSSXX (ex: 20260623145830AA)
   final String userId;
   String title;
   String description;
-  String areaId; // ID de uma das 10 áreas da Roda da Vida
-  int eisenhowerQ; // 1–4
-  bool isMIT; // Most Important Task (máx 3 simultâneas)
-  int mitOrder; // 0 = não MIT; 1, 2 ou 3 = posição no bloco MIT
-  String status; // 'pending' | 'in_progress' | 'completed'
+  String areaId;
+  int eisenhowerQ;         // 1–4
+  bool isMIT;
+  int mitOrder;
+  String status;           // 'pending' | 'in_progress' | 'completed' | 'blocked'
   DateTime? dueDate;
+  double? estimatedHours;  // Horas estimadas de execução (nível tarefa)
+  String environment;      // 'indoor' | 'outdoor' | 'unspecified'
+  int progressPercent;     // 0–100 — progresso manual dentro do estágio atual
   List<SubtaskModel> subtasks;
   final DateTime createdAt;
   DateTime? completedAt;
-
-  /// Indica que esta tarefa foi importada do Google Calendar.
-  /// Tarefas de calendário não são enviadas ao Firestore e não podem
-  /// ser excluídas — apenas seu status/quadrante/MIT podem ser alterados.
   final bool isFromCalendar;
-
-  /// ID do evento no Google Calendar (sem prefixo 'cal_').
-  /// Usado como chave para persistir overrides locais.
   final String? calendarEventId;
-
-  /// Endereço ou nome de lugar obtido via Google Maps.
-  /// Ex: "Av. Paulista, 1578, São Paulo — SP"
   final String? locationAddress;
 
   TaskModel({
@@ -73,11 +75,14 @@ class TaskModel {
     required this.title,
     this.description = '',
     required this.areaId,
-    this.eisenhowerQ = 2,
+    this.eisenhowerQ = 3,       // Padrão: Q3 = Importante, não urgente
     this.isMIT = false,
     this.mitOrder = 0,
     this.status = 'pending',
     this.dueDate,
+    this.estimatedHours,
+    this.environment = 'unspecified',
+    this.progressPercent = 0,
     List<SubtaskModel>? subtasks,
     required this.createdAt,
     this.completedAt,
@@ -86,38 +91,79 @@ class TaskModel {
     this.locationAddress,
   }) : subtasks = subtasks ?? [];
 
-  /// Retorna true quando há um endereço preenchido.
+  // ── Computed ───────────────────────────────────────────────────────────────
+
   bool get hasLocation =>
       locationAddress != null && locationAddress!.trim().isNotEmpty;
 
-  /// URL do Google Maps para o endereço salvo.
   String? get googleMapsUrl {
     if (!hasLocation) return null;
     final encoded = Uri.encodeComponent(locationAddress!.trim());
     return 'https://www.google.com/maps/search/$encoded';
   }
 
-  /// Horas estimadas totais = soma das subtarefas (ou 0 se não houver)
-  int get totalEstimatedHours =>
-      subtasks.fold(0, (sum, s) => sum + s.estimatedHours);
+  /// Tarefa ao ar livre — afetada por condições climáticas.
+  bool get isOutdoor {
+    if (environment == 'outdoor') return true;
+    if (environment == 'indoor') return false;
+    // Fallback: verificação por palavras-chave (importada de weather_model)
+    return _kOutdoorKeywords.any(
+      (kw) => title.toLowerCase().contains(kw) ||
+          description.toLowerCase().contains(kw),
+    );
+  }
 
-  int get completedSubtasks => subtasks.where((s) => s.isCompleted).length;
-  double get progress =>
-      subtasks.isEmpty ? 0 : completedSubtasks / subtasks.length;
+  /// Pontos concedidos ao concluir a tarefa.
+  int get points {
+    final base = switch (eisenhowerQ) {
+      1 => 100,  // Urgente + Importante
+      2 => 50,   // Urgente − Importante
+      3 => 75,   // − Urgente + Importante
+      _ => 25,   // Não urgente, não importante
+    };
+    return isMIT ? (base * 1.5).round() : base;
+  }
 
   String get eisenhowerLabel => switch (eisenhowerQ) {
         1 => 'Faça Agora',
-        2 => 'Agende',
-        3 => 'Delegue',
+        2 => 'Delegue',
+        3 => 'Agende',
         _ => 'Elimine',
+      };
+
+  String get eisenhowerDescription => switch (eisenhowerQ) {
+        1 => '+Urgente +Importante',
+        2 => '+Urgente −Importante',
+        3 => '−Urgente +Importante',
+        _ => '−Urgente −Importante',
       };
 
   String get eisenhowerEmoji => switch (eisenhowerQ) {
         1 => '🔴',
-        2 => '🟢',
-        3 => '🟡',
+        2 => '🟡',
+        3 => '🟢',
         _ => '⚫',
       };
+
+  String get statusLabel => switch (status) {
+        'in_progress' => 'Em Andamento',
+        'completed'   => 'Feito',
+        'blocked'     => 'Bloqueado',
+        _             => 'Planejado',
+      };
+
+  String get environmentLabel => switch (environment) {
+        'indoor'  => 'Indoor',
+        'outdoor' => 'Outdoor',
+        _         => 'Não definido',
+      };
+
+  /// Progresso por subtarefas (0.0–1.0). Usado se houver subtarefas.
+  int get completedSubtasks => subtasks.where((s) => s.isCompleted).length;
+  double get subtaskProgress =>
+      subtasks.isEmpty ? 0 : completedSubtasks / subtasks.length;
+
+  // ── Serialização ──────────────────────────────────────────────────────────
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -130,6 +176,9 @@ class TaskModel {
         'mitOrder': mitOrder,
         'status': status,
         'dueDate': dueDate?.toIso8601String(),
+        'estimatedHours': estimatedHours,
+        'environment': environment,
+        'progressPercent': progressPercent,
         'subtasks': subtasks.map((s) => s.toJson()).toList(),
         'createdAt': createdAt.toIso8601String(),
         'completedAt': completedAt?.toIso8601String(),
@@ -144,12 +193,16 @@ class TaskModel {
         title: j['title'] as String,
         description: j['description'] as String? ?? '',
         areaId: j['areaId'] as String,
-        eisenhowerQ: j['eisenhowerQ'] as int? ?? 2,
+        eisenhowerQ: j['eisenhowerQ'] as int? ?? 3,
         isMIT: j['isMIT'] as bool? ?? false,
         mitOrder: j['mitOrder'] as int? ?? 0,
         status: j['status'] as String? ?? 'pending',
-        dueDate:
-            j['dueDate'] != null ? DateTime.parse(j['dueDate'] as String) : null,
+        dueDate: j['dueDate'] != null
+            ? DateTime.parse(j['dueDate'] as String)
+            : null,
+        estimatedHours: (j['estimatedHours'] as num?)?.toDouble(),
+        environment: j['environment'] as String? ?? 'unspecified',
+        progressPercent: j['progressPercent'] as int? ?? 0,
         subtasks: (j['subtasks'] as List<dynamic>?)
                 ?.map((s) => SubtaskModel.fromJson(s as Map<String, dynamic>))
                 .toList() ??
@@ -172,12 +225,16 @@ class TaskModel {
     int? mitOrder,
     String? status,
     DateTime? dueDate,
+    double? estimatedHours,
+    String? environment,
+    int? progressPercent,
     List<SubtaskModel>? subtasks,
     DateTime? completedAt,
     bool? isFromCalendar,
     String? calendarEventId,
     String? locationAddress,
     bool clearLocation = false,
+    bool clearDueDate = false,
   }) =>
       TaskModel(
         id: id,
@@ -189,7 +246,10 @@ class TaskModel {
         isMIT: isMIT ?? this.isMIT,
         mitOrder: mitOrder ?? this.mitOrder,
         status: status ?? this.status,
-        dueDate: dueDate ?? this.dueDate,
+        dueDate: clearDueDate ? null : (dueDate ?? this.dueDate),
+        estimatedHours: estimatedHours ?? this.estimatedHours,
+        environment: environment ?? this.environment,
+        progressPercent: progressPercent ?? this.progressPercent,
         subtasks: subtasks ?? this.subtasks,
         createdAt: createdAt,
         completedAt: completedAt ?? this.completedAt,
@@ -199,3 +259,11 @@ class TaskModel {
             clearLocation ? null : (locationAddress ?? this.locationAddress),
       );
 }
+
+// Palavras-chave para detecção de tarefas outdoor quando environment='unspecified'
+const _kOutdoorKeywords = [
+  'limpeza', 'solar', 'pintura', 'jardinagem', 'obra', 'lavagem',
+  'telhado', 'calha', 'muro', 'terreno', 'quintal', 'jardim',
+  'poda', 'externo', 'outdoor', 'campo', 'praça', 'rua',
+  'corrida', 'caminhada', 'ciclismo', 'futebol', 'esporte',
+];

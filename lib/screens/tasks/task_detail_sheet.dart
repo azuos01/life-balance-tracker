@@ -116,15 +116,50 @@ class TaskDetailSheet extends StatelessWidget {
                     text: '🗓️ Google Agenda',
                     color: Colors.blue,
                   ),
-                if (current.totalEstimatedHours > 0)
+                if (current.estimatedHours != null && current.estimatedHours! > 0)
                   TaskBadge(
-                    text: '⏱ ${current.totalEstimatedHours}h',
+                    text: '⏱ ${current.estimatedHours!.toStringAsFixed(current.estimatedHours! % 1 == 0 ? 0 : 1)}h',
                     color: Colors.blueGrey,
                   ),
+                if (current.environment != 'unspecified')
+                  TaskBadge(
+                    text: current.environment == 'outdoor' ? '🌳 Outdoor' : '🏠 Indoor',
+                    color: current.environment == 'outdoor'
+                        ? const Color(0xFF10B981)
+                        : AppTheme.primary,
+                  ),
+                TaskBadge(
+                  text: '⭐ ${current.points} pts',
+                  color: const Color(0xFFFF9F1C),
+                ),
                 if (current.hasLocation)
                   _LocationBadge(task: current),
               ],
             ),
+            // Barra de progresso
+            if (current.progressPercent > 0) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: current.progressPercent / 100,
+                        backgroundColor: AppTheme.divider,
+                        color: AppTheme.primary,
+                        minHeight: 6,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${current.progressPercent}%',
+                    style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+            ],
 
             if (current.description.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -153,50 +188,59 @@ class TaskDetailSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  if (current.status == 'in_progress')
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          context.read<TasksProvider>().moveToPending(current.id);
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.arrow_back, size: 14),
-                        label: const Text('Pausar'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.textSecondary,
-                          side: BorderSide(color: AppTheme.divider),
-                        ),
+                  if (current.status == 'in_progress' || current.status == 'blocked')
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        context.read<TasksProvider>().moveToPending(current.id);
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.arrow_back, size: 14),
+                      label: const Text('Planejado'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.textSecondary,
+                        side: BorderSide(color: AppTheme.divider),
                       ),
                     ),
-                  if (current.status == 'in_progress') const SizedBox(width: 8),
-                  if (current.status == 'pending')
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          context.read<TasksProvider>().moveToInProgress(current.id);
-                          Navigator.pop(context);
-                        },
-                        icon: const Text('⚡', style: TextStyle(fontSize: 14)),
-                        label: const Text('Iniciar'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF9F1C),
-                        ),
+                  if (current.status == 'pending' || current.status == 'blocked')
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        context.read<TasksProvider>().moveToInProgress(current.id);
+                        Navigator.pop(context);
+                      },
+                      icon: const Text('⚡', style: TextStyle(fontSize: 14)),
+                      label: const Text('Em Andamento'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF9F1C),
                       ),
                     ),
                   if (current.status == 'in_progress')
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          await context.read<TasksProvider>().completeTask(current.id);
-                          if (context.mounted) Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.check, size: 16, color: Colors.white),
-                        label: const Text('Concluir',
-                            style: TextStyle(color: Colors.white)),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF34D399)),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await context.read<TasksProvider>().completeTask(current.id);
+                        if (context.mounted) Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.check, size: 16, color: Colors.white),
+                      label: const Text('Feito', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF34D399)),
+                    ),
+                  if (current.status != 'blocked')
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        context.read<TasksProvider>().updateTask(
+                          current.copyWith(status: 'blocked'),
+                        );
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.block, size: 14, color: Colors.red),
+                      label: const Text('Bloquear',
+                          style: TextStyle(color: Colors.red)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red, width: 0.5),
                       ),
                     ),
                 ],
@@ -351,21 +395,25 @@ class TaskDetailSheet extends StatelessWidget {
 
   Color _qColor(int q) => switch (q) {
         1 => Colors.red,
-        2 => Colors.green,
-        3 => Colors.orange,
+        2 => Colors.orange,
+        3 => Colors.green,
         _ => Colors.grey,
       };
 
   String _statusLabel(String s) => switch (s) {
-        'pending'     => '📋 Planejada',
-        'in_progress' => '⚡ Em Execução',
-        _             => '✅ Concluída',
+        'pending'     => '📋 Planejado',
+        'in_progress' => '⚡ Em Andamento',
+        'completed'   => '✅ Feito',
+        'blocked'     => '🚫 Bloqueado',
+        _             => '📋 Planejado',
       };
 
   Color _statusColor(String s) => switch (s) {
         'pending'     => AppTheme.primary,
         'in_progress' => const Color(0xFFFF9F1C),
-        _             => const Color(0xFF34D399),
+        'completed'   => const Color(0xFF34D399),
+        'blocked'     => const Color(0xFFEF4444),
+        _             => AppTheme.primary,
       };
 
   String _fmtFull(DateTime d) =>

@@ -186,9 +186,7 @@ class _WeatherCard extends StatelessWidget {
     final weather = wp.data!;
     final sensitiveTasks = weather.isBadWeather
         ? tasks.tasks
-            .where((t) =>
-                t.status != 'completed' &&
-                isWeatherSensitiveTask(t.title, t.description))
+            .where((t) => t.status != 'completed' && t.isOutdoor)
             .toList()
         : <TaskModel>[];
 
@@ -886,7 +884,7 @@ class _MITTile extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   CircularProgressIndicator(
-                    value: task.progress,
+                    value: task.progressPercent / 100,
                     strokeWidth: 3,
                     backgroundColor: AppTheme.divider,
                     valueColor:
@@ -894,7 +892,7 @@ class _MITTile extends StatelessWidget {
                   ),
                   Center(
                     child: Text(
-                      '${(task.progress * 100).toInt()}%',
+                      '${task.progressPercent}%',
                       style: TextStyle(
                         fontSize: 8,
                         color: AppTheme.textPrimary,

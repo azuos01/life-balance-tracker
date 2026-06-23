@@ -147,10 +147,10 @@ Regras obrigatórias:
 - Gere tarefas APENAS quando há um compromisso, prazo, pedido ou ação explícita no e-mail
 - Máximo de 8 tarefas; prefira qualidade a quantidade
 - Priorize com Matriz de Eisenhower:
-  1 = Urgente e Importante (faça agora)
-  2 = Importante, não urgente (agende)
-  3 = Urgente, não importante (delegue)
-  4 = Nem urgente nem importante (elimine)
+  1 = +Urgente +Importante → Faça Agora
+  2 = +Urgente −Importante → Delegue
+  3 = −Urgente +Importante → Agende
+  4 = −Urgente −Importante → Elimine
 - isMIT = true apenas para as 3 tarefas mais críticas do dia
 - areaId deve ser uma das áreas: $areas
 - reasoning deve mencionar o e-mail de origem

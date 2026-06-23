@@ -1,8 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:uuid/uuid.dart';
 import '../../models/task_model.dart';
+import '../../services/task_id_service.dart';
 import '../../providers/tasks_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/area_classifier.dart';
@@ -27,8 +27,10 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
   bool _isImportant = true;
   bool _isMIT       = false;
   String _areaId     = 'career';
-  String _autoAreaId = 'career'; // sugerido pelo classificador
+  String _autoAreaId = 'career';
   DateTime? _dueDate;
+  double _estimatedHours = 1.0;
+  String _environment = 'unspecified'; // 'indoor' | 'outdoor' | 'unspecified'
 
   final List<_SubtaskEntry> _subtasks = [];
   bool _saving = false;
@@ -41,12 +43,15 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
       _titleCtrl.text    = t.title;
       _descCtrl.text     = t.description;
       _locationCtrl.text = t.locationAddress ?? '';
-      _isUrgent    = t.eisenhowerQ == 1 || t.eisenhowerQ == 3;
-      _isImportant = t.eisenhowerQ == 1 || t.eisenhowerQ == 2;
-      _isMIT    = t.isMIT;
-      _areaId   = t.areaId;
-      _autoAreaId = t.areaId;
-      _dueDate  = t.dueDate;
+      // Q1=U+I, Q2=U-I, Q3=-U+I, Q4=-U-I
+      _isUrgent    = t.eisenhowerQ == 1 || t.eisenhowerQ == 2;
+      _isImportant = t.eisenhowerQ == 1 || t.eisenhowerQ == 3;
+      _isMIT       = t.isMIT;
+      _areaId      = t.areaId;
+      _autoAreaId  = t.areaId;
+      _dueDate     = t.dueDate;
+      _estimatedHours = t.estimatedHours ?? 1.0;
+      _environment = t.environment;
       for (final s in t.subtasks) {
         _subtasks.add(_SubtaskEntry(
           id: s.id,
@@ -80,10 +85,11 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     }
   }
 
+  // Q1=U+I, Q2=U-I(Delegue), Q3=-U+I(Agende), Q4=-U-I
   int get _eisenhowerQ {
     if (_isUrgent && _isImportant) return 1;
-    if (!_isUrgent && _isImportant) return 2;
-    if (_isUrgent && !_isImportant) return 3;
+    if (_isUrgent && !_isImportant) return 2;
+    if (!_isUrgent && _isImportant) return 3;
     return 4;
   }
 
@@ -101,7 +107,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
   void _addSubtask() {
     setState(() {
       _subtasks.add(_SubtaskEntry(
-        id: const Uuid().v4(),
+        id: TaskIdService.instance.generate(),
         titleCtrl: TextEditingController(),
         hours: 4,
       ));
@@ -173,7 +179,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     final existing = widget.existingTask;
     final locationText = _locationCtrl.text.trim();
     final task = TaskModel(
-      id: existing?.id ?? const Uuid().v4(),
+      id: existing?.id ?? TaskIdService.instance.generate(),
       userId: userId,
       title: _titleCtrl.text.trim(),
       description: _descCtrl.text.trim(),
@@ -183,6 +189,9 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
       mitOrder: existing?.mitOrder ?? 0,
       status: existing?.status ?? 'pending',
       dueDate: _dueDate,
+      estimatedHours: _estimatedHours > 0 ? _estimatedHours : null,
+      environment: _environment,
+      progressPercent: existing?.progressPercent ?? 0,
       subtasks: subtasks,
       createdAt: existing?.createdAt ?? DateTime.now(),
       completedAt: existing?.completedAt,
@@ -472,6 +481,32 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
             ),
             SizedBox(height: 24),
 
+            // ── Tempo Estimado ─────────────────────────────────────────────
+            _SectionLabel(
+              icon: '⏱️',
+              title: 'Tempo Estimado',
+              subtitle: 'Horas necessárias para concluir',
+            ),
+            const SizedBox(height: 10),
+            _HoursSlider(
+              value: _estimatedHours,
+              onChanged: (v) => setState(() => _estimatedHours = v),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Ambiente ───────────────────────────────────────────────────
+            _SectionLabel(
+              icon: '🌤️',
+              title: 'Ambiente',
+              subtitle: 'Atividades Outdoor são afetadas pelo clima',
+            ),
+            const SizedBox(height: 10),
+            _EnvironmentPicker(
+              value: _environment,
+              onChanged: (v) => setState(() => _environment = v),
+            ),
+            const SizedBox(height: 20),
+
             // ── Localização ────────────────────────────────────────────────
             _SectionLabel(
               icon: '📍',
@@ -647,11 +682,10 @@ class _EisenhowerBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, desc, color) = switch (q) {
-      1 => ('🔴 Q1 — Faça Agora', 'Urgente + Importante', Colors.red),
-      2 => ('🟢 Q2 — Agende', 'Não Urgente + Importante', Colors.green),
-      3 => ('🟡 Q3 — Delegue', 'Urgente + Não Importante', Colors.orange),
-      _ => ('⚫ Q4 — Elimine', 'Não Urgente + Não Importante',
-          Colors.grey),
+      1 => ('🔴 Q1 — Faça Agora', '+Urgente +Importante',   Colors.red),
+      2 => ('🟡 Q2 — Delegue',    '+Urgente −Importante',   Colors.orange),
+      3 => ('🟢 Q3 — Agende',     '−Urgente +Importante',   Colors.green),
+      _ => ('⚫ Q4 — Elimine',    '−Urgente −Importante',   Colors.grey),
     };
 
     return Container(
@@ -761,6 +795,127 @@ class _SubtaskEntry {
   int hours;
 
   _SubtaskEntry({required this.id, required this.titleCtrl, required this.hours});
+}
+
+// ── Hours Slider ──────────────────────────────────────────────────────────────
+
+class _HoursSlider extends StatelessWidget {
+  final double value;
+  final ValueChanged<double> onChanged;
+  const _HoursSlider({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = value < 0.5
+        ? '< 30 min'
+        : value < 1
+            ? '~30 min'
+            : value == 1
+                ? '1 hora'
+                : '${value.toStringAsFixed(value % 1 == 0 ? 0 : 1)} horas';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Estimativa:', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.primary,
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: value.clamp(0.5, 24.0),
+            min: 0.5,
+            max: 24.0,
+            divisions: 47,
+            activeColor: AppTheme.primary,
+            inactiveColor: AppTheme.divider,
+            onChanged: onChanged,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('30min', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+              Text('8h', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+              Text('24h', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Environment Picker ────────────────────────────────────────────────────────
+
+class _EnvironmentPicker extends StatelessWidget {
+  final String value;
+  final ValueChanged<String> onChanged;
+  const _EnvironmentPicker({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    const opts = [
+      ('unspecified', '❓', 'Auto'),
+      ('indoor',      '🏠', 'Indoor'),
+      ('outdoor',     '🌳', 'Outdoor'),
+    ];
+    return Row(
+      children: opts.map((o) {
+        final selected = value == o.$1;
+        final color = o.$1 == 'outdoor'
+            ? const Color(0xFF10B981)
+            : o.$1 == 'indoor'
+                ? AppTheme.primary
+                : AppTheme.textSecondary;
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: GestureDetector(
+              onTap: () => onChanged(o.$1),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: selected ? color.withOpacity(0.12) : AppTheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: selected ? color.withOpacity(0.6) : AppTheme.divider,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(o.$2, style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 4),
+                    Text(
+                      o.$3,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: selected ? FontWeight.w700 : FontWeight.normal,
+                        color: selected ? color : AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 }
 
 // ── Subtask Editor Widget ─────────────────────────────────────────────────────

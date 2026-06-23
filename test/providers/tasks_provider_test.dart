@@ -349,11 +349,11 @@ void main() {
       expect(calTask.calendarEventId, 'abc');
     });
 
-    test('tarefa de calendário padrão: Q2 (Agende), status pending', () async {
+    test('tarefa de calendário padrão: Q3 (Agende), status pending', () async {
       final p = await _makeProvider();
       p.syncCalendarTasks([_event()], 'u1');
       final calTask = p.tasks.firstWhere((t) => t.isFromCalendar);
-      expect(calTask.eisenhowerQ, 2);
+      expect(calTask.eisenhowerQ, 3); // Q3 = padrão (−Urgente +Importante)
       expect(calTask.status, 'pending');
       expect(calTask.isMIT, false);
     });

@@ -6,7 +6,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?logo=firebase)](https://firebase.google.com)
-[![Versão](https://img.shields.io/badge/versão-2.6.0-blueviolet)](pubspec.yaml)
+[![Versão](https://img.shields.io/badge/versão-2.7.0-blueviolet)](pubspec.yaml)
 
 **🌐 Live:** https://azuos01.github.io/life-balance-tracker/
 
@@ -18,7 +18,7 @@ O Life Balance Tracker é um aplicativo Flutter Web que combina **gamificação*
 
 ---
 
-## Funcionalidades Implementadas (v2.6.0)
+## Funcionalidades Implementadas (v2.7.0)
 
 ### 🔐 Autenticação
 
@@ -48,17 +48,25 @@ O Life Balance Tracker é um aplicativo Flutter Web que combina **gamificação*
 
 ### 📋 Planejamento de Tarefas (6 abas)
 
-- [x] **Matriz de Eisenhower** (4 quadrantes: Urgente/Importante)
-- [x] **Kanban** (Planejado → Em Progresso → Concluído)
+- [x] **Matriz de Eisenhower** — Q1=+Urg+Imp (🔴), Q2=+Urg−Imp (🟡), Q3=−Urg+Imp (🟢), Q4=−Urg−Imp (⚫)
+- [x] **Kanban** (4 colunas: Planejado → Em Andamento → Feito → Bloqueado) com scroll horizontal
 - [x] **MITs — Most Important Tasks** (máx. 3 por dia)
 - [x] **Histórico** de tarefas concluídas
 - [x] **Relatórios** com filtros de status, taxa de conclusão e métricas por área
 - [x] **IA (Agente OpenAI)** — sugere tarefas priorizadas por Eisenhower/MIT com base no perfil de vida (GPT-4o-mini)
 - [x] **E-mail** — analisa e-mails do Gmail e gera tarefas automaticamente via IA
-- [x] Campo **Localização** vinculado ao Google Maps em cada tarefa
+- [x] **Campos padronizados** em todas as tarefas:
+  - ID com timestamp (`YYYYMMDDHHMMSSXX`) — sem colisões no mesmo segundo
+  - Área da Vida (auto-classificada por `AreaClassifier` em importações)
+  - Prazo (`dueDate`), Tempo Estimado em horas (slider 30min–24h)
+  - Campo **Localização** vinculado ao Google Maps
+  - **Ambiente**: Indoor / Outdoor / Auto (tarefas outdoor afetadas pelo clima)
+  - **Status Kanban**: Planejado | Em Andamento | Feito | Bloqueado
+  - **Pontuação**: Q1=100, Q3=75, Q2=50, Q4=25 pts (×1,5 se MIT)
+  - **Progresso** (0–100%) com barra visual nos cards Kanban
 - [x] Classificação automática de área por palavras-chave (`AreaClassifier`)
 - [x] Sincronização bidirecional com Cloud Firestore
-- [x] Tarefas de calendário protegidas (não editáveis/deletáveis pelo usuário)
+- [x] Tarefas de calendário protegidas (não deletáveis; área auto-classificada)
 
 ### 📧 Análise de E-mails (aba E-mail em Tarefas)
 
@@ -202,7 +210,7 @@ life_balance_tracker/
     │   ├── activity_model.dart            # Log de atividade
     │   ├── checkin_model.dart             # Check-in matinal + noturno
     │   ├── achievement_model.dart         # Conquistas
-    │   ├── task_model.dart                # Tarefas Eisenhower/Kanban + MIT + localização
+    │   ├── task_model.dart                # Tarefas: ID timestamp, Eisenhower, Kanban, MIT, ambiente, pontos, progresso
     │   ├── task_suggestion.dart           # Sugestão de tarefa gerada por IA
     │   ├── calendar_event_model.dart      # Evento do Google Calendar
     │   ├── learning_progress.dart         # 7 plataformas (DataCamp, Duolingo, etc.)
@@ -217,6 +225,7 @@ life_balance_tracker/
     │   ├── weather_service.dart           # Open-Meteo geocoding + forecast
     │   ├── gmail_service.dart             # Gmail REST API v1 (batch fetch)
     │   ├── area_classifier.dart           # Classificação de tarefas por palavras-chave
+    │   └── task_id_service.dart           # Geração de IDs timestamp (YYYYMMDDHHMMSSXX)
     │   └── quotes_service.dart            # 150 frases filosóficas (por dia do ano)
     │
     ├── providers/
@@ -285,7 +294,7 @@ life_balance_tracker/
 | Previsão do tempo | Open-Meteo API (gratuita, sem API key) |
 | Deploy | GitHub Pages via `peaceiris/actions-gh-pages` |
 | CI/CD | GitHub Actions (test gate + build + deploy) |
-| Testes | `flutter_test` (327 testes unitários/integração/stress) |
+| Testes | `flutter_test` (344 testes unitários/integração/stress) |
 | Fontes | Google Fonts |
 | Geração de IDs | uuid |
 
@@ -344,7 +353,7 @@ flutter test --reporter=expanded
 flutter test --coverage --reporter=expanded
 ```
 
-**327 testes** cobrindo modelos, providers, filtros de relatórios e cenários stress:
+**344 testes** cobrindo modelos, providers, filtros de relatórios e cenários stress:
 
 | Arquivo | Escopo |
 |---|---|
@@ -399,6 +408,7 @@ Formato: **`MAJOR.MINOR.PATCH+BUILD`**
 
 | Versão | Tipo | Timestamp | Resumo |
 |---|---|---|---|
+| `v2.7.0+10` | MINOR | 23/06/2026 18:45 | Campos padronizados: ID timestamp, Ambiente Indoor/Outdoor, Tempo Estimado, Pontuação, Kanban com Bloqueado; Q2/Q3 corrigidos; 344 testes |
 | `v2.6.0+9` | MINOR | 23/06/2026 11:58 | Nova aba E-mail: integração Gmail + OpenAI para gerar tarefas; 327 testes |
 | `v2.5.0+8` | MINOR | 22/06/2026 22:18 | Previsão do tempo no Dashboard + alertas de tarefas sensíveis ao clima; 7 plataformas de aprendizado; 313 testes |
 | `v2.4.0+7` | MINOR | 22/06/2026 03:21 | Aba Aprender com DataCamp, Duolingo e Chess.com; 273 testes |

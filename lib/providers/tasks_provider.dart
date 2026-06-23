@@ -3,7 +3,7 @@ import '../models/task_model.dart';
 import '../models/calendar_event_model.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_service.dart';
-import '../constants/app_constants.dart';
+import '../services/area_classifier.dart';
 
 const String _kTasksKey = 'tasks_data';
 const String _kCalendarOverridesKey = 'calendar_task_overrides';
@@ -81,6 +81,12 @@ class TasksProvider extends ChangeNotifier {
       .toList()
     ..sort((a, b) =>
         (b.completedAt ?? b.createdAt).compareTo(a.completedAt ?? a.createdAt));
+
+  /// Tarefas bloqueadas
+  List<TaskModel> get blockedTasks => _allTasks
+      .where((t) => t.status == 'blocked')
+      .toList()
+    ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
   int get totalTasks => _allTasks.length;
   int get completedCount => completedTasks.length;
@@ -228,6 +234,10 @@ class TasksProvider extends ChangeNotifier {
       final taskId = 'cal_$eventId';
       final ov = _calendarOverrides[eventId];
 
+      final classifiedArea = AreaClassifier.instance.classify(
+        event.title,
+        event.description,
+      );
       final task = TaskModel(
         id: taskId,
         userId: userId,
@@ -235,18 +245,22 @@ class TasksProvider extends ChangeNotifier {
         description: event.description.isNotEmpty
             ? event.description
             : (event.location.isNotEmpty ? '📍 ${event.location}' : ''),
-        areaId: kAreas.first.id,
-        eisenhowerQ: ov?['eisenhowerQ'] as int? ?? 2,
+        areaId: ov?['areaId'] as String? ?? classifiedArea,
+        eisenhowerQ: ov?['eisenhowerQ'] as int? ?? 3,
         isMIT: ov?['isMIT'] as bool? ?? false,
         mitOrder: ov?['mitOrder'] as int? ?? 0,
         status: ov?['status'] as String? ?? 'pending',
         dueDate: event.start,
+        environment: ov?['environment'] as String? ?? 'unspecified',
+        estimatedHours: (ov?['estimatedHours'] as num?)?.toDouble(),
+        progressPercent: ov?['progressPercent'] as int? ?? 0,
         createdAt: event.start,
         completedAt: ov?['completedAt'] != null
             ? DateTime.tryParse(ov!['completedAt'] as String)
             : null,
         isFromCalendar: true,
         calendarEventId: eventId,
+        locationAddress: event.location.isNotEmpty ? event.location : null,
       );
 
       newCalendarTasks.add(task);

@@ -77,19 +77,19 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '2.6.0';
+const String kAppVersion = '2.7.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // ── Changelog da última versão ────────────────────────────────────────────────
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
-const String kLastChangeVersion = 'v2.6.0';
-const String kLastChangeDate    = '23/06/2026 11:58';
+const String kLastChangeVersion = 'v2.7.0';
+const String kLastChangeDate    = '23/06/2026 18:45';
 const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
-    'Nova aba E-mail em Tarefas: integração Gmail (OAuth2 gmail.readonly) com '
-    'análise por OpenAI GPT-4o-mini para gerar tarefas priorizadas '
-    'por Eisenhower. Configuração de remetentes e janela de 1 dia a 1 ano.';
+    'Campos padronizados em todas as tarefas: ID timestamp (YYYYMMDDHHMMSSXX), '
+    'Ambiente Indoor/Outdoor, Tempo Estimado (slider), Pontuação por quadrante Eisenhower, '
+    'Kanban com coluna Bloqueado + barra de progresso; Q2/Q3 redefinidos corretamente.';
 
 // XP rewards
 const int kXpEasy = 10;

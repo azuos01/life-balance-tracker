@@ -123,7 +123,7 @@ void main() {
         'areaId': 'career',
         'createdAt': DateTime(2024, 1, 1).toIso8601String(),
       });
-      expect(t.eisenhowerQ, 2);
+      expect(t.eisenhowerQ, 3); // Q3 = padrão (−Urgente +Importante)
       expect(t.isMIT, false);
       expect(t.mitOrder, 0);
       expect(t.status, 'pending');
@@ -147,15 +147,15 @@ void main() {
 
     test('eisenhowerLabel retorna labels corretos', () {
       expect(base.copyWith(eisenhowerQ: 1).eisenhowerLabel, 'Faça Agora');
-      expect(base.copyWith(eisenhowerQ: 2).eisenhowerLabel, 'Agende');
-      expect(base.copyWith(eisenhowerQ: 3).eisenhowerLabel, 'Delegue');
+      expect(base.copyWith(eisenhowerQ: 2).eisenhowerLabel, 'Delegue');
+      expect(base.copyWith(eisenhowerQ: 3).eisenhowerLabel, 'Agende');
       expect(base.copyWith(eisenhowerQ: 4).eisenhowerLabel, 'Elimine');
     });
 
     test('eisenhowerEmoji retorna emojis corretos', () {
       expect(base.copyWith(eisenhowerQ: 1).eisenhowerEmoji, '🔴');
-      expect(base.copyWith(eisenhowerQ: 2).eisenhowerEmoji, '🟢');
-      expect(base.copyWith(eisenhowerQ: 3).eisenhowerEmoji, '🟡');
+      expect(base.copyWith(eisenhowerQ: 2).eisenhowerEmoji, '🟡');
+      expect(base.copyWith(eisenhowerQ: 3).eisenhowerEmoji, '🟢');
       expect(base.copyWith(eisenhowerQ: 4).eisenhowerEmoji, '⚫');
     });
   });
@@ -172,25 +172,25 @@ void main() {
       );
     });
 
-    test('progress = 0 sem subtarefas', () {
-      expect(base.progress, 0);
-      expect(base.totalEstimatedHours, 0);
+    test('subtaskProgress = 0 sem subtarefas', () {
+      expect(base.subtaskProgress, 0);
+      expect(base.estimatedHours, isNull);
     });
 
-    test('progress = 0.5 com metade das subtarefas concluídas', () {
+    test('subtaskProgress = 0.5 com metade das subtarefas concluídas', () {
       final t = base.copyWith(subtasks: [
         SubtaskModel(id: 's1', title: 'A', isCompleted: true),
         SubtaskModel(id: 's2', title: 'B', isCompleted: false),
       ]);
-      expect(t.progress, 0.5);
+      expect(t.subtaskProgress, 0.5);
     });
 
-    test('progress = 1.0 com todas as subtarefas concluídas', () {
+    test('subtaskProgress = 1.0 com todas as subtarefas concluídas', () {
       final t = base.copyWith(subtasks: [
         SubtaskModel(id: 's1', title: 'A', isCompleted: true),
         SubtaskModel(id: 's2', title: 'B', isCompleted: true),
       ]);
-      expect(t.progress, 1.0);
+      expect(t.subtaskProgress, 1.0);
     });
 
     test('completedSubtasks conta corretamente', () {
@@ -202,12 +202,10 @@ void main() {
       expect(t.completedSubtasks, 2);
     });
 
-    test('totalEstimatedHours soma horas de todas as subtarefas', () {
-      final t = base.copyWith(subtasks: [
-        SubtaskModel(id: 's1', title: 'A', estimatedHours: 3),
-        SubtaskModel(id: 's2', title: 'B', estimatedHours: 5),
-      ]);
-      expect(t.totalEstimatedHours, 8);
+    test('estimatedHours (task-level) é nulo por padrão', () {
+      expect(base.estimatedHours, isNull);
+      final t = base.copyWith(estimatedHours: 3.5);
+      expect(t.estimatedHours, 3.5);
     });
   });
 
@@ -336,6 +334,102 @@ void main() {
       final t = taskWithLocation('Av. Brasil, 100');
       final copy = t.copyWith(title: 'Novo título');
       expect(copy.locationAddress, 'Av. Brasil, 100');
+    });
+  });
+
+  // ── Ambiente (environment) ────────────────────────────────────────────────
+
+  group('TaskModel — environment e isOutdoor', () {
+    TaskModel mk({String env = 'unspecified', String title = 'T'}) => TaskModel(
+          id: 't', userId: 'u', title: title,
+          areaId: 'career', createdAt: DateTime(2024, 1, 1),
+          environment: env,
+        );
+
+    test('environment outdoor → isOutdoor = true', () {
+      expect(mk(env: 'outdoor').isOutdoor, true);
+    });
+
+    test('environment indoor → isOutdoor = false', () {
+      expect(mk(env: 'indoor').isOutdoor, false);
+    });
+
+    test('environment unspecified + keyword → isOutdoor = true', () {
+      expect(mk(env: 'unspecified', title: 'Corrida no parque').isOutdoor, true);
+    });
+
+    test('environment unspecified + sem keyword → isOutdoor = false', () {
+      expect(mk(env: 'unspecified', title: 'Reunião online').isOutdoor, false);
+    });
+
+    test('environmentLabel retorna texto correto', () {
+      expect(mk(env: 'indoor').environmentLabel, 'Indoor');
+      expect(mk(env: 'outdoor').environmentLabel, 'Outdoor');
+      expect(mk(env: 'unspecified').environmentLabel, 'Não definido');
+    });
+  });
+
+  // ── Pontuação (points) ────────────────────────────────────────────────────
+
+  group('TaskModel — points', () {
+    TaskModel mk({required int q, bool mit = false}) => TaskModel(
+          id: 't', userId: 'u', title: 'T',
+          areaId: 'career', createdAt: DateTime(2024, 1, 1),
+          eisenhowerQ: q, isMIT: mit,
+        );
+
+    test('Q1 = 100 pts, Q2 = 50 pts, Q3 = 75 pts, Q4 = 25 pts', () {
+      expect(mk(q: 1).points, 100);
+      expect(mk(q: 2).points, 50);
+      expect(mk(q: 3).points, 75);
+      expect(mk(q: 4).points, 25);
+    });
+
+    test('MIT multiplica por 1.5 (arredondado)', () {
+      expect(mk(q: 1, mit: true).points, 150); // 100 × 1.5
+      expect(mk(q: 3, mit: true).points, 113); // 75 × 1.5 = 112.5 → 113
+    });
+  });
+
+  // ── progressPercent ──────────────────────────────────────────────────────
+
+  group('TaskModel — progressPercent', () {
+    TaskModel mk({int prog = 0}) => TaskModel(
+          id: 't', userId: 'u', title: 'T',
+          areaId: 'career', createdAt: DateTime(2024, 1, 1),
+          progressPercent: prog,
+        );
+
+    test('progressPercent padrão é 0', () {
+      expect(mk().progressPercent, 0);
+    });
+
+    test('progressPercent é preservado no round-trip JSON', () {
+      final t = mk(prog: 60);
+      final restored = TaskModel.fromJson(t.toJson());
+      expect(restored.progressPercent, 60);
+    });
+
+    test('copyWith atualiza progressPercent', () {
+      final t = mk(prog: 20).copyWith(progressPercent: 80);
+      expect(t.progressPercent, 80);
+    });
+  });
+
+  // ── statusLabel ───────────────────────────────────────────────────────────
+
+  group('TaskModel — statusLabel', () {
+    TaskModel mk(String status) => TaskModel(
+          id: 't', userId: 'u', title: 'T',
+          areaId: 'career', createdAt: DateTime(2024, 1, 1),
+          status: status,
+        );
+
+    test('labels corretos para cada status Kanban', () {
+      expect(mk('pending').statusLabel,     'Planejado');
+      expect(mk('in_progress').statusLabel, 'Em Andamento');
+      expect(mk('completed').statusLabel,   'Feito');
+      expect(mk('blocked').statusLabel,     'Bloqueado');
     });
   });
 }

@@ -295,8 +295,8 @@ void main() {
     test('inclui tarefas de calendário nos quadrantes', () async {
       final p = await _makeProvider();
       p.syncCalendarTasks([_event(id: 'e1')], 'u1');
-      // padrão de calendário é Q2
-      expect(p.activeTasksByQuadrant[2], 1);
+      // padrão de calendário é Q3 (−Urgente +Importante)
+      expect(p.activeTasksByQuadrant[3], 1);
     });
 
     test('soma de todos os quadrantes = totalTasks - completedCount', () async {

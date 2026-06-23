@@ -142,10 +142,10 @@ class _MatrixView extends StatelessWidget {
               Expanded(
                 child: _Quadrant(
                   q: 2,
-                  title: 'NÃO URGENTE\n+ IMPORTANTE',
-                  action: 'Agende',
-                  emoji: '🟢',
-                  color: Colors.green,
+                  title: 'URGENTE\n− IMPORTANTE',
+                  action: 'Delegue',
+                  emoji: '🟡',
+                  color: Colors.orange,
                   tasks: tp.byQuadrant(2),
                 ),
               ),
@@ -158,10 +158,10 @@ class _MatrixView extends StatelessWidget {
               Expanded(
                 child: _Quadrant(
                   q: 3,
-                  title: 'URGENTE\n+ NÃO IMPORTANTE',
-                  action: 'Delegue',
-                  emoji: '🟡',
-                  color: Colors.orange,
+                  title: 'NÃO URGENTE\n+ IMPORTANTE',
+                  action: 'Agende',
+                  emoji: '🟢',
+                  color: Colors.green,
                   tasks: tp.byQuadrant(3),
                 ),
               ),
@@ -380,12 +380,14 @@ class _EisenhowerCard extends StatelessWidget {
                   ),
               ],
             ),
-            if (task.subtasks.isNotEmpty) ...[
+            if (task.subtasks.isNotEmpty || task.progressPercent > 0) ...[
               SizedBox(height: 4),
               ClipRRect(
                 borderRadius: BorderRadius.circular(2),
                 child: LinearProgressIndicator(
-                  value: task.progress,
+                  value: task.subtasks.isNotEmpty
+                      ? task.subtaskProgress
+                      : task.progressPercent / 100,
                   minHeight: 3,
                   backgroundColor: AppTheme.divider,
                   valueColor: AlwaysStoppedAnimation<Color>(accentColor),
@@ -410,62 +412,81 @@ class _KanbanView extends StatelessWidget {
   final TasksProvider tp;
   const _KanbanView({required this.tp});
 
-  static const _colorPlanned = AppTheme.primary;
+  static const _colorPlanned    = AppTheme.primary;
   static const _colorInProgress = Color(0xFFFF9F1C);
-  static const _colorDone = Color(0xFF34D399);
+  static const _colorDone       = Color(0xFF34D399);
+  static const _colorBlocked    = Color(0xFFEF4444);
 
   @override
   Widget build(BuildContext context) {
-    final planned = tp.plannedTasks;
+    final planned    = tp.plannedTasks;
     final inProgress = tp.inProgressTasks;
-    final completed = tp.completedTasks;
+    final completed  = tp.completedTasks;
+    final blocked    = tp.blockedTasks;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Seção de Relatório ──────────────────────────────────────────
           _KanbanReport(
-            planned: planned.length,
+            planned:    planned.length,
             inProgress: inProgress.length,
-            completed: completed.length,
+            completed:  completed.length,
+            blocked:    blocked.length,
           ),
           const SizedBox(height: 12),
-          // ── Colunas Kanban ──────────────────────────────────────────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _KanbanColumn(
-                  title: 'Planejadas',
-                  icon: '📋',
-                  color: _colorPlanned,
-                  tasks: planned,
-                  columnStatus: 'pending',
+          // 4 colunas com scroll horizontal
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: _KanbanColumn(
+                    title: 'Planejado',
+                    icon: '📋',
+                    color: _colorPlanned,
+                    tasks: planned,
+                    columnStatus: 'pending',
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _KanbanColumn(
-                  title: 'Em Execução',
-                  icon: '⚡',
-                  color: _colorInProgress,
-                  tasks: inProgress,
-                  columnStatus: 'in_progress',
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 200,
+                  child: _KanbanColumn(
+                    title: 'Em Andamento',
+                    icon: '⚡',
+                    color: _colorInProgress,
+                    tasks: inProgress,
+                    columnStatus: 'in_progress',
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _KanbanColumn(
-                  title: 'Concluídas',
-                  icon: '✅',
-                  color: _colorDone,
-                  tasks: completed,
-                  columnStatus: 'completed',
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 200,
+                  child: _KanbanColumn(
+                    title: 'Feito',
+                    icon: '✅',
+                    color: _colorDone,
+                    tasks: completed,
+                    columnStatus: 'completed',
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 200,
+                  child: _KanbanColumn(
+                    title: 'Bloqueado',
+                    icon: '🚫',
+                    color: _colorBlocked,
+                    tasks: blocked,
+                    columnStatus: 'blocked',
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -476,20 +497,22 @@ class _KanbanView extends StatelessWidget {
 // ── Relatório Kanban ──────────────────────────────────────────────────────────
 
 class _KanbanReport extends StatelessWidget {
-  final int planned, inProgress, completed;
+  final int planned, inProgress, completed, blocked;
   _KanbanReport({
     required this.planned,
     required this.inProgress,
     required this.completed,
+    required this.blocked,
   });
 
-  static const _colorPlanned = AppTheme.primary;
+  static const _colorPlanned    = AppTheme.primary;
   static const _colorInProgress = Color(0xFFFF9F1C);
-  static const _colorDone = Color(0xFF34D399);
+  static const _colorDone       = Color(0xFF34D399);
+  static const _colorBlocked    = Color(0xFFEF4444);
 
   @override
   Widget build(BuildContext context) {
-    final total = planned + inProgress + completed;
+    final total = planned + inProgress + completed + blocked;
     final doneRate = total > 0 ? completed / total : 0.0;
 
     return Container(
@@ -572,10 +595,17 @@ class _KanbanReport extends StatelessWidget {
               ),
               SizedBox(width: 8),
               _StatusChip(
-                label: 'Concluídas',
+                label: 'Feito',
                 count: completed,
                 color: _colorDone,
                 icon: '✅',
+              ),
+              SizedBox(width: 8),
+              _StatusChip(
+                label: 'Bloqueado',
+                count: blocked,
+                color: _colorBlocked,
+                icon: '🚫',
               ),
             ],
           ),
@@ -604,20 +634,22 @@ class _KanbanReport extends StatelessWidget {
             planned: planned,
             inProgress: inProgress,
             completed: completed,
+            blocked: blocked,
           ),
           SizedBox(height: 8),
           // Legenda
-          Row(
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
             children: [
-              _LegendDot(color: _colorDone, label: 'Concluídas'),
-              SizedBox(width: 14),
-              _LegendDot(color: _colorInProgress, label: 'Em execução'),
-              SizedBox(width: 14),
-              _LegendDot(color: _colorPlanned, label: 'Planejadas'),
+              _LegendDot(color: _colorDone, label: 'Feito'),
+              _LegendDot(color: _colorInProgress, label: 'Em andamento'),
+              _LegendDot(color: _colorPlanned, label: 'Planejado'),
+              _LegendDot(color: _colorBlocked, label: 'Bloqueado'),
             ],
           ),
           // Taxa de conclusão detalhada
-          if (planned + inProgress + completed > 0) ...[
+          if (total > 0) ...[
             SizedBox(height: 12),
             Divider(height: 1, color: AppTheme.divider),
             const SizedBox(height: 12),
@@ -654,49 +686,37 @@ class _KanbanReport extends StatelessWidget {
 }
 
 class _SegmentedBar extends StatelessWidget {
-  final int planned, inProgress, completed;
+  final int planned, inProgress, completed, blocked;
   _SegmentedBar({
     required this.planned,
     required this.inProgress,
     required this.completed,
+    this.blocked = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final total = planned + inProgress + completed;
+    final total = planned + inProgress + completed + blocked;
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: LayoutBuilder(
         builder: (ctx, constraints) {
           if (total == 0) {
-            return Container(
-              height: 10,
-              color: AppTheme.surfaceLight,
-            );
+            return Container(height: 10, color: AppTheme.surfaceLight);
           }
           final w = constraints.maxWidth;
-          final doneW = w * completed / total;
-          final progW = w * inProgress / total;
-          final planW = w * planned / total;
           return SizedBox(
             height: 10,
             child: Row(
               children: [
                 if (completed > 0)
-                  Container(
-                    width: doneW,
-                    color: const Color(0xFF34D399),
-                  ),
+                  Container(width: w * completed / total, color: const Color(0xFF34D399)),
                 if (inProgress > 0)
-                  Container(
-                    width: progW,
-                    color: const Color(0xFFFF9F1C),
-                  ),
+                  Container(width: w * inProgress / total, color: const Color(0xFFFF9F1C)),
                 if (planned > 0)
-                  Container(
-                    width: planW,
-                    color: AppTheme.primary.withOpacity(0.65),
-                  ),
+                  Container(width: w * planned / total, color: AppTheme.primary.withOpacity(0.65)),
+                if (blocked > 0)
+                  Container(width: w * blocked / total, color: const Color(0xFFEF4444)),
               ],
             ),
           );
@@ -1036,7 +1056,7 @@ class _KanbanCard extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(3),
                       child: LinearProgressIndicator(
-                        value: task.progress,
+                        value: task.subtaskProgress,
                         minHeight: 4,
                         backgroundColor: AppTheme.divider,
                         valueColor: AlwaysStoppedAnimation<Color>(
@@ -1331,7 +1351,7 @@ class _HistoryView extends StatelessWidget {
                       SizedBox(height: 4),
                       Text(
                         '${t.subtasks.length} subtarefa${t.subtasks.length > 1 ? 's' : ''}'
-                        ' · ${t.totalEstimatedHours}h estimadas',
+                        '${t.estimatedHours != null ? ' · ${t.estimatedHours!.toStringAsFixed(0)}h estimadas' : ''}',
                         style: TextStyle(
                             fontSize: 10,
                             color: AppTheme.textSecondary),

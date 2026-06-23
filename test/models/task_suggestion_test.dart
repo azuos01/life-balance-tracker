@@ -27,7 +27,7 @@ void main() {
         'areaId': 'career',
       });
       expect(s.description, '');
-      expect(s.eisenhowerQ, 2);
+      expect(s.eisenhowerQ, 3); // Q3 = padrão (−Urgente +Importante)
       expect(s.isMIT, false);
       expect(s.reasoning, '');
     });
@@ -66,15 +66,15 @@ void main() {
 
     test('eisenhowerLabel correto para cada quadrante', () {
       expect(make(1).eisenhowerLabel, 'Faça Agora');
-      expect(make(2).eisenhowerLabel, 'Agende');
-      expect(make(3).eisenhowerLabel, 'Delegue');
+      expect(make(2).eisenhowerLabel, 'Delegue');
+      expect(make(3).eisenhowerLabel, 'Agende');
       expect(make(4).eisenhowerLabel, 'Elimine');
     });
 
     test('eisenhowerEmoji correto para cada quadrante', () {
       expect(make(1).eisenhowerEmoji, '🔴');
-      expect(make(2).eisenhowerEmoji, '🟢');
-      expect(make(3).eisenhowerEmoji, '🟡');
+      expect(make(2).eisenhowerEmoji, '🟡');
+      expect(make(3).eisenhowerEmoji, '🟢');
       expect(make(4).eisenhowerEmoji, '⚫');
     });
   });
