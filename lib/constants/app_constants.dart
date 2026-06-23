@@ -77,19 +77,19 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '2.5.0';
+const String kAppVersion = '2.6.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // ── Changelog da última versão ────────────────────────────────────────────────
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
-const String kLastChangeVersion = 'v2.5.0';
+const String kLastChangeVersion = 'v2.6.0';
 const String kLastChangeDate    = 'Jun 2026';
 const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
-    'Previsão do tempo no Dashboard via Open-Meteo (sem API key) com alerta '
-    'automático de tarefas sensíveis ao clima. Aba Aprender expandida com '
-    'Goodreads, NotebookLM, MEC Livros e MEC Idiomas.';
+    'Nova aba E-mail em Tarefas: integração Gmail (OAuth2 gmail.readonly) com '
+    'análise por OpenAI GPT-4o-mini para gerar tarefas priorizadas '
+    'por Eisenhower. Configuração de remetentes e janela de 1 dia a 1 ano.';
 
 // XP rewards
 const int kXpEasy = 10;

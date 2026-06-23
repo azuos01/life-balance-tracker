@@ -13,6 +13,7 @@ import 'providers/settings_provider.dart';
 import 'providers/ai_agent_provider.dart';
 import 'providers/learning_provider.dart';
 import 'providers/weather_provider.dart';
+import 'providers/gmail_tasks_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -91,6 +92,11 @@ void main() async {
         // WeatherProvider: previsão do tempo via Open-Meteo (sem API key)
         ChangeNotifierProvider(
           create: (_) => WeatherProvider()..init(),
+        ),
+
+        // GmailTasksProvider: análise de e-mails + geração de tarefas via IA
+        ChangeNotifierProvider(
+          create: (_) => GmailTasksProvider()..init(),
         ),
 
         // TasksProvider: tarefas MIT + Matriz de Eisenhower + eventos de calendário

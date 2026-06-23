@@ -9,6 +9,7 @@ import 'task_create_screen.dart';
 import 'task_detail_sheet.dart';
 import '../reports/reports_screen.dart';
 import '../ai_agent/ai_agent_screen.dart';
+import 'email_tasks_tab.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -24,7 +25,7 @@ class _TasksScreenState extends State<TasksScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -75,6 +76,7 @@ class _TasksScreenState extends State<TasksScreen>
               Tab(text: 'Histórico'),
               Tab(icon: Icon(Icons.bar_chart_outlined, size: 15), text: 'Relatórios'),
               Tab(icon: Icon(Icons.psychology_outlined, size: 15), text: 'IA'),
+              Tab(icon: Icon(Icons.email_outlined, size: 15), text: 'E-mail'),
             ],
           ),
         ),
@@ -86,6 +88,7 @@ class _TasksScreenState extends State<TasksScreen>
             _HistoryView(tp: tp),
             const ReportsScreen(),
             const AiAgentScreen(),
+            const EmailTasksTab(),
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
