@@ -195,14 +195,51 @@ O `README.md` deve ser atualizado **sempre que houver mudança significativa** n
 
 ---
 
+## Documentação — CHANGELOG.md
+
+O `CHANGELOG.md` documenta **todas** as versões públicas do app no formato [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+### Padrão de versão nas tags git
+
+Tags usam o prefixo capital **V**: `V2.7.0`, `V2.6.0`, etc. (sem número de build `+N`).
+
+### Quando atualizar o CHANGELOG
+
+Atualizar **a cada release** (mesmo patch). Adicionar nova entrada no topo com:
+
+```markdown
+## [V{X.Y.Z}] - YYYY-MM-DD
+
+### Added     ← novas funcionalidades
+### Changed   ← mudanças em comportamento existente
+### Fixed     ← correções de bug
+### Removed   ← funcionalidades removidas (raro)
+```
+
+> Mudanças internas sem impacto para o usuário (refatoração pura, CI fix) podem ser omitidas ou agrupadas em um bullet conciso.
+
+### Como criar a tag após o commit
+
+```bash
+# Criar tag anotada apontando para o commit atual (HEAD)
+git tag -a V2.8.0 -m "Release V2.8.0 — descrição breve"
+
+# Enviar a tag para o repositório remoto
+git push origin V2.8.0
+```
+
+---
+
 ## Checklist de Release
 
 Antes de cada `git push origin main`, verificar:
 
 - [ ] `pubspec.yaml` — `version:` atualizada
 - [ ] `app_constants.dart` — `kAppVersion`, `kLastChange*` atualizados
+- [ ] `CHANGELOG.md` — nova entrada adicionada no topo
 - [ ] `README.md` — atualizado se houve mudança estrutural ou de design
 - [ ] Testes passando: `flutter test`
 - [ ] Analyze limpo: `flutter analyze --no-fatal-infos` → exit 0
 - [ ] Sem `unused_local_variable` ou `unused_import`
 - [ ] Commit message segue convenção: `tipo(escopo): descrição`
+- [ ] Tag git criada e publicada: `git tag -a V{X.Y.Z} -m "..."` + `git push origin V{X.Y.Z}`
