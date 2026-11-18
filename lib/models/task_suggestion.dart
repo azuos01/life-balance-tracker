@@ -1,9 +1,9 @@
 /// Sugestão de tarefa gerada por IA (Agente ou análise de e-mails).
 ///
-/// Quadrantes:
+/// Quadrantes — numeração de Covey (7 Hábitos):
 ///   Q1 = +Urgente +Importante  → Faça Agora  🔴
-///   Q2 = +Urgente −Importante  → Delegue     🟡
-///   Q3 = −Urgente +Importante  → Agende      🟢
+///   Q2 = −Urgente +Importante  → Agende      🟢  ← quadrante estratégico
+///   Q3 = +Urgente −Importante  → Delegue     🟡
 ///   Q4 = −Urgente −Importante  → Elimine     ⚫
 class TaskSuggestion {
   final String id;
@@ -36,7 +36,7 @@ class TaskSuggestion {
       title: (json['title'] as String?)?.trim() ?? 'Tarefa sugerida',
       description: (json['description'] as String?)?.trim() ?? '',
       areaId: _validArea(json['areaId'] as String?),
-      eisenhowerQ: ((json['eisenhowerQ'] as int?) ?? 3).clamp(1, 4),
+      eisenhowerQ: ((json['eisenhowerQ'] as int?) ?? 2).clamp(1, 4),
       isMIT: json['isMIT'] as bool? ?? false,
       reasoning: (json['reasoning'] as String?)?.trim() ?? '',
       dueDate: json['dueDate'] != null
@@ -61,22 +61,22 @@ class TaskSuggestion {
 
   String get eisenhowerLabel => switch (eisenhowerQ) {
         1 => 'Faça Agora',
-        2 => 'Delegue',
-        3 => 'Agende',
+        2 => 'Agende',
+        3 => 'Delegue',
         _ => 'Elimine',
       };
 
   String get eisenhowerEmoji => switch (eisenhowerQ) {
         1 => '🔴',
-        2 => '🟡',
-        3 => '🟢',
+        2 => '🟢',
+        3 => '🟡',
         _ => '⚫',
       };
 
   String get eisenhowerDescription => switch (eisenhowerQ) {
         1 => '+Urgente +Importante',
-        2 => '+Urgente −Importante',
-        3 => '−Urgente +Importante',
+        2 => '−Urgente +Importante',
+        3 => '+Urgente −Importante',
         _ => '−Urgente −Importante',
       };
 }

@@ -15,7 +15,7 @@ As regras aqui definidas têm prioridade sobre qualquer instrução genérica.
 | **State** | Provider (`ChangeNotifier`, `ProxyProvider2`) |
 | **Auth** | Firebase Auth (Google + LinkedIn OAuth2 PKCE) |
 | **DB Cloud** | Cloud Firestore (`users/{uid}/...`) |
-| **Testes** | `flutter_test` — 273 testes unitários/integração/stress |
+| **Testes** | `flutter_test` — 344 testes unitários/integração/stress |
 
 ---
 
@@ -85,7 +85,8 @@ const String kLastChangeSummary =
 
 | Versão | Tipo | Timestamp | Resumo |
 |---|---|---|---|
-| `v2.7.0+10` | MINOR | 23/06/2026 18:45 | Campos padronizados: ID timestamp (YYYYMMDDHHMMSSXX), Ambiente Indoor/Outdoor, Tempo Estimado, Pontuação por quadrante, Kanban com coluna Bloqueado + barra de progresso; Q2=Delegue(+Urg−Imp) e Q3=Agende(−Urg+Imp) redefinidos; AreaClassifier em importações de calendário; 344 testes, CI/CD verde |
+| `v2.8.0+11` | MINOR | 18/11/2026 00:00 | Eisenhower corrigido para Covey: Q2=Agende(−Urg+Imp,🟢,75pts) e Q3=Delegue(+Urg−Imp,🟡,50pts); aviso de segurança na chave OpenAI; guard LinkedIn sem Client ID; settings.local.json no .gitignore; 344 testes, CI/CD verde |
+| `v2.7.0+10` | MINOR | 23/06/2026 18:45 | Campos padronizados: ID timestamp (YYYYMMDDHHMMSSXX), Ambiente Indoor/Outdoor, Tempo Estimado, Pontuação por quadrante, Kanban com coluna Bloqueado + barra de progresso; AreaClassifier em importações de calendário; 344 testes, CI/CD verde |
 | `v2.6.0+9` | MINOR | 23/06/2026 11:58 | Nova aba E-mail em Tarefas: integração Gmail (OAuth2 gmail.readonly) + OpenAI GPT-4o-mini para gerar tarefas priorizadas por Eisenhower; configuração de remetentes e janela de 1 dia a 1 ano; 327 testes, CI/CD verde |
 | `v2.5.0+8` | MINOR | 22/06/2026 22:18 | Previsão do tempo no Dashboard (Open-Meteo, sem API key) + alertas de tarefas sensíveis ao clima; aba Aprender expandida com Goodreads, NotebookLM, MEC Livros e MEC Idiomas; 313 testes, CI/CD verde |
 | `v2.4.0+7` | MINOR | 22/06/2026 03:21 | Nova aba Aprender: tracking de DataCamp (cursos/capítulos), Duolingo (streak/XP) e Chess.com (ratings via API); 273 testes, CI/CD verde |

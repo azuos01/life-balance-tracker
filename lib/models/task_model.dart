@@ -32,10 +32,10 @@ class SubtaskModel {
       );
 }
 
-/// Quadrantes Eisenhower (definição vigente):
+/// Quadrantes Eisenhower — numeração de Covey (7 Hábitos):
 ///   Q1 = +Urgente +Importante  → Faça Agora  🔴
-///   Q2 = +Urgente −Importante  → Delegue     🟡
-///   Q3 = −Urgente +Importante  → Agende      🟢
+///   Q2 = −Urgente +Importante  → Agende      🟢  ← quadrante estratégico
+///   Q3 = +Urgente −Importante  → Delegue     🟡
 ///   Q4 = −Urgente −Importante  → Elimine     ⚫
 ///
 /// Ambientes:
@@ -75,7 +75,7 @@ class TaskModel {
     required this.title,
     this.description = '',
     required this.areaId,
-    this.eisenhowerQ = 3,       // Padrão: Q3 = Importante, não urgente
+    this.eisenhowerQ = 2,       // Padrão: Q2 = Importante, não urgente (Agende)
     this.isMIT = false,
     this.mitOrder = 0,
     this.status = 'pending',
@@ -116,32 +116,32 @@ class TaskModel {
   /// Pontos concedidos ao concluir a tarefa.
   int get points {
     final base = switch (eisenhowerQ) {
-      1 => 100,  // Urgente + Importante
-      2 => 50,   // Urgente − Importante
-      3 => 75,   // − Urgente + Importante
-      _ => 25,   // Não urgente, não importante
+      1 => 100,  // +Urgente +Importante → Faça Agora
+      2 => 75,   // −Urgente +Importante → Agende (estratégico)
+      3 => 50,   // +Urgente −Importante → Delegue
+      _ => 25,   // −Urgente −Importante → Elimine
     };
     return isMIT ? (base * 1.5).round() : base;
   }
 
   String get eisenhowerLabel => switch (eisenhowerQ) {
         1 => 'Faça Agora',
-        2 => 'Delegue',
-        3 => 'Agende',
+        2 => 'Agende',
+        3 => 'Delegue',
         _ => 'Elimine',
       };
 
   String get eisenhowerDescription => switch (eisenhowerQ) {
         1 => '+Urgente +Importante',
-        2 => '+Urgente −Importante',
-        3 => '−Urgente +Importante',
+        2 => '−Urgente +Importante',
+        3 => '+Urgente −Importante',
         _ => '−Urgente −Importante',
       };
 
   String get eisenhowerEmoji => switch (eisenhowerQ) {
         1 => '🔴',
-        2 => '🟡',
-        3 => '🟢',
+        2 => '🟢',
+        3 => '🟡',
         _ => '⚫',
       };
 
@@ -193,7 +193,7 @@ class TaskModel {
         title: j['title'] as String,
         description: j['description'] as String? ?? '',
         areaId: j['areaId'] as String,
-        eisenhowerQ: j['eisenhowerQ'] as int? ?? 3,
+        eisenhowerQ: j['eisenhowerQ'] as int? ?? 2,
         isMIT: j['isMIT'] as bool? ?? false,
         mitOrder: j['mitOrder'] as int? ?? 0,
         status: j['status'] as String? ?? 'pending',

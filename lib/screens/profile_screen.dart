@@ -1038,6 +1038,38 @@ class _ApiKeySectionState extends State<_ApiKeySection> {
             'Obtenha sua chave em platform.openai.com/api-keys',
             style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
           ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.08),
+              border: Border.all(color: Colors.orange.withOpacity(0.4)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.warning_amber_rounded,
+                    size: 16, color: Colors.orange),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '⚠️ Aviso de segurança: a chave é armazenada no '
+                    'localStorage do navegador e enviada diretamente ao '
+                    'servidor da OpenAI. Isso é aceitável para uso pessoal, '
+                    'mas não recomendado em ambientes compartilhados ou '
+                    'corporativos. Em produção, prefira uma Cloud Function '
+                    'como proxy para nunca expor a chave no front-end.',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.orange.shade800,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
