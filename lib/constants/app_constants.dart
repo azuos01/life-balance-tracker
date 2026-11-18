@@ -77,19 +77,19 @@ const List<AreaConfig> kAreas = [
 
 // App identity
 const String kAppName = 'Life Balance Tracker';
-const String kAppVersion = '2.7.0';
+const String kAppVersion = '2.8.0';
 const String kAppTagline = 'Monitore e melhore as 10 áreas\nfundamentais da sua vida.';
 
 // ── Changelog da última versão ────────────────────────────────────────────────
 // ⚠️  Estes campos são atualizados automaticamente pelo protocolo de versionamento
 //     descrito em CLAUDE.md. Não edite manualmente fora do fluxo de release.
-const String kLastChangeVersion = 'v2.7.0';
-const String kLastChangeDate    = '23/06/2026 18:45';
+const String kLastChangeVersion = 'v2.8.0';
+const String kLastChangeDate    = '18/11/2026 00:00';
 const String kLastChangeType    = 'MINOR';   // MAJOR | MINOR | PATCH
 const String kLastChangeSummary =
-    'Campos padronizados em todas as tarefas: ID timestamp (YYYYMMDDHHMMSSXX), '
-    'Ambiente Indoor/Outdoor, Tempo Estimado (slider), Pontuação por quadrante Eisenhower, '
-    'Kanban com coluna Bloqueado + barra de progresso; Q2/Q3 redefinidos corretamente.';
+    'Quadrantes Eisenhower corrigidos para numeracao de Covey: '
+    'Q2=Agende(nao urgente+importante,75pts) e Q3=Delegue(urgente-importante,50pts). '
+    'Aviso de seguranca na configuracao da chave OpenAI; LinkedIn exibe mensagem clara quando nao configurado.';
 
 // XP rewards
 const int kXpEasy = 10;

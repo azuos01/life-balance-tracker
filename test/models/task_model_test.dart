@@ -123,7 +123,7 @@ void main() {
         'areaId': 'career',
         'createdAt': DateTime(2024, 1, 1).toIso8601String(),
       });
-      expect(t.eisenhowerQ, 3); // Q3 = padrão (−Urgente +Importante)
+      expect(t.eisenhowerQ, 2); // Q2 = padrão (−Urgente +Importante, Covey)
       expect(t.isMIT, false);
       expect(t.mitOrder, 0);
       expect(t.status, 'pending');
@@ -145,17 +145,17 @@ void main() {
       );
     });
 
-    test('eisenhowerLabel retorna labels corretos', () {
+    test('eisenhowerLabel retorna labels corretos (Covey)', () {
       expect(base.copyWith(eisenhowerQ: 1).eisenhowerLabel, 'Faça Agora');
-      expect(base.copyWith(eisenhowerQ: 2).eisenhowerLabel, 'Delegue');
-      expect(base.copyWith(eisenhowerQ: 3).eisenhowerLabel, 'Agende');
+      expect(base.copyWith(eisenhowerQ: 2).eisenhowerLabel, 'Agende');
+      expect(base.copyWith(eisenhowerQ: 3).eisenhowerLabel, 'Delegue');
       expect(base.copyWith(eisenhowerQ: 4).eisenhowerLabel, 'Elimine');
     });
 
-    test('eisenhowerEmoji retorna emojis corretos', () {
+    test('eisenhowerEmoji retorna emojis corretos (Covey)', () {
       expect(base.copyWith(eisenhowerQ: 1).eisenhowerEmoji, '🔴');
-      expect(base.copyWith(eisenhowerQ: 2).eisenhowerEmoji, '🟡');
-      expect(base.copyWith(eisenhowerQ: 3).eisenhowerEmoji, '🟢');
+      expect(base.copyWith(eisenhowerQ: 2).eisenhowerEmoji, '🟢');
+      expect(base.copyWith(eisenhowerQ: 3).eisenhowerEmoji, '🟡');
       expect(base.copyWith(eisenhowerQ: 4).eisenhowerEmoji, '⚫');
     });
   });
@@ -378,16 +378,16 @@ void main() {
           eisenhowerQ: q, isMIT: mit,
         );
 
-    test('Q1 = 100 pts, Q2 = 50 pts, Q3 = 75 pts, Q4 = 25 pts', () {
+    test('Q1 = 100 pts, Q2 = 75 pts, Q3 = 50 pts, Q4 = 25 pts (Covey)', () {
       expect(mk(q: 1).points, 100);
-      expect(mk(q: 2).points, 50);
-      expect(mk(q: 3).points, 75);
+      expect(mk(q: 2).points, 75);
+      expect(mk(q: 3).points, 50);
       expect(mk(q: 4).points, 25);
     });
 
     test('MIT multiplica por 1.5 (arredondado)', () {
       expect(mk(q: 1, mit: true).points, 150); // 100 × 1.5
-      expect(mk(q: 3, mit: true).points, 113); // 75 × 1.5 = 112.5 → 113
+      expect(mk(q: 2, mit: true).points, 113); // 75 × 1.5 = 112.5 → 113
     });
   });
 

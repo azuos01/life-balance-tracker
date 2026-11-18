@@ -395,8 +395,8 @@ class TaskDetailSheet extends StatelessWidget {
 
   Color _qColor(int q) => switch (q) {
         1 => Colors.red,
-        2 => Colors.orange,
-        3 => Colors.green,
+        2 => Colors.green,
+        3 => Colors.orange,
         _ => Colors.grey,
       };
 

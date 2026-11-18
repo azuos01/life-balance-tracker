@@ -188,13 +188,20 @@ class AuthService {
 
   // ─── LINKEDIN (OAuth2 PKCE) ───────────────────────────────────────────────
   //
-  // LinkedIn usa Authorization Code + PKCE.
-  // A troca do code por token acontece via POST ao endpoint do LinkedIn.
-  // NOTA: o endpoint de token do LinkedIn tem restrição de CORS em browsers.
-  // Para produção, use uma Firebase Function como proxy.
-  // Este fluxo funciona em apps mobile (não-web) sem CORS issues.
+  // ⚠️  LIMITAÇÕES CONHECIDAS (intencionais no contexto educacional):
+  //   1. Client ID deve ser configurado antes do uso (substituir 'YOUR_LINKEDIN_CLIENT_ID').
+  //   2. A troca do code por token (handleLinkedInCallback) exige um proxy server:
+  //      o endpoint de token do LinkedIn bloqueia chamadas diretas do browser (CORS).
+  //      Em produção, use uma Firebase Function como proxy.
+  //      Em apps móveis (não-web) não há esse problema.
   //
   Future<AuthResult?> signInWithLinkedIn() async {
+    if (_linkedInClientId == 'YOUR_LINKEDIN_CLIENT_ID') {
+      throw Exception(
+        'LinkedIn não configurado: substitua YOUR_LINKEDIN_CLIENT_ID '
+        'pelo Client ID do seu app em developer.linkedin.com.',
+      );
+    }
     final codeVerifier = _generateCodeVerifier();
     final codeChallenge = _generateCodeChallenge(codeVerifier);
     final state = _generateState();

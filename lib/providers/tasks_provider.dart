@@ -246,7 +246,7 @@ class TasksProvider extends ChangeNotifier {
             ? event.description
             : (event.location.isNotEmpty ? '📍 ${event.location}' : ''),
         areaId: ov?['areaId'] as String? ?? classifiedArea,
-        eisenhowerQ: ov?['eisenhowerQ'] as int? ?? 3,
+        eisenhowerQ: ov?['eisenhowerQ'] as int? ?? 2,
         isMIT: ov?['isMIT'] as bool? ?? false,
         mitOrder: ov?['mitOrder'] as int? ?? 0,
         status: ov?['status'] as String? ?? 'pending',

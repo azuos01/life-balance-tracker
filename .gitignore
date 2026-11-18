@@ -51,3 +51,6 @@ build/
 
 # macOS
 .DS_Store
+
+# Claude Code — arquivos locais de sessão (não versionar)
+.claude/settings.local.json

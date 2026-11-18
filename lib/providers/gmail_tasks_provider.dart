@@ -148,8 +148,8 @@ Regras obrigatórias:
 - Máximo de 8 tarefas; prefira qualidade a quantidade
 - Priorize com Matriz de Eisenhower:
   1 = +Urgente +Importante → Faça Agora
-  2 = +Urgente −Importante → Delegue
-  3 = −Urgente +Importante → Agende
+  2 = −Urgente +Importante → Agende (estratégico)
+  3 = +Urgente −Importante → Delegue
   4 = −Urgente −Importante → Elimine
 - isMIT = true apenas para as 3 tarefas mais críticas do dia
 - areaId deve ser uma das áreas: $areas

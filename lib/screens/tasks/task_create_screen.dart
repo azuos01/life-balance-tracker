@@ -43,9 +43,9 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
       _titleCtrl.text    = t.title;
       _descCtrl.text     = t.description;
       _locationCtrl.text = t.locationAddress ?? '';
-      // Q1=U+I, Q2=U-I, Q3=-U+I, Q4=-U-I
-      _isUrgent    = t.eisenhowerQ == 1 || t.eisenhowerQ == 2;
-      _isImportant = t.eisenhowerQ == 1 || t.eisenhowerQ == 3;
+      // Q1=U+I, Q2=-U+I(Agende), Q3=U-I(Delegue), Q4=-U-I
+      _isUrgent    = t.eisenhowerQ == 1 || t.eisenhowerQ == 3;
+      _isImportant = t.eisenhowerQ == 1 || t.eisenhowerQ == 2;
       _isMIT       = t.isMIT;
       _areaId      = t.areaId;
       _autoAreaId  = t.areaId;
@@ -85,11 +85,11 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     }
   }
 
-  // Q1=U+I, Q2=U-I(Delegue), Q3=-U+I(Agende), Q4=-U-I
+  // Q1=U+I, Q2=-U+I(Agende), Q3=U-I(Delegue), Q4=-U-I
   int get _eisenhowerQ {
     if (_isUrgent && _isImportant) return 1;
-    if (_isUrgent && !_isImportant) return 2;
-    if (!_isUrgent && _isImportant) return 3;
+    if (!_isUrgent && _isImportant) return 2;
+    if (_isUrgent && !_isImportant) return 3;
     return 4;
   }
 
@@ -683,8 +683,8 @@ class _EisenhowerBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, desc, color) = switch (q) {
       1 => ('🔴 Q1 — Faça Agora', '+Urgente +Importante',   Colors.red),
-      2 => ('🟡 Q2 — Delegue',    '+Urgente −Importante',   Colors.orange),
-      3 => ('🟢 Q3 — Agende',     '−Urgente +Importante',   Colors.green),
+      2 => ('🟢 Q2 — Agende',     '−Urgente +Importante',   Colors.green),
+      3 => ('🟡 Q3 — Delegue',    '+Urgente −Importante',   Colors.orange),
       _ => ('⚫ Q4 — Elimine',    '−Urgente −Importante',   Colors.grey),
     };
 

@@ -9,6 +9,30 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [V2.8.0] - 2026-11-18
+
+### Fixed
+- **Quadrantes Eisenhower corrigidos para a numeração de Covey** ("7 Hábitos das Pessoas Altamente Eficazes"):
+  - Q2 = −Urgente +Importante → **Agende** 🟢 → 75 pts (quadrante estratégico)
+  - Q3 = +Urgente −Importante → **Delegue** 🟡 → 50 pts
+  - A V2.7.0 havia invertido Q2/Q3; esta versão restaura a convenção correta
+- Lógica de Urgente/Importante no formulário de criação de tarefa corrigida (`_eisenhowerQ`)
+- Cores dos badges de quadrante consistentes em todas as telas (Q2=verde, Q3=laranja)
+- Padrão de novas tarefas e importações de calendário: Q2 (−Urgente +Importante)
+- `.claude/settings.local.json` removido do versionamento e adicionado ao `.gitignore`
+- Contagem de testes no `CLAUDE.md` corrigida: 273 → 344
+
+### Added
+- **Aviso de segurança** na tela de configuração da chave OpenAI: explica que a chave é salva
+  no `localStorage` do navegador e enviada diretamente ao servidor da OpenAI (aceitável para
+  uso pessoal; em produção, prefira uma Cloud Function como proxy)
+- **Guard no login com LinkedIn**: se `YOUR_LINKEDIN_CLIENT_ID` ainda não foi substituído,
+  o app exibe uma mensagem clara ao invés de redirecionar para uma URL inválida
+- Comentário no código documenta as duas limitações conhecidas do fluxo LinkedIn
+  (placeholder de Client ID + restrição de CORS na troca do token via browser)
+
+---
+
 ## [V2.7.0] - 2026-06-23
 
 ### Added

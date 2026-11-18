@@ -142,10 +142,10 @@ class _MatrixView extends StatelessWidget {
               Expanded(
                 child: _Quadrant(
                   q: 2,
-                  title: 'URGENTE\n− IMPORTANTE',
-                  action: 'Delegue',
-                  emoji: '🟡',
-                  color: Colors.orange,
+                  title: 'NÃO URGENTE\n+ IMPORTANTE',
+                  action: 'Agende',
+                  emoji: '🟢',
+                  color: Colors.green,
                   tasks: tp.byQuadrant(2),
                 ),
               ),
@@ -158,10 +158,10 @@ class _MatrixView extends StatelessWidget {
               Expanded(
                 child: _Quadrant(
                   q: 3,
-                  title: 'NÃO URGENTE\n+ IMPORTANTE',
-                  action: 'Agende',
-                  emoji: '🟢',
-                  color: Colors.green,
+                  title: 'URGENTE\n− IMPORTANTE',
+                  action: 'Delegue',
+                  emoji: '🟡',
+                  color: Colors.orange,
                   tasks: tp.byQuadrant(3),
                 ),
               ),
